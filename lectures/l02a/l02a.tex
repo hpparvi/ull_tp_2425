@@ -1,0 +1,200 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\usetheme{Dresden}
+
+% Listings style for Fortran
+\lstset{
+  language=[90]Fortran,
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{white},
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  showstringspaces=false,
+  breaklines=true,
+}
+
+\title{Programming Techniques 2024-2025}
+\subtitle{Lecture 2: Recap of Basic Fortran Topics}
+\author{Hannu Parviainen}
+\institute{Universidad de la Laguna}
+\date{\today}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Recap - Variables}
+
+\begin{frame}[fragile]
+  \frametitle{Recap - Variables}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+    \begin{block}{Basic data types}
+      \begin{itemize}
+          \item logical
+          \item integer
+          \item real
+          \item complex
+          \item character
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{Variables}
+      \begin{itemize}
+        \item Are defined after `implicit none` but before the actual code.
+        \item Can be initialised when defined.
+      \end{itemize}        
+    \end{block}
+    \end{column}
+    
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+program a
+  implicit none
+  integer :: j, i, k = 4
+  real :: f, s = 0.12
+  ! Some code here
+end program a
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Recap - Constants}
+
+\begin{frame}[fragile]
+  \frametitle{Recap - Constants}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \begin{itemize}
+        \item Constants are variables that do not change during the program's execution.
+        \item Identified by the `parameter` modifier in the variable definition.
+        \item Can be used to initialise other variables.
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.55\textwidth}
+      \begin{lstlisting}
+program a
+  implicit none
+  real, parameter :: pi = 3.14
+  real, parameter :: two_pi = 2*pi
+  integer :: j, i, k = 4
+  real :: f, s = 0.12, r = two_pi
+  ! Some code here
+end program a
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Recap - Conditional Execution}
+
+\begin{frame}[fragile]
+  \frametitle{Recap - Conditional Execution}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+- if (x) a = 2
+
+- if (x) then
+    a = 2
+  end if
+
+- if (x) then
+    a = 2
+  else
+    a = 3
+  end if
+      \end{lstlisting}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+- if (x) then
+    a = 2
+  else if (y) then
+    a = 4
+  else
+    a = 3
+  end if
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Recap - Loops}
+
+\begin{frame}[fragile]
+  \frametitle{Recap - Loops}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+    \begin{itemize}
+        \item Loops allow you to execute a block of code multiple times.
+        \item `do while`, and `do i =` loops are commonly used in Fortran.
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+do
+  if (x) exit
+  ! Some code
+end do
+
+do while (a < 10)
+  ! Some code
+end do
+
+do i = 1, 10
+  a = a + i
+end do
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Exercises}
+
+\begin{frame}[fragile]
+  \frametitle{Exercises}
+  \begin{columns}[t]
+    \begin{column}{0.5\textwidth}
+      \textbf{Exercise 1:}
+      \begin{itemize}
+        \item Write a program that computes and prints the matrix multiplication of two real arrays.
+      \end{itemize}
+      \vspace*{0.2cm}
+      \[
+      A = \begin{pmatrix}
+      3 & 2 & 4 & 1 \\
+      2 & 4 & 2 & 2 \\
+      1 & 2 & 3 & 7
+      \end{pmatrix}
+      \quad
+      B = \begin{pmatrix}
+      3 & 2 & 4 \\
+      2 & 1 & 2 \\
+      3 & 0 & 2
+      \end{pmatrix}
+      \]
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \textbf{Exercise 2:}
+      \begin{itemize}
+        \item Write a program that reads two real arrays of length n and prints the sum of these arrays.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\end{document}
