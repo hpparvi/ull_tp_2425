@@ -1,0 +1,316 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+\usepackage{graphicx}
+
+%\usetheme{Berlin}
+\usetheme{Dresden}
+%\usetheme{Bergen}
+
+\title{Programming Techniques 2024-2025}
+\subtitle{Lecture 2: Basics of Git and GitHub}
+\author{Hannu Parviainen}
+\institute{Universidad de la Laguna}
+\date{\today}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{white},
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  showstringspaces=false,
+  breaklines=true,
+  frame=lines
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction to Git}
+\begin{frame}
+  %\frametitle{What is Git?}
+  \begin{block}{What is Git?}
+    \textbf{Distributed Version Control System (VCS)} 
+    \begin{itemize}
+        \item Tracks changes in the source code and helps coordinate work among programmers.
+        \item Designed to handle everything from small to very large projects quickly and efficiently. 
+        \item Allows multiple developers to work on a project simultaneously without overwriting each other's changes. 
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Distributed?}
+  \justifying
+  \begin{itemize}
+      \item Each user has a full copy of the repository.
+      \item Allows for a more flexible workflow than centralised VCSs.
+      \item Branching is fast and does not require a connection to the VCS server.
+  \end{itemize}
+   \end{block}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Why Use Git?}
+  \begin{itemize}
+    \item \textbf{Collaboration:} Streamlines teamwork on projects.
+    \item \textbf{Backup and Restore:} Safeguards code with version history.
+    \item \textbf{Track History:} Allows you to see what changes were made and when.
+    \item \textbf{Branching and Merging:} Supports multiple development lines.
+  \end{itemize}
+\end{frame}
+
+\section{Getting Started with Git}
+
+\begin{frame}
+  \frametitle{Installing Git}
+  \begin{block}{Windows}
+    Install via \href{https://git-scm.com/download/win}{Git for Windows}.
+  \end{block}
+  \begin{block}{Mac}
+    Install via Homebrew using `brew install git` or install \href{https://developer.apple.com/xcode/}{Xcode}.
+  \end{block}
+  \begin{block}{Linux}
+    Install via package manager using `sudo apt-get install git` or equivalent.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Configuring Git}
+  Set your username and email for Git commits:
+  \begin{lstlisting}[language=bash]
+$ git config --global user.name "Your Name"
+$ git config --global user.email "you@example.com"
+  \end{lstlisting}
+  \begin{itemize}
+    \item These settings are used to attribute commits to you.
+    \item The `--global` flag applies settings for all repositories.
+  \end{itemize}
+\end{frame}
+
+\section{Basic Git Commands}
+
+\begin{frame}[fragile]
+  \frametitle{Initializing a Repository}
+  Initialize a new Git repository in the current directory:
+  \begin{lstlisting}[language=bash]
+$ git init
+  \end{lstlisting}
+  \begin{itemize}
+    \item Creates a new `.git` subdirectory.
+    \item Starts tracking versions for your project.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Checking Status}
+  Check the status of your working directory and staging area:
+  \begin{lstlisting}[language=bash]
+$ git status
+  \end{lstlisting}
+  \begin{itemize}
+    \item Shows tracked and untracked files.
+    \item Indicates changes that are staged for commit.
+  \end{itemize}
+\end{frame}
+
+% New slide: How Git Tracking Works
+\begin{frame}
+  \frametitle{How Git Tracking Works}
+  \begin{itemize}
+    \item \textbf{Working Directory:} Your local filesystem where you modify files.
+    \item \textbf{Staging Area (Index):} A temporary area where you add changes to prepare for a commit.
+    \item \textbf{Repository (History):} The database where commits are stored.
+    \item \textbf{Tracking Changes:}
+      \begin{itemize}
+        \item Git monitors changes in tracked files.
+        \item Untracked files are not monitored until added.
+      \end{itemize}
+    \item \textbf{Lifecycle of a File:}
+      \begin{enumerate}
+        \item Modify files in the working directory.
+        \item Stage changes using `git add`.
+        \item Commit changes to the repository with `git commit`.
+      \end{enumerate}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Staging vs. Committing Changes}
+  \begin{itemize}
+    \item \textbf{Staging Changes (\texttt{git add}):}
+      \begin{itemize}
+        \item Prepares selected changes for the next commit.
+        \item Allows you to review and group changes.
+      \end{itemize}
+    \item \textbf{Committing Changes (\texttt{git commit}):}
+      \begin{itemize}
+        \item Records the staged changes into the repository history.
+        \item Creates a new commit object with a unique ID.
+        \item Includes a commit message describing the changes.
+      \end{itemize}
+    \item \textbf{Key Differences:}
+      \begin{itemize}
+        \item \textbf{Staging:} Prepares changes, but does not save them to history.
+        \item \textbf{Committing:} Saves the staged changes permanently in the repository.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Staging Changes with \texttt{git add}}
+  Add files to the staging area:
+  \begin{lstlisting}[language=bash]
+$ git add filename
+$ git add .
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{git add filename}: Stages a specific file.
+    \item \texttt{git add .}: Stages all changes in the current directory.
+    \item \textbf{Staging:} Prepares changes to be included in the next commit.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Committing Changes with \texttt{git commit}}
+  Commit the staged changes to the repository:
+  \begin{lstlisting}[language=bash]
+$ git commit -m "Commit message"
+  \end{lstlisting}
+  \begin{itemize}
+    \item Records a snapshot of the staging area.
+    \item \textbf{Commit Message:} Describes the changes made.
+  \end{itemize}
+\end{frame}
+
+\section{Branching and Merging}
+
+\begin{frame}
+  \frametitle{Understanding Branches}
+  \begin{itemize}
+    \item \textbf{What is a Branch?}
+      \begin{itemize}
+        \item A parallel version of the repository.
+        \item Allows you to work on different features independently.
+      \end{itemize}
+    \item \textbf{Why Use Branches?}
+      \begin{itemize}
+        \item Isolate development work without affecting the main codebase.
+        \item Facilitate collaboration by allowing multiple features to be developed simultaneously.
+      \end{itemize}
+    \item \textbf{Default Branch:} Typically named `main` or `master`.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Creating and Switching Branches}
+  Create a new branch and switch to it:
+  \begin{lstlisting}[language=bash]
+$ git branch new-feature
+$ git checkout new-feature
+  \end{lstlisting}
+  Or combine both steps:
+  \begin{lstlisting}[language=bash]
+$ git checkout -b new-feature
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{git branch new-feature}: Creates a new branch named `new-feature`.
+    \item \texttt{git checkout new-feature}: Switches to the `new-feature` branch.
+    \item \texttt{git checkout -b new-feature}: Creates and switches to `new-feature` in one command.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Merging Branches}
+  Merge changes from `new-feature` branch into `main`:
+  \begin{lstlisting}[language=bash]
+$ git checkout main
+$ git merge new-feature
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{git checkout main}: Switches to the `main` branch.
+    \item \texttt{git merge new-feature}: Merges `new-feature` into `main`.
+    \item \textbf{Merging:} Combines changes from one branch into another.
+  \end{itemize}
+\end{frame}
+
+\section{Introduction to GitHub}
+
+\begin{frame}
+  \frametitle{What is GitHub?}
+  \begin{itemize}
+    \item \textbf{Code Hosting Platform:} Hosts Git repositories online.
+    \item \textbf{Facilitates Collaboration:} Tools for team communication and coordination.
+    \item \textbf{Additional Features:}
+      \begin{itemize}
+        \item Issue tracking.
+        \item Pull requests for code reviews.
+        \item Wiki pages and documentation.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Setting Up GitHub}
+  \begin{itemize}
+    \item \textbf{Create an Account:} Sign up at \href{https://github.com}{github.com}.
+    \item \textbf{Set Up SSH Keys:}
+      \begin{itemize}
+        \item Generate an SSH key pair on your local machine.
+        \item Add the public key to your GitHub account.
+      \end{itemize}
+    \item \textbf{Configure Git to Use SSH:}
+      \begin{itemize}
+        \item Ensures secure communication with GitHub.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Working with GitHub}
+
+\begin{frame}[fragile]
+  \frametitle{Connecting a Local Repository to GitHub}
+  Add a remote repository and push changes:
+  \begin{lstlisting}[language=bash]
+$ git remote add origin git@github.com:username/repo.git
+$ git push -u origin main
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{git remote add origin}: Links your local repo to GitHub.
+    \item \texttt{git push -u origin main}: Pushes commits to the `main` branch on GitHub.
+    \item \textbf{The \texttt{-u} Flag:} Sets `origin main` as the default upstream branch.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Collaborating on GitHub}
+  \begin{itemize}
+    \item \textbf{Forking Repositories:} Create a personal copy of someone else's project.
+    \item \textbf{Cloning Repositories:} Download a repository to your local machine.
+    \item \textbf{Pull Requests:} Propose changes to a repository.
+    \item \textbf{Code Reviews:} Collaboratively review code changes before merging.
+    \item \textbf{Issue Tracking:} Report bugs or request features.
+  \end{itemize}
+\end{frame}
+
+\section{Best Practices and Conclusion}
+
+\begin{frame}
+  \frametitle{Best Practices}
+  \begin{itemize}
+    \item \textbf{Write Meaningful Commit Messages:} Clearly describe what changes were made.
+    \item \textbf{Keep Commits Small and Focused:} Easier to review and understand.
+    \item \textbf{Regularly Pull Updates:} Keep your local repository up-to-date with the remote.
+    \item \textbf{Use Branches for New Features:} Isolate development work.
+    \item \textbf{Avoid Committing Sensitive Information:} Don't commit passwords or API keys.
+  \end{itemize}
+\end{frame}
+
+\end{document}
