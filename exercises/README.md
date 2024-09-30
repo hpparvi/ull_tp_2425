@@ -27,3 +27,6 @@ Now, your directory tree should look like:
 | Name | Directory |
 |--|--|
 | Hannu Parviainen | ph |
+|--|--|
+| Daniel García Jiménez | gjd |
+|--|--|
