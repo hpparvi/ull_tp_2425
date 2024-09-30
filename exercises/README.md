@@ -28,4 +28,5 @@ Now, your directory tree should look like:
 |--|--|
 | David Mirabal    | md |
 | Cathaysa Perdomo | pc |
+| Eva Sola | se |
 | Xoan Vilas | vx |
