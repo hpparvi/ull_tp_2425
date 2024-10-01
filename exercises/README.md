@@ -24,6 +24,8 @@ Now, your directory tree should look like:
 
 ## Students
 
+
 | Name | Directory |
+|--|--|
 | Hannu Parviainen | ph |
-| Daniel García Jiménez | gjd |
+| Daniel García | gd |
