@@ -24,8 +24,12 @@ Now, your directory tree should look like:
 
 ## Students
 
-
 | Name | Directory |
 |--|--|
-| Hannu Parviainen | ph |
 | Daniel García | gd |
+| Urma Gonzalez | gu |
+| David Mirabal    | md |
+| Cathaysa Perdomo | pc |
+| Eva Sola | se |
+| Oscar Soler | so |
+| Xoan Vilas | vx |
