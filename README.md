@@ -44,3 +44,4 @@ After which the conda environment can be activated as
 <p align="center">
 &copy;2024 Hannu Parviainen
 </p>
+
