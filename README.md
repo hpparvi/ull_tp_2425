@@ -23,7 +23,7 @@ Two options:
 
 
 ## Additional literature
-- S. Chacon and B. Straub "Pro Git"
+- S. Chacon and B. Straub "Pro Git".
 - M. Metcalf, J. Reid, M. Cohen "Modern Fortran Explained" (2nd ed., NY: Oxford University Press, 2018). If the last edition of this book is not available, it can be substituted by previous editions from the same authors: "Modern Fortran Explained" (1st ed., 2011), "Fortran 95/2003 Explained" (2004), or "Fortran 90/95 Explained" (1996, 1999).
 
 ## Prerequisites
