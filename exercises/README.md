@@ -34,3 +34,8 @@ Now, your directory tree should look like:
 | Eva Sola | se |
 | Oscar Soler | so |
 | Xoan Vilas | vx |
+
+---
+<p align="center">
+&copy;2024 Hannu Parviainen
+</p>
