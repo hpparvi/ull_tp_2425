@@ -31,3 +31,8 @@ Now, your directory tree should look like:
 | Eva Sola | se |
 | Xoan Vilas | vx |
 | Urma Gonzalez | gu |
+
+---
+<p align="center">
+&copy;2024 Hannu Parviainen
+</p>
