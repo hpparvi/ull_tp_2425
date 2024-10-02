@@ -1,0 +1,200 @@
+\input{../common}
+\subtitle{Lecture 3: More about data types}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Data type precision}
+\begin{frame}
+  \frametitle{Data type precision}
+  \begin{itemize}
+  \item   Fortran is used in very different computer architectures
+  \begin{itemize}
+    \item Can use different number of bytes
+  \end{itemize}
+  \end{itemize}
+
+  \begin{itemize}
+  \item   Many different ways to specify the precision of a data type
+  \begin{itemize}
+    \item C: float, double, int, longint, etc…
+    \item Fortran: : integer(kind=x), real(kind=x)
+  \end{itemize}
+  where x is an integer stating the precision… but the the meaning of x depends on the compiler…
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Precision in GNU Fortran}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item In GNU Fortran, `x` stands for the number of bytes used for the data type.
+            \begin{itemize}
+            \item x = 1, 2, 4, 8, 16
+          \end{itemize}
+        \item Defaults to:
+          \begin{itemize}
+            \item 4 for logical, integer, real, and complex.
+            \item 8 for double precision.
+            \item 1 for character.
+          \end{itemize}
+        \item But other compilers don't necessiraly use the same logic!
+        \item Don’t use the kind specification directly if you want your program to be portable!
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+        In Gnu Fortran\\
+
+      \begin{lstlisting}
+real(kind=4) ! 32-bit single-precision float
+real(kind=8) ! 64-bit double-precision float
+integer(kind=4) ! 32-bit signed int
+integer(kind=8) ! 64-bit signed int
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Portability with SELECTED\_KIND}
+  \begin{columns}[T]
+    \begin{column}{0.43\textwidth}
+      \begin{itemize}
+        \item For portability, use:
+          \begin{itemize}
+          \vspace*{2mm}
+            \item \texttt{SELECTED\_INT\_KIND(R)} \\
+            returns the kind value of the smallest integer type that can represent all values ranging from -10$^R$ to 10$^R$
+            \vspace*{2mm}
+            \item \texttt{SELECTED\_REAL\_KIND(P, R)} \\
+            returns the kind value of a real data type with decimal precision of at least P digits and exponent range of at least R
+          \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.57\textwidth}
+      \begin{lstlisting}
+program ex3a
+  implicit none
+  integer, parameter :: si = selected_int_kind(5)
+  integer, parameter :: li = selected_int_kind(15)
+  integer(kind=si) :: o
+  integer(kind=li) :: p
+  print *, huge(o), huge(p)
+end program ex3a
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using ISO\_FORTRAN\_ENV}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+      \item The Fortran 2003 standard includes an intrinsinc \texttt{ISO\_FORTRAN\_ENV} module that allows you to specify the number of bits directly.
+        \item Does not necessarily guarantee the desired precision, but provides control over the number of bits.
+        \item Common types:
+          \begin{itemize}
+            \item \texttt{int32}, \texttt{int64}
+            \item \texttt{real32}, \texttt{real64}
+          \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+program ex3b
+  use iso_fortran_env
+  implicit none
+  integer(int32) :: i
+  integer(int64) :: j
+  real(real32) :: x
+  real(real64) :: y
+  print *, huge(i), huge(j)
+  print *, tiny(x), huge(x)
+  print *, tiny(y), huge(y)
+end program ex3b
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using ISO\_C\_BIND}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item The Fortran 2003 standard includes an intrinsinc \texttt{ISO\_C\_BIND} module that enables interoperability with C.
+        \item This allows direct relation to C data types.
+        \item Common types:
+          \begin{itemize}
+            \item \texttt{c\_float}
+            \item \texttt{c\_double}
+          \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}
+program ex3c
+  use iso_c_bind
+  implicit none
+  real(c_float) :: x
+  real(c_double) :: y
+  print *, tiny(x), huge(x)
+end program ex3c
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Exercises}
+
+\begin{frame}[fragile]
+  \frametitle{Exercises}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{Exercise 1:}
+      \begin{itemize}
+        \item Write a program that computes and prints the matrix multiplication of two real arrays.
+      \end{itemize}
+      \vspace*{0.2cm}
+      \[
+      A = \begin{pmatrix}
+      3 & 2 & 4 & 1 \\
+      2 & 4 & 2 & 2 \\
+      1 & 2 & 3 & 7
+      \end{pmatrix}
+      \quad
+      B = \begin{pmatrix}
+      3 & 2 & 4 \\
+      2 & 1 & 2 \\
+      3 & 0 & 2
+      \end{pmatrix}
+      \]
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \textbf{Exercise 2:}
+      \begin{itemize}
+        \item Write a program that reads two real arrays of length n and prints the sum of these arrays.
+      \end{itemize}
+
+      \textbf{Exercise 3:}
+      \begin{itemize}
+        \item Modify the matrix multiplication program to use a subroutine for the multiplication.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\end{document}
