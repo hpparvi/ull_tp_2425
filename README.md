@@ -28,7 +28,6 @@ Two options:
 
 ## Prerequisites
 
-
 ### For Windows users
 You can find the instructions for installing GFortran in Windows from the fortran-lang.org website.
 
