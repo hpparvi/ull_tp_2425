@@ -8,7 +8,7 @@
 
 This course teaches the basics of modern Fortran programming in astrophysics, version control with Git, debugging, and code parallelisation with OpenMP and MPI.
 
-Note: The first class of the course will be in Aula 17 from 15:00 to 17:00 on Wednesday, 25.09.2024.
+Note: The first classes will be in Aula 17 from 15:00 to 17:00.
 
 ## Scoring
 Two options:
@@ -44,3 +44,4 @@ After which the conda environment can be activated as
 <p align="center">
 &copy;2024 Hannu Parviainen
 </p>
+
