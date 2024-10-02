@@ -26,13 +26,16 @@ Now, your directory tree should look like:
 
 | Name | Directory |
 |--|--|
+| Daniel García | gd |
+| Urma Gonzalez | gu |
 | David Mirabal    | md |
 | Cathaysa Perdomo | pc |
 | Eva Sola | se |
+| Oscar Soler | so |
 | Xoan Vilas | vx |
-| Urma Gonzalez | gu |
 
 ---
 <p align="center">
 &copy;2024 Hannu Parviainen
 </p>
+
