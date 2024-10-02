@@ -32,7 +32,7 @@ Two options:
 You can find the instructions for installing GFortran in Windows from the fortran-lang.org website.
 
 ### For Mac users
-The easiest way to install GNU Fortran in Mac is by creating a separate Anaconda environment
+The easiest way to install GNU Fortran in Mac is by creating a separate Anaconda environment:
 
     conda create -n fortran -c conda-forge compilers
 
