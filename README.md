@@ -13,8 +13,7 @@ Note: The first classes will be in Aula 17 from 15:00 to 17:00.
 ## Scoring
 Two options:
 - no final exam, but three equally weighted course exercises, or
-- a final exam that involves writing a fully working parallelised Fortran program with paper and a pen!!!
-
+- a final exam that involves writing a fully working parallelised Fortran program with paper and a pen.
 
 ## Literature
 - W.S. Brainerd "Guide to Fortran 2008 Programming" (London: Springer, 2015).
