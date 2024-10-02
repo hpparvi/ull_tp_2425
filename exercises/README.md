@@ -30,6 +30,7 @@ Now, your directory tree should look like:
 | Urma Gonzalez | gu |
 | David Mirabal    | md |
 | Cathaysa Perdomo | pc |
+| Helena Rivero | rh |
 | Eva Sola | se |
 | Oscar Soler | so |
 | Xoan Vilas | vx |
@@ -38,4 +39,3 @@ Now, your directory tree should look like:
 <p align="center">
 &copy;2024 Hannu Parviainen
 </p>
-
