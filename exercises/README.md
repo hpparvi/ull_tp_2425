@@ -29,6 +29,7 @@ Now, your directory tree should look like:
 | Daniel García | gd |
 | Urma Gonzalez | gu |
 | David Mirabal    | md |
+| Javier Moya |  mj |
 | Daniel Parra | pd |
 | Cathaysa Perdomo | pc |
 | Helena Rivero | rh |
