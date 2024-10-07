@@ -29,11 +29,13 @@ Now, your directory tree should look like:
 | Daniel García | gd |
 | Urma Gonzalez | gu |
 | David Mirabal    | md |
+| Daniel Parra | pd |
 | Cathaysa Perdomo | pc |
 | Helena Rivero | rh |
 | Eva Sola | se |
 | Oscar Soler | so |
 | Xoan Vilas | vx |
+
 
 ---
 <p align="center">
