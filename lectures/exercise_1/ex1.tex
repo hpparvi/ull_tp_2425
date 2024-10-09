@@ -1,0 +1,54 @@
+\input{../common}
+\subtitle{Course exercise 1: basic dynamical simulation}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Exercise 1}
+
+\begin{frame}
+  \frametitle{Exercise 1: basic dynamical simulation}
+
+  \textbf{Exercise:} Direct numerical integration of a system consisting of gravitationally interacting particles using the leapfrog integration method.
+  \begin{itemize}
+   \item See TAP p. 32-48 and p. 74-85
+  \end{itemize}
+
+
+  \textbf{To do}
+  \begin{enumerate}
+   \item Create module \texttt{geometry} stored in \texttt{geometry.f90} file that contains:
+   \begin{itemize}
+    \item types \texttt{vector3d} and \texttt{point3d}, both with real components \texttt{x}, \texttt{y}, and \texttt{z}
+    \item functions \texttt{sumvp}, \texttt{sumpv}, \texttt{subvp}, \texttt{subpv}, \texttt{mulrv}, \texttt{mulvr}, \texttt{divvr} for adding and subtracting points and vectors, and for multiplying and dividing vectors with reals.
+    \item operators matching these functions.
+    \item function \texttt{distance} that calculates the distance between two 3d points.
+    \item function \texttt{angle} that calculates the angle between two vectors a and b (in radians).
+    \item function \texttt{normalize} that takes a vector a and returns it divided by its length.
+    \item function \texttt{cross\_product} that takes two 3d vectors (a and b) and returns their cross product.
+    \item function \texttt{orthv} that takes two vectors (a and b) and returns a vector orthogonal to them.
+   \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Exercise 1: basic dynamical simulation}
+
+  \begin{enumerate}
+   \item[2.] Create a module \texttt{particle} stored in \texttt{particle.f90} that uses the \texttt{geometry} module and contains a type \texttt{particle}. This type should have components: a \texttt{point3d} variable \texttt{p} storing the particle's position, a \texttt{vector2d} variable \texttt{v} storing the particle's velocity, and a real variable \texttt{m} storing the particle's mass.
+   \item[3.] Take the code from TAP page 34 and modify it to use the \texttt{geometry} and \texttt{particle} modules. Store the program in \texttt{ex1.f90} file.
+   \item[4.] Write a Makefile
+   \item[5.] Create a pull request with your final code.
+  \end{enumerate}
+
+  \vspace*{2mm}
+  \textbf{Note:} All the source files should be saved in your \texttt{ex1} folder. Add and commit your changes often and feel free to try working with different branches. Also feel free to create pull requests as often you like, but remember that other students can see the code you add to the main repository (this is perfectly ok, though).
+  \end{frame}
+
+
+\end{document}
