@@ -1,29 +1,5 @@
-\documentclass[10pt]{beamer}
-\usepackage[utf8]{inputenc}
-\usepackage{listings}
-\usepackage{hyperref}
-\usepackage{xcolor}
-
-\usetheme{Dresden}
-
-% Listings style for Fortran
-\lstset{
-  language=[90]Fortran,
-  basicstyle=\ttfamily\footnotesize,
-  backgroundcolor=\color{white},
-  keywordstyle=\color{blue},
-  commentstyle=\color{gray},
-  stringstyle=\color{red},
-  showstringspaces=false,
-  breaklines=true,
-}
-
-\title{Programming Techniques 2024-2025}
+\input{../common}
 \subtitle{Lecture 2: Recap of Basic Fortran Topics}
-\author{Hannu Parviainen}
-\institute{Universidad de la Laguna}
-\date{\today}
-
 
 \begin{document}
 
@@ -162,39 +138,5 @@ end do
   \end{columns}
 \end{frame}
 
-\section{Exercises}
-
-\begin{frame}[fragile]
-  \frametitle{Exercises}
-  \begin{columns}[t]
-    \begin{column}{0.5\textwidth}
-      \textbf{Exercise 1:}
-      \begin{itemize}
-        \item Write a program that computes and prints the matrix multiplication of two real arrays.
-      \end{itemize}
-      \vspace*{0.2cm}
-      \[
-      A = \begin{pmatrix}
-      3 & 2 & 4 & 1 \\
-      2 & 4 & 2 & 2 \\
-      1 & 2 & 3 & 7
-      \end{pmatrix}
-      \quad
-      B = \begin{pmatrix}
-      3 & 2 & 4 \\
-      2 & 1 & 2 \\
-      3 & 0 & 2
-      \end{pmatrix}
-      \]
-    \end{column}
-
-    \begin{column}{0.5\textwidth}
-      \textbf{Exercise 2:}
-      \begin{itemize}
-        \item Write a program that reads two real arrays of length n and prints the sum of these arrays.
-      \end{itemize}
-    \end{column}
-  \end{columns}
-\end{frame}
 
 \end{document}
