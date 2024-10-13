@@ -26,4 +26,19 @@ Now, your directory tree should look like:
 
 | Name | Directory |
 |--|--|
-| Hannu Parviainen | ph |
+| Daniel García | gd |
+| Urma Gonzalez | gu |
+| David Mirabal    | md |
+| Javier Moya |  mj |
+| Daniel Parra | pd |
+| Cathaysa Perdomo | pc |
+| Helena Rivero | rh |
+| Eva Sola | se |
+| Oscar Soler | so |
+| Xoan Vilas | vx |
+
+
+---
+<p align="center">
+&copy;2024 Hannu Parviainen
+</p>

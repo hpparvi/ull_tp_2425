@@ -1,0 +1,41 @@
+\input{../common}
+\subtitle{Lecture 4: Linked list exercise}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Recap - Variables}
+
+\begin{frame}
+
+Step 1: Write a module named \texttt{slist} saved in \texttt{slist.f90} that contains
+\small
+\begin{itemize}
+    \item Type \texttt{Cell} consisting of an allocatable string ``\texttt{data}'' and a pointer to a \texttt{Cell} ``\texttt{next}''
+    \item Type \texttt{SortedList} that contains an integer \texttt{length} and a pointer to a cell named \texttt{head}
+    \item Subroutine \texttt{extend} that takes a \texttt{SortedList} and a string, creates a new \texttt{Cell}, adds it to the list so that the cells are sorted based on the string's first letter, and increments \texttt{length}.
+    \item Subroutine \texttt{empty\_list} that takes a list and empties it taking care to deallocate memory correctly
+    \item Function \texttt{pop} that returns the last cell of the list and removes it
+    \item Recursive function \texttt{print\_forward} that prints all the strings in the list from last to first
+    \item Recursive function \texttt{print\_reverse} that prints all strings in the list from first to last
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+
+Step 2: Write a program in a separate file that uses the \texttt{SortedList} module, creates a sorted list, adds the strings:
+
+\vspace{2mm}
+river, spark, melody, whisper, canyon, drift, lantern, echo, quartz, and breeze
+
+\vspace{2mm}
+to it, and prints the list in ascending and descending order.
+
+% Write a makefile that compiles the module and the program, and has additionally a target named “test” that compiles everything and runs the program
+
+\end{frame}
+
+\end{document}

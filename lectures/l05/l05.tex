@@ -1,0 +1,86 @@
+\input{../common}
+\subtitle{Lecture 5: Custom Operators}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction to Custom Operators}
+
+
+\begin{frame}[fragile]
+  \frametitle{Custom Operators}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item Fortran allows you to define complex derived types.
+        \item But using them directly for calculations leads to cumbersome code (and bugs, lots and lots of bugs)
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+    \lstinputlisting[firstline=1,lastline=6]{code.f90}
+    \lstinputlisting[firstline=8,lastline=16]{code.f90}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Custom Operators}
+        \begin{itemize}
+        \item Code can be simplified (and made more robust) by using functions.
+      \end{itemize}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+          \lstinputlisting[firstline=18,lastline=35]{code.f90}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+    \lstinputlisting[firstline=37,lastline=45]{code.f90}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Custom Operators}
+        \begin{itemize}
+        \item And defining custom operators can make your code even cleaner.
+      \end{itemize}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+          \lstinputlisting[firstline=48,lastline=69,basicstyle=\ttfamily\tiny]{code.f90}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+    \lstinputlisting[firstline=75,lastline=83,basicstyle=\ttfamily\tiny]{code.f90}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{How to Define a Custom Operator}
+  Custom operators are defined inside a module using the \texttt{operator} keyword.
+  \vspace*{2mm}
+
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+            \item Standard operators (+, -, *, /) \lstinputlisting[firstline=86,lastline=88]{code.f90}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+            \item A new operator named \texttt{.op.} \lstinputlisting[firstline=90,lastline=92]{code.f90}
+      \end{itemize}    \end{column}
+  \end{columns}
+
+  \vspace*{2mm}
+  The functions implementing the operators are defined later in the module after the \texttt{contains} keyword.
+\end{frame}
+
+
+\end{document}
