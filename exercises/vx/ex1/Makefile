@@ -12,7 +12,7 @@ ex1: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
 
 clean:
-	rm -f *.o *.mod
+	del /Q *.o *.mod #it would be rm -f on linux but on windows it's del /Q
 
 test: ex1
 	ex1
