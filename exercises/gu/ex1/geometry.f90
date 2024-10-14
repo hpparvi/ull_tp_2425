@@ -147,10 +147,10 @@ contains
     cross_product%zz = vector1%xx * vector2%yy - vector1%yy * vector2%xx
   end function cross_product
 
-  pure type(vector3d) function orthv(vector1, vector2) !revise later
+  pure type(vector3d) function orthv(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
     
-    orthv = normalize(cross_product(vector1, vector2))
+    orthv = cross_product(vector1, vector2)
   end function orthv
   
 end module geometry
