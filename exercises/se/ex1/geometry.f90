@@ -121,5 +121,46 @@ CONTAINS
   END FUNCTION divvr
 
 
+  ! Distance between points
+  FUNCTION distance(p1, p2)
+    REAL :: distance
+    TYPE(point3d) :: p1, p2
+ 
+    
+  END FUNCTION distance
+
+  
+  ! Angle between vectors (in radians)
+  FUNCTION angle(vec1, vec2)
+    REAL :: angle
+    TYPE(vector3d) :: vec1, vec2
+
+  END FUNCTION angle
+
+  
+  ! Normalizing one vector
+  FUNCTION normalize(vec)
+    TYPE(vector3d) :: normalize
+    TYPE(vector3d) :: vec
+    
+  END FUNCTION normalize
+
+  
+  ! Cross product of two vectors
+  FUNCTION cross_product(vec1, vec2)
+    TYPE(vector3d) :: cross_product
+    TYPE(vector3d) :: vec1, vec2
+
+  END FUNCTION cross_product
+
+  
+  ! Returns an orthogonal vector to the input ones
+  FUNCTION otrhv(vec1, vec2)
+    TYPE(vector3d) :: orthv
+    TYPE(vector3d) :: vec1, vec2
+
+  END FUNCTION orthv
+
+      
 
 END MODULE geometry
