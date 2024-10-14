@@ -1,4 +1,4 @@
-MODULE particle
+MODULE particles
   USE geometry
   IMPLICIT NONE
 
@@ -9,4 +9,4 @@ MODULE particle
   END TYPE particle
 
 
-END MODULE particle
+END MODULE particles
