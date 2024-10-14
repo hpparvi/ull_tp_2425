@@ -45,6 +45,7 @@ CONTAINS
     sumvp%x = vec%x + poi%x
     sumvp%y = vec%y + poi%y
     sumvp%z = vec%z + poi%z
+    
   END FUNCTION sumvp
 
 
@@ -58,6 +59,7 @@ CONTAINS
     sumpv%x = vec%x + poi%x
     sumpv%y = vec%y + poi%y
     sumpv%z = vec%z + poi%z
+    
   END FUNCTION sumpv
 
   
@@ -70,6 +72,7 @@ CONTAINS
     subvp%x = vec%x - poi%x
     subvp%y = vec%y - poi%y
     subvp%z = vec%z - poi%z
+    
   END FUNCTION subvp
 
   
@@ -82,6 +85,7 @@ CONTAINS
     subpv%x = poi%x - vec%x
     subpv%y = poi%y - vec%y
     subpv%z = poi%z - vec%z
+    
   END FUNCTION subpv
 
   
@@ -94,6 +98,7 @@ CONTAINS
     mulrv%x = re * vec%x
     mulrv%y = re * vec%y
     mulrv%z = re * vec%z
+    
   END FUNCTION mulrv
 
   
@@ -106,6 +111,7 @@ CONTAINS
     mulvr%x = re * vec%x
     mulvr%y = re * vec%y
     mulvr%z = re * vec%z
+    
   END FUNCTION mulvr
 
   
@@ -118,14 +124,42 @@ CONTAINS
     divvr%x = vec%x / re
     divvr%y = vec%y / re
     divvr%z = vec%z / re
+    
   END FUNCTION divvr
 
+
+  ! Getting the magnitude of a vector
+  FUNCTION magnitude(vec)
+    REAL :: magnitude
+    TYPE(vector3d) :: vec
+
+    magnitude = SQRT(vec%x**2 + vec%y**2 + vec%z**2)
+    
+  END FUNCTION magnitude
+
+
+  ! Calculating the dot product of a vector
+  ! Note: DOT_PRODUCT is an intrinsic function, but
+  ! it works on arrays, so I redefine it
+  FUNCTION dot_prod(vec1, vec2)
+    REAL :: dot_prod
+    TYPE(vector3d) :: vec1, vec2
+
+    dot_prod = vec1%x * vec2%x + &
+               vec1%y * vec2%y + &
+               vec1%z * vec2%z
+    
+  END FUNCTION dot_prod
+  
 
   ! Distance between points
   FUNCTION distance(p1, p2)
     REAL :: distance
     TYPE(point3d) :: p1, p2
- 
+
+    distance = SQRT((p2%x - p1%x)**2 + &
+                    (p2%y - p1%y)**2 + &
+                    (p2%z - p1%z)**2)
     
   END FUNCTION distance
 
@@ -134,7 +168,16 @@ CONTAINS
   FUNCTION angle(vec1, vec2)
     REAL :: angle
     TYPE(vector3d) :: vec1, vec2
+    REAL :: mag1, mag2 ! For the vector magnitudes
+    REAL :: dot        ! For the dot product
+    
+    mag1 = magnitude(vec1)
+    mag2 = magnitude(vec2)
 
+    dot = dot_prod(vec1, vec2)
+    
+    angle = ACOS(dot/(mag1*mag2))
+    
   END FUNCTION angle
 
   
@@ -142,6 +185,11 @@ CONTAINS
   FUNCTION normalize(vec)
     TYPE(vector3d) :: normalize
     TYPE(vector3d) :: vec
+    REAL :: mag
+
+    mag = magnitude(vec)
+
+    normalize = vec / mag ! Should work because of divvr
     
   END FUNCTION normalize
 
@@ -151,6 +199,9 @@ CONTAINS
     TYPE(vector3d) :: cross_product
     TYPE(vector3d) :: vec1, vec2
 
+    cross_product%x = vec1%y * vec2%z - vec2%y * vec1%z
+    cross_product%y = vec1%z * vec2%x - vec2%x * vec1%z
+    cross_product%z = vec1%x * vec2%y - vec2%y * vec1%x
   END FUNCTION cross_product
 
   
@@ -159,8 +210,10 @@ CONTAINS
     TYPE(vector3d) :: orthv
     TYPE(vector3d) :: vec1, vec2
 
+    ! We normalize it, otherwise it's the same as cross_product
+    orthv = normalize(cross_product(vec1,vec2))
+    
   END FUNCTION orthv
 
       
-
 END MODULE geometry
