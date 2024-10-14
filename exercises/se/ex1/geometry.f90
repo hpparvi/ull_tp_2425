@@ -37,7 +37,7 @@ MODULE geometry
 CONTAINS
   
   ! Adding a vector and a point
-  FUNCTION sumvp(vec, poi)
+  ELEMENTAL FUNCTION sumvp(vec, poi)
     TYPE(vector3d) :: sumvp
     TYPE(vector3d) :: vec
     TYPE(point3d)  :: poi
@@ -51,7 +51,7 @@ CONTAINS
 
   ! Adding a point and a vector
   ! (Fortran does not assume commutative property)
-  FUNCTION sumpv(poi, vec)
+  ELEMENTAL FUNCTION sumpv(poi, vec)
     TYPE(vector3d) :: sumpv
     TYPE(vector3d) :: vec
     TYPE(point3d)  :: poi
@@ -64,7 +64,7 @@ CONTAINS
 
   
   ! Subtracting a vector minus a point
-  FUNCTION subvp(vec, poi)
+  ELEMENTAL FUNCTION subvp(vec, poi)
     TYPE(vector3d) :: subvp
     TYPE(vector3d) :: vec
     TYPE(point3d)  :: poi
@@ -77,7 +77,7 @@ CONTAINS
 
   
   ! Subtracting a point minus a vector
-  FUNCTION subpv(poi, vec)
+  ELEMENTAL FUNCTION subpv(poi, vec)
     TYPE(vector3d) :: subpv
     TYPE(vector3d) :: vec
     TYPE(point3d)  :: poi
@@ -90,7 +90,7 @@ CONTAINS
 
   
   ! Multiplying a real and a vector
-  FUNCTION mulrv(re, vec)
+  ELEMENTAL FUNCTION mulrv(re, vec)
     TYPE(vector3d) :: mulrv
     TYPE(vector3d) :: vec
     DOUBLE PRECISION :: re
@@ -103,7 +103,7 @@ CONTAINS
 
   
   ! Multiplying a vector and a real
-  FUNCTION mulvr(vec, re)
+  ELEMENTAL FUNCTION mulvr(vec, re)
     TYPE(vector3d) :: mulvr
     TYPE(vector3d) :: vec
     DOUBLE PRECISION :: re
@@ -116,7 +116,7 @@ CONTAINS
 
   
   ! Dividing a vector by a real
-  FUNCTION divvr
+  ELEMENTAL FUNCTION divvr
     TYPE(vector3d) :: divvr
     TYPE(vector3d) :: vec
     DOUBLE PRECISION :: re
