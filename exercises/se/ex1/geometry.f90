@@ -6,12 +6,12 @@ MODULE geometry
 
   ! Define vectors
   TYPE vector3d
-     REAL :: x, y, z
+     DOUBLE PRECISION :: x, y, z
   END TYPE vector3d
 
   ! Define points
   TYPE point3d
-     REAL :: x, y, z
+     DOUBLE PRECISION :: x, y, z
   END TYPE point3d
 
   ! Operators for code clarity
@@ -93,7 +93,7 @@ CONTAINS
   FUNCTION mulrv(re, vec)
     TYPE(vector3d) :: mulrv
     TYPE(vector3d) :: vec
-    REAL           :: re
+    DOUBLE PRECISION :: re
     
     mulrv%x = re * vec%x
     mulrv%y = re * vec%y
@@ -106,7 +106,7 @@ CONTAINS
   FUNCTION mulvr(vec, re)
     TYPE(vector3d) :: mulvr
     TYPE(vector3d) :: vec
-    REAL           :: re
+    DOUBLE PRECISION :: re
     
     mulvr%x = re * vec%x
     mulvr%y = re * vec%y
@@ -119,7 +119,7 @@ CONTAINS
   FUNCTION divvr
     TYPE(vector3d) :: divvr
     TYPE(vector3d) :: vec
-    REAL           :: re
+    DOUBLE PRECISION :: re
     
     divvr%x = vec%x / re
     divvr%y = vec%y / re
@@ -130,7 +130,7 @@ CONTAINS
 
   ! Getting the magnitude of a vector
   FUNCTION magnitude(vec)
-    REAL :: magnitude
+    DOUBLE PRECISION :: magnitude
     TYPE(vector3d) :: vec
 
     magnitude = SQRT(vec%x**2 + vec%y**2 + vec%z**2)
@@ -142,7 +142,7 @@ CONTAINS
   ! Note: DOT_PRODUCT is an intrinsic function, but
   ! it works on arrays, so I redefine it
   FUNCTION dot_prod(vec1, vec2)
-    REAL :: dot_prod
+    DOUBLE PRECISION :: dot_prod
     TYPE(vector3d) :: vec1, vec2
 
     dot_prod = vec1%x * vec2%x + &
@@ -154,7 +154,7 @@ CONTAINS
 
   ! Distance between points
   FUNCTION distance(p1, p2)
-    REAL :: distance
+    DOUBLE PRECISION :: distance
     TYPE(point3d) :: p1, p2
 
     distance = SQRT((p2%x - p1%x)**2 + &
@@ -166,10 +166,10 @@ CONTAINS
   
   ! Angle between vectors (in radians)
   FUNCTION angle(vec1, vec2)
-    REAL :: angle
+    DOUBLE PRECISION :: angle
     TYPE(vector3d) :: vec1, vec2
-    REAL :: mag1, mag2 ! For the vector magnitudes
-    REAL :: dot        ! For the dot product
+    DOUBLE PRECISION :: mag1, mag2 ! For the vector magnitudes
+    DOUBLE PRECISION :: dot        ! For the dot product
     
     mag1 = magnitude(vec1)
     mag2 = magnitude(vec2)
@@ -185,7 +185,7 @@ CONTAINS
   FUNCTION normalize(vec)
     TYPE(vector3d) :: normalize
     TYPE(vector3d) :: vec
-    REAL :: mag
+    DOUBLE PRECISION :: mag
 
     mag = magnitude(vec)
 
