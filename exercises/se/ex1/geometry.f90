@@ -39,8 +39,8 @@ CONTAINS
   ! Adding a vector and a point
   ELEMENTAL FUNCTION sumvp(vec, poi)
     TYPE(vector3d) :: sumvp
-    TYPE(vector3d) :: vec
-    TYPE(point3d)  :: poi
+    TYPE(vector3d), INTENT(IN) :: vec
+    TYPE(point3d), INTENT(IN)  :: poi
 
     sumvp%x = vec%x + poi%x
     sumvp%y = vec%y + poi%y
@@ -53,8 +53,8 @@ CONTAINS
   ! (Fortran does not assume commutative property)
   ELEMENTAL FUNCTION sumpv(poi, vec)
     TYPE(vector3d) :: sumpv
-    TYPE(vector3d) :: vec
-    TYPE(point3d)  :: poi
+    TYPE(vector3d), INTENT(IN) :: vec
+    TYPE(point3d), INTENT(IN)  :: poi
     
     sumpv%x = vec%x + poi%x
     sumpv%y = vec%y + poi%y
@@ -66,8 +66,8 @@ CONTAINS
   ! Subtracting a vector minus a point
   ELEMENTAL FUNCTION subvp(vec, poi)
     TYPE(vector3d) :: subvp
-    TYPE(vector3d) :: vec
-    TYPE(point3d)  :: poi
+    TYPE(vector3d), INTENT(IN) :: vec
+    TYPE(point3d), INTENT(IN)  :: poi
     
     subvp%x = vec%x - poi%x
     subvp%y = vec%y - poi%y
@@ -79,8 +79,8 @@ CONTAINS
   ! Subtracting a point minus a vector
   ELEMENTAL FUNCTION subpv(poi, vec)
     TYPE(vector3d) :: subpv
-    TYPE(vector3d) :: vec
-    TYPE(point3d)  :: poi
+    TYPE(vector3d), INTENT(IN) :: vec
+    TYPE(point3d), INTENT(IN)  :: poi
     
     subpv%x = poi%x - vec%x
     subpv%y = poi%y - vec%y
@@ -92,8 +92,8 @@ CONTAINS
   ! Multiplying a real and a vector
   ELEMENTAL FUNCTION mulrv(re, vec)
     TYPE(vector3d) :: mulrv
-    TYPE(vector3d) :: vec
-    DOUBLE PRECISION :: re
+    TYPE(vector3d), INTENT(IN) :: vec
+    DOUBLE PRECISION, INTENT(IN) :: re
     
     mulrv%x = re * vec%x
     mulrv%y = re * vec%y
@@ -105,8 +105,8 @@ CONTAINS
   ! Multiplying a vector and a real
   ELEMENTAL FUNCTION mulvr(vec, re)
     TYPE(vector3d) :: mulvr
-    TYPE(vector3d) :: vec
-    DOUBLE PRECISION :: re
+    TYPE(vector3d), INTENT(IN) :: vec
+    DOUBLE PRECISION, INTENT(IN) :: re
     
     mulvr%x = re * vec%x
     mulvr%y = re * vec%y
@@ -116,10 +116,10 @@ CONTAINS
 
   
   ! Dividing a vector by a real
-  ELEMENTAL FUNCTION divvr
+  ELEMENTAL FUNCTION divvr(vec, re)
     TYPE(vector3d) :: divvr
-    TYPE(vector3d) :: vec
-    DOUBLE PRECISION :: re
+    TYPE(vector3d), INTENT(IN) :: vec
+    DOUBLE PRECISION, INTENT(IN) :: re
     
     divvr%x = vec%x / re
     divvr%y = vec%y / re
@@ -206,7 +206,7 @@ CONTAINS
 
   
   ! Returns an orthogonal vector to the input ones
-  FUNCTION otrhv(vec1, vec2)
+  FUNCTION orthv(vec1, vec2)
     TYPE(vector3d) :: orthv
     TYPE(vector3d) :: vec1, vec2
 
