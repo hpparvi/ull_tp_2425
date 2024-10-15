@@ -1,12 +1,12 @@
-
-module particles
+module particle
 
   use geometry
+  implicit none
   
-  type particle
+  type particle3d
     type(point3d) :: p ! particle position
     type(vector3d) :: v ! velocity of the particle
     real :: m ! mass of the particle
-  end type particle
+  end type particle3d
   
-end module particles
+end module particle

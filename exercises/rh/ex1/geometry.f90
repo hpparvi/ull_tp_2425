@@ -6,8 +6,7 @@ module geometry
      real :: x, y, z
   end type vector3d
 
-  type :: point3d !What is the difference between point and a vector
-  		  ! maybe the vector is like a point but with a direction coordinate assignation
+  type :: point3d 
      real :: x, y, z
   end type point3d
 
@@ -112,16 +111,16 @@ contains
   end function modulev 
   
 ! Scalar product of two vectors function
-  pure type(real) function mulvv(vector1, vector2)
+  pure type(real) function dot_prod(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
-    mulvv = (vector1%x*vector2%x + vector1%y*vector2%y + vector1%z*vector2%z)
-  end function mulvv
+    dot_prod = (vector1%x*vector2%x + vector1%y*vector2%y + vector1%z*vector2%z)
+  end function dot_prod
  
   
 ! Angle between two vectors function  
   pure type(real) function angle(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
-    angle = acos(mulvv(vector1,vector2)/(modulev(vector1)*modulev(vector2)))
+    angle = acos(dot_prod(vector1,vector2)/(modulev(vector1)*modulev(vector2)))
   end function angle
   
 ! Vector normalization function
@@ -140,27 +139,6 @@ contains
   
 end module geometry
 
-program test
-  use geometry
-  implicit none
-  type(vector3d) :: v1, v2, v3
-  type(point3d) :: p1, p2
-  real :: theta, pi
-  real :: dist
-  real :: s = 2.
-  v1 = vector3d(2.0, 1.0, 2.0)
-  v2 = vector3d(0.0, 1.0, 0.0)
-  p1 = point3d(0.0, 1.0, 2.0)
-  p2 = point3d(2.0, 1.0, 2.0)
-  pi= 3.1415927
-  v3 = cross_product(v1,v2)
-  dist = distance(p1,p2)
-  theta = angle(v3,v1)
-  print *, v3
-  !print *, vector3d(2./3., 1./3., 2./3.)
-  print *, theta
-  print *, pi/2.
-  
-end program test
+
 
 
