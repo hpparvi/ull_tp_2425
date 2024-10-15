@@ -33,6 +33,7 @@ Now, your directory tree should look like:
 | Daniel Parra | pd |
 | Cathaysa Perdomo | pc |
 | Helena Rivero | rh |
+| Pere Rosselló | rp |
 | Eva Sola | se |
 | Oscar Soler | so |
 | Xoan Vilas | vx |
