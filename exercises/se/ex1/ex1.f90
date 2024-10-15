@@ -1,4 +1,6 @@
 PROGRAM ex1
+  USE GEOMETRY
+  USE PARTICLE
   IMPLICIT NONE
 
   ! Loop indices
@@ -16,13 +18,13 @@ PROGRAM ex1
   DOUBLE PRECISION :: r2, r3 
 
   ! We will have n instances of the "particle" type
-  TYPE(particle), DIMENSION(:), ALLOCATABLE :: particles 
+  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
   
   ! Acceleration arrays
-  DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: a
+  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: a
 
   ! Difference vector
-  DOUBLE PRECISION, DIMENSION(3) :: rji
+  TYPE(vector3d) :: rji
 
   ! Take the necessary inputs
   READ*, dt 
@@ -64,8 +66,8 @@ PROGRAM ex1
   ! For all needed times
   DO t = 0.0, t_end, dt 
      ! Compute velocities and positions for 1st time in the timestep
-     v = v + a * dt/2 
-     r = r + v * dt 
+     particles%v = particles%v + a * dt/2 
+     particles%p = particles%p + particles%v * dt 
 
      ! Set all accelerations to 0 again and recompute
      a = 0.0 
