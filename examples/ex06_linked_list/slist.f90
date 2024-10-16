@@ -26,6 +26,7 @@ contains
     character(len=*) :: s
 
     call init_cell(new, s)
+    list%length = list%length + 1
     
     cur => list%head
     do while (associated(cur%next))
