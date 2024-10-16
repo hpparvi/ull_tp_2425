@@ -1,12 +1,10 @@
 FC = gfortran
 FCFLAGS = -c
-OBJECTS : geometry.o particles.o test.o
+OBJECTS = geometry.o particle.o ex1.o
 
-all: test
+all: ex1
 
-test : test
-
-test : geometry.o particles.o test.o
+ex1 : geometry.o particle.o ex1.o
 	$(FC) -o $@ $(OBJECTS)
 
 %.o : %.f90
@@ -15,5 +13,5 @@ test : geometry.o particles.o test.o
 clean :
 	rm *.o *.mod
 
-test : test
-	./test
+test : ex1
+	./ex1
