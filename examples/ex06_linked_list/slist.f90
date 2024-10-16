@@ -39,7 +39,6 @@ contains
     ! previous one
 
     call init_cell(new, s)
-    list%length = list%length + 1
     
     ! Create new cell
     call init_cell(new, s)
