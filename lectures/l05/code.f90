@@ -1,21 +1,9 @@
 module geometry
   implicit none
-  
   type :: vector2d
      real :: x, y
   end type vector2d
 end module geometry
-
-  type :: vector3d
-     real :: x, y, z
-  end type vector3d
-end module geometry
-
-type :: point3d
-     real :: x, y, z
-  end type point3d
-end module geometry
-
 
 program test
   use geometry
