@@ -22,7 +22,7 @@
   \begin{enumerate}
    \item Create module \texttt{geometry} stored in \texttt{geometry.f90} file that contains:
    \begin{itemize}
-    \item types \texttt{vector3d} and \texttt{point3d}, both with real components \texttt{x}, \texttt{y}, and \texttt{z}
+    \item types \texttt{vector3d} and \texttt{point3d}, both with (64-bit) real components \texttt{x}, \texttt{y}, and \texttt{z}.
     \item functions \texttt{sumvp}, \texttt{sumpv}, \texttt{subvp}, \texttt{subpv}, \texttt{mulrv}, \texttt{mulvr}, \texttt{divvr} for adding and subtracting points and vectors, and for multiplying and dividing vectors with reals.
     \item operators matching these functions.
     \item function \texttt{distance} that calculates the distance between two 3d points.
@@ -40,7 +40,7 @@
   \frametitle{Exercise 1: basic dynamical simulation}
 
   \begin{enumerate}
-   \item[2.] Create a module \texttt{particle} stored in \texttt{particle.f90} that uses the \texttt{geometry} module and contains a type \texttt{particle}. This type should have components: a \texttt{point3d} variable \texttt{p} storing the particle's position, a \texttt{vector2d} variable \texttt{v} storing the particle's velocity, and a real variable \texttt{m} storing the particle's mass.
+   \item[2.] Create a module \texttt{particle} stored in \texttt{particle.f90} that uses the \texttt{geometry} module and contains a type \texttt{particle3d}. This type should have components: a \texttt{point3d} variable \texttt{p} storing the particle's position, a \texttt{vector3d} variable \texttt{v} storing the particle's velocity, and a real variable \texttt{m} storing the particle's mass.
    \item[3.] Take the code from TAP page 34 and modify it to use the \texttt{geometry} and \texttt{particle} modules. Store the program in \texttt{ex1.f90} file.
    \item[4.] Write a Makefile
    \item[5.] Create a pull request with your final code.
@@ -48,6 +48,23 @@
 
   \vspace*{2mm}
   \textbf{Note:} All the source files should be saved in your \texttt{ex1} folder. Add and commit your changes often and feel free to try working with different branches. Also feel free to create pull requests as often you like, but remember that other students can see the code you add to the main repository (this is perfectly ok, though).
+
+  \vspace*{2mm}
+  \textbf{Note:} All the real variables should be 64-bit floats (double precision)! 
+  \end{frame}
+
+\begin{frame}
+  \frametitle{Exercise 1: basic dynamical simulation}
+
+  \textbf{Scoring} is based on
+  \begin{enumerate}
+  \item Functionality: the code should work as described.
+  \item Understandability: the code should be clear to read and logical.
+  \item Comments: all the functionality in both the module and the program should be documented using comments.
+  \item Use of guidelines: the code should use the type and method names exactly as written in the exercise.
+  \end{enumerate}
+
+  \textbf{Bonus points} from anything that goes beyond to what I've taught at the classes, frequent push requests, interaction (asking questions, answering questions, and so on). If in doubt, ask!
   \end{frame}
 
 

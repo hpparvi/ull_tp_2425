@@ -38,8 +38,8 @@ contains
     type(cell), pointer :: cur, new ! Two new pointers, to new cell and
     ! previous one
 
-    ! New data
-    character(len=*) :: s
+    call init_cell(new, s)
+    list%length = list%length + 1
     
     ! Create new cell
     call init_cell(new, s)
