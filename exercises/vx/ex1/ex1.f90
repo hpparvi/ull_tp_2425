@@ -1,5 +1,5 @@
 PROGRAM leapfrog
-  use particl
+  use particle
   IMPLICIT NONE
 
   
@@ -9,13 +9,14 @@ PROGRAM leapfrog
   REAL :: rs, r2, r3                          !posicion sun??, r al cuadrado y al cubo
   type(vector3d) :: rji                       !posición entre dos cuerpos
 
-  type(particle), allocatable :: p(:)         !particulas p tienen (%p, v, a, m)
+  type(particle3d), allocatable :: p(:)         !particulas p tienen (%p, v, a, m)
 
-  print*, 'Por favor, introduzca el salto temporal: '
+  print*, 'Ahora se pedirán los parametros a introducir, para evitar bucles infinitos ponga dt < dt_out < t_end'
+  print*, 'Por favor, introduzca el salto temporal (dt). Si introduce 0.1, el bucle se ejecutara 100 veces: '
   READ*, dt
-  print*, 'Por favor, introduza el dt_out: '
+  print*, 'Por favor, introduza el tiempo de impresion de reusltados (dt_out). Si introduce 1, son 1 dato por segundo: '
   READ*, dt_out
-  print*, 'Por favor, introduzca el tiempo final: '
+  print*, 'Por favor, introduzca el tiempo final (t_end). Si introduce 10, seran 10 segundos de simulacion: '
   READ*, t_end
   print*, 'Por favor, introduzca el numero de cuerpos: '
   READ*, n
@@ -81,6 +82,8 @@ PROGRAM leapfrog
 
          t_out = 0.0
       END IF
+
+      t = t + dt !test
   END DO
   
 END PROGRAM leapfrog
