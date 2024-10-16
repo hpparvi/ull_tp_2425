@@ -12,6 +12,7 @@ PROGRAM ex1
   ! Timestep, end time, time loop index,
   ! times at which to print
   DOUBLE PRECISION :: dt, t_end, t, dt_out, t_out
+  INTEGER :: time_counter, total_timesteps
 
   ! Vector related quantities (squared, cubed)
   ! I removed rs because it was not used
@@ -27,17 +28,28 @@ PROGRAM ex1
   TYPE(vector3d) :: rji
 
   ! Take the necessary inputs
-  READ*, dt 
-  READ*, dt_out 
-  READ*, t_end 
+  PRINT*, "Input the time step"
+  READ*, dt
+
+  PRINT*, "Input the time step for outputs"
+  READ*, dt_out
+
+  PRINT*, "Input the final time"
+  READ*, t_end
+
+  PRINT*, "Input the number of particles"
   READ*, n 
 
+  ! Calculate the necessary timesteps to reach end
+  total_timesteps = t_end/dt
+  
   ALLOCATE(particles(n))
   ALLOCATE(a(n)) 
 
   ! Assign the masses & initial conditions
-  DO i = 1, n 
-	READ*, particles(i)%m, particles(i)%p, particles(i)%v 
+  DO i = 1, n
+     PRINT*, "Input the mass, position and velocity for particle", i
+     READ*, particles(i)%m, particles(i)%p, particles(i)%v 
   END DO
 
 
@@ -54,7 +66,6 @@ PROGRAM ex1
      ! And each of its neighbors...
      DO j = i+1,n 
 	! Determine difference vector
-        ! WARNING: THIS IS NOT OK, %p IS A POINT, - IS FOR VECTOR & POINT
 	rji = particles(j)%p - particles(i)%p
 	! The cube of the distance
         r3 = magnitude(rji)**3
@@ -69,7 +80,8 @@ PROGRAM ex1
   t_out = 0.0 
 
   ! For all needed times
-  DO t = 0.0, t_end, dt 
+  DO time_counter = 0, total_timesteps
+  ! DO t = 0.0, t_end, dt 
      ! Compute velocities and positions for 1st time in the timestep
      particles%v = particles%v + a * (dt/2) 
      particles%p = particles%p + particles%v * dt 
@@ -85,7 +97,6 @@ PROGRAM ex1
      ! Same as before
      DO i = 1,n 
 	DO j = i+1,n
-           ! WARNING: THIS IS NOT OK, %p IS A POINT, - IS FOR VECTOR & POINT
            rji = particles(j)%p - particles(i)%p
     
            r3 = magnitude(rji)**3
@@ -106,8 +117,9 @@ PROGRAM ex1
 	! For each of the particles
 	DO i = 1,n 
            ! Print ALL the positions if it is time to do so
-	   PRINT*, particles(i)%p 
-	END DO 
+           PRINT*, particles(i)%p
+	END DO
+        PRINT*, "" 
 	t_out = 0.0 
      END IF
 
