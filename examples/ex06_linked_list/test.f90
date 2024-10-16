@@ -15,7 +15,7 @@ program test
   call extend(list, "quartz")
   call extend(list, "breeze")
   call print_forward(list%head)
-  print * ! Empty line
+  print *
   call print_reverse(list%head)
 
 end program test
