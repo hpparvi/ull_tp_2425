@@ -21,7 +21,7 @@ PROGRAM ex1
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
   
   ! Acceleration arrays
-  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: a
+  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: a
 
   ! Difference vector
   TYPE(vector3d) :: rji
@@ -33,7 +33,7 @@ PROGRAM ex1
   READ*, n 
 
   ALLOCATE(particles(n))
-  ALLOCATE(a(n,3)) 
+  ALLOCATE(a(n)) 
 
   ! Assign the masses & initial conditions
   DO i = 1, n 
@@ -43,7 +43,12 @@ PROGRAM ex1
 
   ! Make this big block into a function or subroutine
   ! Set all accelerations at 0 initially
-  a = 0.0 
+  DO i = 1, n
+     a(i)%x = 0.
+     a(i)%y = 0.
+     a(i)%z = 0.
+  END DO
+  
   ! For each particle
   DO i = 1,n 
      ! And each of its neighbors...
@@ -55,8 +60,8 @@ PROGRAM ex1
         r3 = magnitude(rji)**3
 
 	! Compute the accelerations for i, j. Adding to previous value
-	a(i,:) = a(i,:) + particles(j)%m * rji / r3 
-	a(j,:) = a(j,:) - particles(i)%m * rji / r3 
+	a(i) = a(i) + particles(j)%m * rji / r3
+	a(j) = a(j) - particles(i)%m * rji / r3 
     END DO
   END DO
 
@@ -66,11 +71,17 @@ PROGRAM ex1
   ! For all needed times
   DO t = 0.0, t_end, dt 
      ! Compute velocities and positions for 1st time in the timestep
-     particles%v = particles%v + a * dt/2 
+     particles%v = particles%v + a * (dt/2) 
      particles%p = particles%p + particles%v * dt 
 
      ! Set all accelerations to 0 again and recompute
-     a = 0.0 
+     DO i = 1, n
+        a(i)%x = 0.
+        a(i)%y = 0.
+        a(i)%z = 0.
+     END DO
+
+     
      ! Same as before
      DO i = 1,n 
 	DO j = i+1,n
@@ -79,13 +90,13 @@ PROGRAM ex1
     
            r3 = magnitude(rji)**3
 
-           a(i,:) = a(i,:) + particles(j)%m * rji / r3 
-	   a(j,:) = a(j,:) - particles(i)%m * rji / r3 
+           a(i) = a(i) + particles(j)%m * rji / r3 
+	   a(j) = a(j) - particles(i)%m * rji / r3 
 	END DO 
      END DO
 
      
-     particles%v = particles%v + a * dt/2
+     particles%v = particles%v + a * (dt/2)
 
      ! Update the output time (t_out just keeps track of the progress
      ! until print)
