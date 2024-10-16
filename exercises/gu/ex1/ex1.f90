@@ -1,54 +1,18 @@
-PROGRAM leapfrog
-  IMPLICIT NONE
-  INTEGER :: i,j,k
-  INTEGER :: n
-  REAL :: dt, t_end, t, dt_out, t_out
-  REAL :: rs, r2, r3
-  REAL, DIMENSION(:), ALLOCATABLE :: m
-  REAL, DIMENSION(:,:), ALLOCATABLE :: r,v,a
-  REAL, DIMENSION(3) :: rji
-  READ*, dt
-  READ*, dt_out
-  READ*, t_end
-  READ*, n
-  ALLOCATE(m(n))
-  ALLOCATE(r(n,3))
-  ALLOCATE(v(n,3))
-  ALLOCATE(a(n,3))
-  DO i = 1, n
-     READ*, m(i), r(i,:),v(i,:)
-  END DO
-  a = 0.0
-  DO i = 1,n
-     DO j = i+1,n
-        rji = r(j,:) - r(i,:)
-        r2 = SUM(rji**2)
-        r3 = r2 * SQRT(r2)
-        a(i,:) = a(i,:) + m(j) * rji / r3
-        a(j,:) = a(j,:) - m(i) * rji / r3
-     END DO
-  END DO
-  t_out = 0.0
-  DO t = 0.0, t_end, dt
-     v = v + a * dt/2
-     r = r + v * dt
-     a = 0.0
-     DO i = 1,n
-        DO j = i+1,n
-           rji = r(j,:) - r(i,:)
-           r2 = SUM(rji**2)
-           r3 = r2 * SQRT(r2)
-           a(i,:) = a(i,:) + m(j) * rji / r3
-           a(j,:) = a(j,:) - m(i) * rji / r3
-        END DO
-     END DO
-     v = v + a * dt/2
-     t_out = t_out + dt
-     IF (t_out >= dt_out) THEN
-        DO i = 1,n
-           PRINT*, r(i,:)
-        END DO
-        t_out = 0.0
-     END IF
-  END DO
-END PROGRAM leapfrog
+program ex1
+  use geometry
+  use particle
+  implicit none
+  integer, parameter :: n = 3
+  real, parameter :: dt = 0.001, t_end = 100, dt_out = 0.1, t_out = 100
+  real :: t
+  type(particle3d) :: star1
+
+  
+
+  open (file = 'file.txt', action = 'read', status = 'old', unit = 3)
+
+  read (3,*) star1%m, star1%p%xx, star1%p%yy, star1%p%zz, star1%v%xx, star1%v%yy, star1%v%zz
+
+  close(3)
+    
+end program ex1
