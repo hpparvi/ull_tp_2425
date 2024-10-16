@@ -1,6 +1,10 @@
 module geometry
   implicit none
 
+  type :: vector2d
+     real :: x, y
+  end type vector2d
+  
   type :: vector3d
      real :: x, y, z
   end type vector3d
@@ -9,48 +13,67 @@ module geometry
      real :: x, y, z
   end type point3d
 
-  interface operator (.v+p.)
+  interface operator (.vsp.)
      module procedure sumvp
-  end interface operator (.v+p.)
+  end interface operator (.vsp.)
 
-  interface operator (.p+v.)
+  interface operator (.psv.)
      module procedure sumpv
-  end interface operator (.p+v.)
+  end interface operator (.psv.)
 
-  interface operator (.v-p.)
+  interface operator (.vrp.)
      module procedure subvp
-  end interface operator (.v-p.)
+  end interface operator (.vrp.)
 
-  interface operator (.p-v.)
+  interface operator (.prv.)
      module procedure subpv
-  end interface operator (.p-v.)
+  end interface operator (.prv.)
 
-  interface operator (.r*v.)
+  interface operator (.rpv.)
      module procedure mulrv
-  end interface operator (.r*v.)
+  end interface operator (.rpv.)
 
-  interface operator (.v*r.)
+  interface operator (.vpr.)
      module procedure mulvr
-  end interface operator (.v*r.)
+  end interface operator (.vpr.)
 
-  interface operator (.v/r.)
+  interface operator (.ver.)
      module procedure divvr
-  end interface operator (.v/r.)
+  end interface operator (.ver.)
+
+  interface operator (.vsv.)                          !also added
+     module procedure sumvv
+  end interface operator (.vsv.)
+
+  interface operator (.vrv.)                          !also added
+     module procedure subvv
+  end interface operator (.vrv.)
+
 
   
 
 contains
-  pure type(vector3d) function sumvp(v, p)
+  pure type(point3d) function sumvp(v, p)            !changed point + vector = point
     type(vector3d), intent(in) :: v
     type(point3d), intent(in) :: p
-    sumvp = vector3d(v%x + p%x, v%y + p%y, v%z + p%z)
+    sumvp = point3d(v%x + p%x, v%y + p%y, v%z + p%z)
   end function sumvp
 
-  pure type(vector3d) function sumpv(p, v)
+  pure type(point3d) function sumpv(p, v)             !same change as ^
     type(point3d), intent(in) :: p
     type(vector3d), intent(in) :: v
-    sumpv = vector3d(p%x + v%x, p%y + v%y, p%z + v%z)
+    sumpv = point3d(p%x + v%x, p%y + v%y, p%z + v%z)
   end function sumpv
+
+  pure type(vector3d) function sumvv(a, b)            !added function
+    type(vector3d), intent(in) :: a, b
+    sumvv = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
+  end function sumvv
+
+  pure type(vector3d) function subvv(a, b)            !added function
+    type(vector3d), intent(in) :: a, b
+    subvv = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
+  end function subvv
 
   pure type(vector3d) function subvp(v, p)
     type(vector3d), intent(in) :: v
@@ -74,7 +97,7 @@ contains
     type(vector3d), intent(in) :: v
     real, intent(in) :: r
     mulvr = vector3d(v%x*r, v%y*r, v%z*r)
-  end function mulrv
+  end function mulvr
 
   pure type(vector3d) function divvr(v, r)
     type(vector3d), intent(in) :: v
@@ -82,14 +105,14 @@ contains
     divvr = vector3d(v%x/r, v%y/r, v%z/r)
   end function divvr
 
-  pure type(real) function distance(a, b)
-    type(vector3d), intent(in) :: a, b
-    distance = real(sqrt((b%x-a%x)**2+(b%y-a%y)**2+(b%z-a%z)**2))
+  pure type(vector3d) function distance(a, b)
+    type(point3d), intent(in) :: a, b
+    distance = vector3d(b%x - a%x, b%y - a%y, b%z - a%z)
   end function distance
 
-  pure type(real) function modulus(a)
+  pure real function modulus(a)
     type(vector3d), intent(in) :: a
-    modulus = real(sqrt(a%x**2 + a%y**2 + a%z**2))
+    modulus = sqrt(a%x**2 + a%y**2 + a%z**2)
   end function modulus
   
   pure type(vector3d) function normalize(a)
@@ -97,12 +120,12 @@ contains
     normalize = divvr(a, modulus(a))
   end function normalize
 
-  pure type(real) function dotproduct(a, b)
+  pure real function dotproduct(a, b)
     type(vector3d), intent(in) :: a, b
-    dotproduct = real(a%x*b%x + a%y*b%y + a%z*b%z)
+    dotproduct = a%x*b%x + a%y*b%y + a%z*b%z
   end function dotproduct
 
-  pure type(real) function angle(a, b)
+  pure real function angle(a, b)
     type(vector3d), intent(in) :: a, b
     angle = acos(dotproduct(normalize(a),  normalize(b)))
   end function angle
@@ -117,4 +140,5 @@ contains
 !    orthv = vector3d
 !  end function orthv
 
+  
 end module geometry
