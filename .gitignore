@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+
+# Emacs buffers
+*~
+
+# LaTeX
+*.aux
+*.log
+*.nav
+*.toc
+*.snm
+*.vrb
+*.synctex.gz
+.DS_Store
+tmp
