@@ -57,7 +57,7 @@ contains
 
   pure type(vector3d) function subvv(v1, v2) !substracts two 3d vectors
     type(vector3d), intent(in) :: v1, v2
-    subvv = vector3d(v2%x - v1%x, v2%y - v1%y, v2%z - v1%z)
+    subvv = vector3d(v1%x - v2%x, v1%y - v2%y, v1%z - v2%z)
   end function subvv
 
   pure type(vector3d) function mulrv(r, v) !multiplies a real number by a 3d vector

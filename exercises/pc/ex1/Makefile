@@ -5,7 +5,7 @@ OBJECTS = geometry.o particle.o ex1.o
 all: ex1
 
 ex1: $(OBJECTS)
-	$(FC) -O $@ $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
 
 %.o: %.f90
 	$(FC) $(FCFLAGS) $<
