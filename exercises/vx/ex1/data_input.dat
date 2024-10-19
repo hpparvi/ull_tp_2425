@@ -1,0 +1,13 @@
+0.1    ! dt
+1    ! dt_out
+10   ! t_end
+2      ! número de cuerpos
+
+0.0 0.0 0.0   ! Posición del cuerpo 1
+0.0 0.0 0.0   ! Velocidad del cuerpo 1
+2.0           ! Masa del cuerpo 1
+
+5.0 5.0 5.0   ! Posición del cuerpo 2
+0.0 0.0 0.0   ! Velocidad del cuerpo 2
+10.0           ! Masa del cuerpo 2
+

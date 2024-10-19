@@ -6,47 +6,62 @@ PROGRAM leapfrog
   INTEGER :: i,j,k
   INTEGER :: n                                !número de cuerpos
   REAL :: dt, t_end, t, dt_out, t_out         !paso temporal, ...
-  REAL :: rs, r2, r3                          !posicion sun??, r al cuadrado y al cubo
+  REAL :: rs, r2, r3                          !posicion, r al cuadrado y al cubo
   type(vector3d) :: rji                       !posición entre dos cuerpos
 
   type(particle3d), allocatable :: p(:)         !particulas p tienen (%p, v, a, m)
 
-  print*, 'Ahora se pedirán los parametros a introducir, para evitar bucles infinitos ponga dt < dt_out < t_end'
-  print*, 'Por favor, introduzca el salto temporal (dt). Si introduce 0.1, el bucle se ejecutara 100 veces: '
-  READ*, dt
-  print*, 'Por favor, introduza el tiempo de impresion de reusltados (dt_out). Si introduce 1, son 1 dato por segundo: '
-  READ*, dt_out
-  print*, 'Por favor, introduzca el tiempo final (t_end). Si introduce 10, seran 10 segundos de simulacion: '
-  READ*, t_end
-  print*, 'Por favor, introduzca el numero de cuerpos: '
-  READ*, n
+  character(len=30) :: datos
+  character(len=30) :: orbitas
+  INTEGER :: io_status  ! Variable para verificar el estado de I/O
 
-  
+  datos = 'data_input.dat'
+  orbitas = 'data_output.dat'
+  OPEN(10, file=datos, status='old', action='read', iostat=io_status)
+
+
+  ! Leer los parámetros básicos y depurar
+  READ(10, *, IOSTAT=io_status) dt
+  print *, "El valor leido del salto temporal (dt) es ", dt
+
+  READ(10, *, IOSTAT=io_status) dt_out
+  print *, "El valor leido del tiempo de impresion de resultados (dt_out) es", dt_out
+
+  READ(10, *, IOSTAT=io_status) t_end
+  print *, "El valor leido del tiempo total de la simulacion (t_end) es ", t_end
+
+  READ(10, *, IOSTAT=io_status) n
+  print *, "El valor leido del numero de cuerpos (n) es ", n
+
+  ! Asignar memoria para las partículas
   ALLOCATE(p(n))
 
+  ! Leer las posiciones, velocidades y masas de las partículas
   DO i = 1, n
-     print*, 'Por favor, introduzca la posicion (tres numeros)',i,':'
-     read*, p(i)%p
+     READ(10, *, IOSTAT=io_status) p(i)%p
+     print *, "El valor leido de la posicion de la particula", i, "es:", p(i)%p
+
+     READ(10, *, IOSTAT=io_status) p(i)%v
+     print *, "El valor leido de la velocidad de la particula", i, "es:", p(i)%v
+
+     READ(10, *, IOSTAT=io_status) p(i)%m
+     print *, "El valor leido de la masa de la particula", i, "es:", p(i)%m
+
   END DO
 
-  DO i = 1, n
-     print*, 'Por favor, introduzca la velocidad (tres numeros)',i,':'
-     read*,  p(i)%v
-  END DO
+  CLOSE(10)
 
-  DO i = 1, n
-     print*, 'Por favor, introduzca la masa del cuerpo (un numero)',i,':'
-     read*, p(i)%m
-  END DO
 
   do i = 1, n
      p(i)%a = vector3d(0.0, 0.0, 0.0)
   end do
+
+  open(11, file = orbitas, status = 'old', action = 'write', iostat = io_status)
   
   DO i = 1, n
      DO j = i+1, n
-        rji = distance(p(j)%p, p(i)%p)
-        r2 = modulus(rji)
+        rji = distance(p(i)%p, p(j)%p)
+        r2 = (modulus(rji))**2
         r3 = r2 * SQRT(r2)
         p(i)%a = p(i)%a .vsv. (p(j)%m .rpv. rji) .ver. r3
         p(j)%a = p(j)%a .vrv. (p(i)%m .rpv. rji) .ver. r3
@@ -63,11 +78,11 @@ PROGRAM leapfrog
      end do
      DO i = 1, n
         DO j = i+1, n
-        rji = distance(p(j)%p, p(i)%p)
-        r2 = modulus(rji)
+        rji = distance(p(i)%p, p(j)%p)
+        r2 = (modulus(rji))**2
         r3 = r2 * SQRT(r2)
-        p(i)%a = p(i)%a .vsv. (p(j)%m .rpv. rji) .ver. r3
-        p(j)%a = p(j)%a .vrv. (p(i)%m .rpv. rji) .ver. r3
+        p(i)%a = p(i)%a .vsv. ((p(j)%m .rpv. rji) .ver. r3)
+        p(j)%a = p(j)%a .vrv. ((p(i)%m .rpv. rji) .ver. r3)
         END DO
      END DO
      do i = 1, n                                            !added
@@ -77,13 +92,12 @@ PROGRAM leapfrog
      t_out = t_out + dt
       IF (t_out >= dt_out) THEN
          DO i = 1,n
-            PRINT*, p(i)%p
+            write (11, '(3F12.6)') p(i)%p%x, p(i)%p%y, p(i)%p%z
          END DO
 
          t_out = 0.0
       END IF
-
-      t = t + dt !test
+      t = t + dt
   END DO
   
 END PROGRAM leapfrog

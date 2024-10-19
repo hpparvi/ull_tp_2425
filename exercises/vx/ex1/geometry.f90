@@ -1,10 +1,6 @@
 module geometry
   implicit none
 
-  type :: vector2d
-     real :: x, y
-  end type vector2d
-  
   type :: vector3d
      real :: x, y, z
   end type vector3d
@@ -75,16 +71,16 @@ contains
     subvv = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
   end function subvv
 
-  pure type(vector3d) function subvp(v, p)
+  pure type(point3d) function subvp(v, p)
     type(vector3d), intent(in) :: v
     type(point3d), intent(in) :: p
-    subvp = vector3d(v%x - p%x, v%y - p%y, v%z - p%z)
+    subvp = point3d(v%x - p%x, v%y - p%y, v%z - p%z)
   end function subvp
 
-  pure type(vector3d) function subpv(p, v)
+  pure type(point3d) function subpv(p, v)
     type(point3d), intent(in) :: p
     type(vector3d), intent(in) :: v
-    subpv = vector3d(p%x - v%x, p%y - v%y, p%z - v%z)
+    subpv = point3d(p%x - v%x, p%y - v%y, p%z - v%z)
   end function subpv
 
   pure type(vector3d) function mulrv(r, v)
@@ -135,10 +131,10 @@ contains
     cross_product = vector3d(a%y*b%z - a%z*b%y, a%z*b%x - a%x*b%z, a%x*b%y - a%y*b%x)
   end function cross_product
   
-!  pure type(vector3d) function orthv(a, b)
-!    type(vector3d), intent(in) :: a, b
-!    orthv = vector3d
-!  end function orthv
+  pure type(vector3d) function orthv(a, b)
+    type(vector3d), intent(in) :: a, b
+    orthv = cross_product(a, b)
+  end function orthv
 
   
 end module geometry
