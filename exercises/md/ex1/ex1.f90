@@ -1,4 +1,4 @@
-program leapfrog
+program n_body
     use geometry
     use particle
 
@@ -8,10 +8,13 @@ program leapfrog
     integer :: n
     real :: dt, t_end, t, dt_out, t_out
     real :: r2, r3
+    character(len=100) :: sim_name, file_out
 
     type(particle3d), allocatable :: particles(:)
     type(vector3d) :: rji
 
+    print*, "Enter the simulation name:"
+    read*, sim_name
     print*, "Enter the time step:"
     read*, dt
     print*, "Enter the output time step:"
@@ -21,6 +24,7 @@ program leapfrog
     print*, "Enter the number of particles:"
     read*, n
 
+    file_out = 'output/' // trim(adjustl(sim_name)) // '_positions.txt'
     allocate(particles(n))
 
     do i = 1, n
@@ -46,7 +50,8 @@ program leapfrog
     end do
 
     t_out = 0.
-    open(unit=1, file='output/positions.txt', action='write')
+    open(unit=1, file=file_out, action='write')
+        write(1, "(A6, 1X, A12, 1X, A12, 1X, A12, 1X, A12)") "#Index", "X", "Y", "Z", "Mass"
         do while (t < t_end)
             call update_pos(particles, dt)
             call update_vel(particles, dt)
@@ -66,10 +71,10 @@ program leapfrog
             t_out = t_out + dt
             if  (t_out >= dt_out) then
                 print*, "Positions at time ", t
-                    do i = 1, n
-                        print*, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z
-                        write(1, "(I5, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5)") i, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z
-                    end do
+                do i = 1, n
+                    print*, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z, particles(i)%m
+                    write(1, "(I6, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5)") i, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z, particles(i)%m
+                end do
                 print*, "____________________________________"
                 t_out = 0.
             end if
@@ -77,4 +82,4 @@ program leapfrog
             t = t + dt
         end do
     close(1)
-end program leapfrog
+end program n_body
