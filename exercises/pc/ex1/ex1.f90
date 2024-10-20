@@ -1,71 +1,62 @@
 PROGRAM ex1
-  USE particle !only using the module particle because it's using the module geometry as well
+  USE calcs !only using the module calcs because it's using the geometry and particle modules as well
   IMPLICIT NONE
-  INTEGER :: i, j, k, n !n is the number of bodies
-  REAL :: dt, t_end, t, dt_out, t_out, rs, r2, r3 !time step, final time, time, final time step, out time, ...
-  TYPE(vector3d) :: rji
+  INTEGER :: n !n is the number of bodies
+  REAL :: dt, t_end, t, dt_out, t_out !time step, final time, time, results printing time step, results printing time, position squared and cubed
+  TYPE(vector3d) :: rji !position between two bodies
   TYPE(particle3d), allocatable :: p(:)
+
+  CHARACTER(len = 20) :: input
+  CHARACTER(len = 20) :: output
+  INTEGER :: io_status
+
+  input = 'initial_data.dat'
+  output = 'final_data.dat'
+
+  OPEN(12, file = input, status = 'old', action = 'read', iostat = io_status)
   
-  PRINT*, "Introduce the time step"
-  READ*, dt
-  PRINT*, "Introduce the ... time step"
-  READ*, dt_out
-  PRINT*, "Introduce the final time"
-  READ*, t_end
-  PRINT*, "Introduce the number of bodies for the simulation"
-  READ*, n 
+  READ(12, *, IOSTAT = io_status) dt, dt_out, t_end, n
+  PRINT*, "Time step: ", dt
+  PRINT*, "Results printing time interval: ", dt_out
+  PRINT*, "Final time: ", t_end
+  PRINT*, "Number of bodies: ", n
 
   !Assigning memory for particles' properties
   ALLOCATE(p(n))
 
   DO i = 1, n
-     PRINT*, "Insert particle's mass, initial position and velocity"
-     READ*, p(i)%m, p(i)%p, p(i)%v !Reading particles' masses, positions and velocities
-     
-     p(i)%a = vector3d(0.0, 0.0, 0.0) !Setting the initial particles' accelerations to zero
-    
+     READ(12, *, IOSTAT = io_status) p(i)%m, p(i)%p, p(i)%v !reading particles' masses, positions and velocities
+     PRINT*, "Body ", i
+     PRINT*, "Mass: ", p(i)%m
+     PRINT*, "Position (x, y, z): ", p(i)%p
+     PRINT*, "Velocity (x, y, z): ", p(i)%v    
   END DO
+
+  CALL set_acceleration(n, p) !calling subroutine that sets the initial particles' accelerations to zero
+
+  CLOSE(12)
+
+  OPEN(13, file = output, status = 'old', action = 'write', iostat = io_status)
+  WRITE(13, '(A)') "Position (x, y, z)"
   
-  
-  DO i = 1, n
-     DO j = i + 1, n
-        rji = distance(p(j)%p, p(i)%p)
-        r2 = (norm(rji))**2
-        r3 = r2 * SQRT(r2)
-        p(i)%a = p(i)%a + ((p(j)%m * rji)/r3)
-        p(j)%a = p(j)%a - ((p(i)%m * rji)/r3)
-     END DO
-  END DO
+  CALL acceleration(n, dt, p, rji) !Calling subroutine to calculate particles' acceleration 
 
   t = 0.0
   t_out = 0.0
-  
-  DO WHILE (t .LE. t_end)
-     DO i = 1, n
-     p(i)%v = p(i)%v + (p(i)%a * (dt * 0.5))
-     p(i)%p = p(i)%p + (p(i)%v *  dt)
-     p(i)%a = vector3d(0.0, 0.0, 0.0)
-     END DO
-  
-     DO i = 1, n
-        DO j = i + 1, n
-            rji = distance(p(j)%p, p(i)%p)
-            r2 = (norm(rji))**2
-            r3 = r2 * SQRT(r2)
-            p(i)%a = p(i)%a + ((p(j)%m * rji)/r3)
-            p(j)%a = p(j)%a - ((p(i)%m * rji)/r3)
-        END DO
-     END DO
 
-     DO i = 1, n
-        p(i)%v = p(i)%v + (p(i)%a * (dt * 0.5))
-     END DO
+  DO WHILE (t .LE. t_end)
+     
+     CALL velocity(n, dt, p)
+     CALL position(n, dt, p)
+     CALL set_acceleration(n, p)
+     CALL acceleration(n, dt, p, rji)
+     CALL velocity(n, dt, p)
      
      t_out = t_out + dt 
      
      IF (t_out .GE. dt_out) THEN
         DO i = 1, n
-           PRINT*, p(i)%p
+           WRITE(13, '(3F12.6)') p(i)%p
         END DO
         
         t_out = 0.0
@@ -75,4 +66,7 @@ PROGRAM ex1
      t = t + dt
      
   END DO
+
+  CLOSE(13)
+
 END PROGRAM ex1
