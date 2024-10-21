@@ -14,7 +14,7 @@ module geometry
   end interface operator(+)
 
   interface operator(-)
-     module procedure subvv, subvp, subpv
+     module procedure subvv, subvp, subpv, subpp
   end interface operator(-)
 
   interface operator(*)
@@ -43,6 +43,15 @@ contains
     subvv%yy = vector1%yy - vector2%yy
     subvv%zz = vector1%zz - vector2%zz
   end function subvv
+
+  elemental type(vector3d) function subpp(point1, point2)
+    type(point3d), intent(in) :: point1, point2
+
+    subpp%xx = point1%xx - point2%xx
+    subpp%yy = point1%yy - point2%yy
+    subpp%zz = point1%zz - point2%zz
+  end function subpp
+    
 
   elemental type(point3d) function sumpv(point1, vector1) !sums p1 and v1, returns point
     type(vector3d), intent(in) :: vector1
@@ -136,7 +145,7 @@ contains
   elemental type(vector3d) function normalize(vector1) !v1/norm(v1)
     type(vector3d), intent(in) :: vector1
 
-    normalize = vector1/vecnorm(vector1)
+    normalize = divvr(vector1, vecnorm(vector1))
   end function normalize
 
   elemental type(vector3d) function cross_product(vector1, vector2)
