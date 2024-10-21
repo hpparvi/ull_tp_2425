@@ -1,57 +1,99 @@
-program ex1
-  use geometry
-  use particle
-  implicit none
-  real :: dt, t_end, dt_out, t_out
-  real :: t
-  type(particle3d), allocatable :: particles(:)
-  integer :: rc, stat, i, j
-  integer :: n = 0
-  character(len=*), parameter :: filename = 'data.txt'
-  type(vector3d), dimension(:), allocatable :: aa
-  type(vector3d) :: rji
-  real :: r2
+PROGRAM ex1
+  USE geometry
+  USE particle
+  IMPLICIT NONE
+  REAL :: dt, t_end, dt_out, t_out
+  REAL :: t
+  TYPE(particle3d), ALLOCATABLE :: particles(:)
+  INTEGER :: rc, stat, i, j
+  INTEGER :: n = 0
+  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'result.dat'
+  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: aa
+  TYPE(vector3d) :: rji
+  REAL :: r2
 
   
 
-  open (file = filename, action = 'read', status = 'old', unit = 3, iostat = rc)
-  if (rc/=0) write (*,*) 'Cannot open file ' , filename
+  OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = rc)
+  IF (rc/=0) WRITE (*,*) 'Cannot open file ' , filename
 
-  do i = 1, 3, 1 ! skips the first 3 lines as those are not particles
-     read(3, *)
-  end do
+  DO i = 1, 3, 1 ! skips the first 3 lines as those are not particles
+     READ(3, *)
+  END DO
   
-  do ! this loop counts the amount of particles
-     read(3, *, iostat = stat)
-     if (stat/=0) exit
+  DO ! this loop counts the amount of particles
+     READ(3, *, iostat = stat)
+     IF (stat/=0) EXIT
      n = n + 1
-  end do
+  END DO
   
-  rewind(3)
+  REWIND(3)
   
-  read (3, *) dt
-  read (3, *) dt_out
-  read (3, *) t_end
+  READ (3, *) dt
+  READ (3, *) t_end
+  READ (3, *) dt_out
 
-  allocate(particles(n))
+  ALLOCATE(particles(n))
 
-  do i = 1, n
-     read (3, *) particles(i)%m, particles(i)%p%xx, particles(i)%p%yy, particles(i)%p%zz,&
+  DO i = 1, n
+     READ (3, *) particles(i)%m, particles(i)%p%xx, particles(i)%p%yy, particles(i)%p%zz,&
           &particles(i)%v%xx, particles(i)%v%yy, particles(i)%v%zz
-  end do   
-  close(3)
+  END DO   
+  CLOSE(3)
 
-  allocate(aa(n))
+  ALLOCATE(aa(n))
   aa = vector3d(0.,0.,0.)
   
   
-  do i = 1, n
-     do j = i+1, n
-        rji =  normalize(particles(i)%p - particles(j)%p)
-        r2 = distance(particles(i)%p, particles(j)%p)
-        aa(i) = aa(i)
-     end do
-  end do
+  CALL calculate_accelerations(particles, aa)
+
+  t_out = 0.0
+
+  t = 0.0
+
+  OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc)
+  IF (rc/=0) WRITE (*,*) 'Cannot open file ' , outname
+
+  DO WHILE (t .LT. t_end)
+
+     particles%v = particles%v + aa * dt/2
+     particles%p = particles%p + particles%v * dt
+     aa = vector3d(0., 0., 0.)
+     CALL calculate_accelerations(particles, aa)
+
+     particles%v = particles%v + aa * dt/2
+     t_out = t_out + dt
+
+     IF (t_out >= dt_out) THEN
+        DO i = 1, n
+           WRITE(4, *) particles(i)
+        END DO
+     t_out = 0.0
+     END IF
+
+     t = t + dt
+   END DO
+
+  CLOSE(4)
   
-    
-end program ex1
+  
+
+CONTAINS
+  
+  SUBROUTINE calculate_accelerations(bodies, accelerations)
+    TYPE(particle3d), DIMENSION(:), INTENT(in) :: bodies
+    TYPE(vector3d), DIMENSION(:), INTENT(inout) :: accelerations
+
+    DO i = 1, n
+       DO j = i+1, n
+          rji =  normalize(bodies(i)%p - bodies(j)%p)
+          r2 = distance(bodies(i)%p, bodies(j)%p)
+          accelerations(i) = accelerations(i) - bodies(j)%m * rji/r2
+          accelerations(j) = accelerations(j) + bodies(i)%m * rji/r2
+       END DO
+    END DO
+
+  END SUBROUTINE calculate_accelerations
+
+
+END PROGRAM ex1
