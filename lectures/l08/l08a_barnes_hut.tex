@@ -1,0 +1,150 @@
+\input{../common}
+\subtitle{Barnes-Hut Algorithm}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Problem: Direct simulation leads to O(N$^2$) scaling}
+  \begin{itemize}
+    \item We need to calculate the forces between all the particles in the simulation.
+    \item The number of force calculations depends on the number of particles, \( N \):
+    \begin{itemize}
+      \item \( N = 2 \Rightarrow 1 \) calculation
+      \item \( N = 3 \Rightarrow 3 \) calculations
+      \item \( N = 4 \Rightarrow 6 \) calculations
+      \item \( N = 10 \Rightarrow 45 \) calculations
+      \item \( N = 100 \Rightarrow 4\,950 \) calculations
+      \item \( N = 1000 \Rightarrow 499\,500 \) calculations
+    \end{itemize}
+    \item Computational complexity: $ \frac{1}{2}N(N-1) \sim N^2$
+    \item Called $O(N^2)$ scaling.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Computational Scaling}
+  \begin{itemize}
+    \item \( T_{N=100} / T_{N=10} = 100 \)
+    \item \( T_{N=1000} / T_{N=100} = 100 \)
+    \item \( T_{N=10\,000} / T_{N=1000} = 100 \)
+    \item \( T_{N=10\,000} / T_{N=10} = 1\,000\,000 \)
+    \item<2> \textbf{Not good!}
+    \item<3> \textbf{Not good at all!}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What can we do?}
+  \begin{itemize}
+    \item Find an algorithm that scales better.
+    \item \textbf{Barnes-Hut Algorithm (Nature, V. 324 1986)}
+    \item Scales as \( O(N \log N) \)
+  \end{itemize}
+  \begin{itemize}
+    \item \( T_{N=100} / T_{N=10} = 20 \)
+    \item \( T_{N=1000} / T_{N=100} = 15 \)
+    \item \( T_{N=10\,000} / T_{N=1000} = 13 \)
+    \item \( T_{N=10\,000} / T_{N=10} = 4000 \)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \centering
+  {\Large\textbf{How?}}
+\end{frame}
+
+
+\begin{frame}
+  \centering
+  {\Large\textbf{How?}}
+
+  \vspace*{5mm}
+    Approximate far-away clumps of particles as point masses.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Barnes-Hut}
+    \centering
+    \only<1>{\includegraphics[height=0.8\textheight]{bh01.pdf}}
+    \only<2>{\includegraphics[height=0.8\textheight]{bh02.pdf}}
+    \only<3>{\includegraphics[height=0.8\textheight]{bh03.pdf}}
+    \only<4>{\includegraphics[height=0.8\textheight]{bh04.pdf}}
+    \only<5>{\includegraphics[height=0.8\textheight]{bh05.pdf}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{How?}
+  Use a spatial data structure to organise the particles.
+
+    \vspace*{2mm}
+  \begin{itemize}
+    \item \textbf{Octree:}
+    \begin{itemize}
+     \item  A tree data structure that divides 3D space into hierarchical cubes.
+     \item A 3D version of a quadtree.
+    \end{itemize}
+
+    \vspace*{2mm}
+    \item \textbf{Octree node:}
+    \begin{itemize}
+    \item An octree node represents a cube in 3D space.
+    \item Each node can be subdivided into eight smaller cubes (children nodes).
+    \item A node has a link to its parent node.
+    \item In our case, a node can contain:
+      \begin{itemize}
+        \item A single particle (either a pointer or an array index).
+        \item Total mass of all the particles in the descendant nodes.
+        \item 3D center of mass.
+      \end{itemize}
+    \end{itemize}
+
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Octree Visualization}
+  \centering
+  \includegraphics[height=0.7\textheight]{octree2.pdf} \\
+  \scriptsize Image by: \href{https://commons.wikimedia.org/wiki/File:Octree2.svg}{WhiteTimberwolf: CC BY-SA 3.0}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Octree Visualization}
+    \centering
+    \only<1>{\includegraphics[height=0.8\textheight]{octree_0.pdf}}
+    \only<2>{\includegraphics[height=0.8\textheight]{octree_1.pdf}}
+    \only<3>{\includegraphics[height=0.8\textheight]{octree_2.pdf}}
+    \only<4>{\includegraphics[height=0.8\textheight]{octree_3.pdf}}
+    \only<5>{\includegraphics[height=0.8\textheight]{octree_4.pdf}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Octree Node Structure}
+    \centering
+  \includegraphics[height=0.8\textheight]{TP_2425_08_barnes_hutt_node.pdf}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Building an Octree}
+  \begin{itemize}
+    \item Find the node the particle belongs to.
+    \item If the node is empty, assign the particle to the node.
+    \item If the node already contains a particle:
+      \begin{itemize}
+        \item Subdivide the node.
+        \item Move the existing particle to the correct child node.
+        \item Try to assign the new particle to the correct child node.
+        \item If the child node already has a particle, subdivide again.
+      \end{itemize}
+    \item Recursive subdivision makes this process clean and efficient.
+  \end{itemize}
+\end{frame}
+
+
+
+\end{document}
