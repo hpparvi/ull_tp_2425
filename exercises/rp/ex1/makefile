@@ -1,25 +1,31 @@
-# Variables
-FC = gfortran  # Fortran compiler
-SRC_DIR = src  # Source directory
-OBJ_DIR = obj  # Object files directory
-BIN_DIR = bin  # Executable directory
-SRC = $(wildcard $(SRC_DIR)/*.f90)  # Automatically find all .f90 files in src/
-OBJ = $(patsubst $(SRC_DIR)/%.f90,$(OBJ_DIR)/%.o,$(SRC))  # Create obj files from src files
-EXEC = $(BIN_DIR)/exec  # The final executable
 
-# Default rule
+FC = gfortran  # Fortran compiler
+SRC = src/geometry.f90 src/particle.f90 src/ex1.f90  # List of source files
+OBJ = obj/geometry.o obj/particle.o obj/ex1.o  # Object files
+EXEC = bin/program  # The final executable
+
 all: $(EXEC)
 
-# Rule to create the executable
+# Link object files to create executable
 $(EXEC): $(OBJ)
-	mkdir -p $(BIN_DIR)
-	$(FC) -o $(EXEC) $(OBJ)
+	$(FC) -o $(EXEC) $(OBJ)  
 
-# Rule to compile .f90 files into .o files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
-	mkdir -p $(OBJ_DIR)
-	$(FC) -c $< -o $@
+
+# Rule to compile geometry.f90
+obj/geometry.o: src/geometry.f90
+	mkdir -p obj
+	$(FC) -c src/geometry.f90 -o obj/geometry.o
+
+# Rule to compile particle.f90 (dependent on geometry.mod)
+obj/particle.o: src/particle.f90 obj/geometry.o
+	mkdir -p obj
+	$(FC) -c src/particle.f90 -o obj/particle.o	
+
+# Rule to compile ex1.f90
+obj/ex1.o: src/ex1.f90 obj/geometry.o obj/particle.o
+	mkdir -p obj
+	$(FC) -c src/ex1.f90 -o obj/ex1.o
 
 # Clean rule
 clean:
-	rm -rf $(OBJ_DIR)/*.o $(BIN_DIR)/exec *.mod
+	rm -rf obj/*.o bin/program geometry.mod particles.mod
