@@ -22,7 +22,7 @@ module geometry
   end interface operator(*)
 
   interface operator(/)
-     module procedure divvr
+     module procedure divvr, divvi
   end interface operator(/)
   
 
@@ -113,6 +113,16 @@ contains
     divvr%yy = vector1%yy / scalar1
     divvr%zz = vector1%zz / scalar1
   end function divvr
+
+  elemental type(vector3d) function divvi(vector1, scalar1) !v1/a
+    type(vector3d), intent(in) :: vector1
+    integer, intent(in)           :: scalar1
+
+    divvi%xx = vector1%xx / scalar1
+    divvi%yy = vector1%yy / scalar1
+    divvi%zz = vector1%zz / scalar1
+  end function divvi
+  
 
   elemental real function dotprod(vector1, vector2) !(v1, v2)
     type(vector3d), intent(in) :: vector1, vector2
