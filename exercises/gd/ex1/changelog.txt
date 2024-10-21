@@ -1,0 +1,8 @@
+[v0.8 Initial release]
+	* Created the Gemetry module
+	* Created the Particles module
+	* Created the main program ex1
+	* Created the makefile
+	* Added the manual insertion of particles
+	* Added the process of calculating the acceleration and position of the particles.
+	* Added the console display of the positions and velocities of the particles.
