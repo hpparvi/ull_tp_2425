@@ -27,18 +27,26 @@ PROGRAM ex1
   ! Difference vector
   TYPE(vector3d) :: rji
 
-  ! Take the necessary inputs
-  PRINT*, "Input the time step"
-  READ*, dt
+  ! Read the necessary inputs
+  INTEGER :: openstatus, readstatus
+  CHARACTER(13) :: myfilename="data_read.txt"
+  
+  OPEN (UNIT=1, FILE=myfilename, STATUS="old", &
+       ACTION="read", POSITION="rewind", &
+       IOSTAT=openstatus)
+  IF (openstatus > 0) stop "Cannot open file."
+  
+  READ (1, *, IOSTAT=readstatus) dt
+  READ (1, *, IOSTAT=readstatus) dt_out
+  READ (1, *, IOSTAT=readstatus) t_end
+  READ (1, '(i5)', IOSTAT=readstatus) n
 
-  PRINT*, "Input the time step for outputs"
-  READ*, dt_out
-
-  PRINT*, "Input the final time"
-  READ*, t_end
-
-  PRINT*, "Input the number of particles"
-  READ*, n 
+  ! Make sure it was read correctly and sensibly
+  PRINT '(A, F8.4)', "This is the selected time step:", dt
+  PRINT '(A, F8.4)', "This is the selected time step for outputs:", dt_out
+  PRINT '(A, F8.4)', "This is the selected final time:", t_end
+  PRINT '(A, I3)', "This is the selected number of particles:", n
+  PRINT*, "" ! Blank space
 
   ! Calculate the necessary timesteps to reach end
   total_timesteps = t_end/dt
@@ -48,10 +56,21 @@ PROGRAM ex1
 
   ! Assign the masses & initial conditions
   DO i = 1, n
-     PRINT*, "Input the mass, position and velocity for particle", i
-     READ*, particles(i)%m, particles(i)%p, particles(i)%v 
+     READ (1, *, IOSTAT=readstatus) particles(i)%m, & 
+          particles(i)%p, particles(i)%v
+     PRINT '(A, I2)', "This is the mass for particle", i
+     PRINT '(F3.1)', particles(i)%m
+
+     PRINT '(A, I2)', "This is the initial position for particle", i
+     PRINT '(F7.3)', particles(i)%p
+
+     PRINT '(A, I2)', "This is the initial velocity for particle", i
+     PRINT '(F7.3)', particles(i)%v
+     PRINT*, "" ! Blank space
   END DO
 
+  CLOSE (UNIT=1) ! Close the file
+  
 
   ! Make this big block into a function or subroutine
   ! Set all accelerations at 0 initially
