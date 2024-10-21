@@ -28,13 +28,14 @@ PROGRAM ex1
   TYPE(vector3d) :: rji
 
   ! Read the necessary inputs
-  INTEGER :: openstatus, readstatus
-  CHARACTER(13) :: myfilename="data_read.txt"
+  INTEGER :: openstatus_input, openstatus_output, readstatus
+  CHARACTER(13) :: datafile="data_read.txt"
+  CHARACTER(11) :: resultfile='results.txt'
   
-  OPEN (UNIT=1, FILE=myfilename, STATUS="old", &
+  OPEN (UNIT=1, FILE=datafile, STATUS="old", &
        ACTION="read", POSITION="rewind", &
-       IOSTAT=openstatus)
-  IF (openstatus > 0) stop "Cannot open file."
+       IOSTAT=openstatus_input)
+  IF (openstatus_input > 0) stop "Cannot open file."
   
   READ (1, *, IOSTAT=readstatus) dt
   READ (1, *, IOSTAT=readstatus) dt_out
@@ -98,6 +99,12 @@ PROGRAM ex1
   ! Now, compute the velocities and positions after one timestep
   t_out = 0.0 
 
+  OPEN (UNIT=2, FILE=resultfile, STATUS="replace", &
+       ACTION="write", POSITION="rewind", &
+       IOSTAT=openstatus_output)
+  IF (openstatus_output > 0) stop "Cannot open file."
+
+  
   ! For all needed times
   DO time_counter = 0, total_timesteps
   ! DO t = 0.0, t_end, dt 
@@ -128,22 +135,26 @@ PROGRAM ex1
      
      particles%v = particles%v + a * (dt/2)
 
+     
      ! Update the output time (t_out just keeps track of the progress
      ! until print)
      t_out = t_out + dt 
      ! If t_out is bigger than the increments at which we want output:
-     IF (t_out >= dt_out) THEN 
+     IF (t_out >= dt_out) THEN
+        WRITE (2, '(A, F5.2)') "t=", dt*time_counter
 	! For each of the particles
 	DO i = 1,n 
            ! Print ALL the positions if it is time to do so
-           PRINT*, particles(i)%p
+           WRITE (2, '(F7.3, F7.3, F7.3)') particles(i)%p%x, &
+                particles(i)%p%y, particles(i)%p%z
+           WRITE (2, '(A)') ""
 	END DO
-        PRINT*, "" 
-	t_out = 0.0 
+        t_out = 0.0
      END IF
 
   END DO
 
+  CLOSE (UNIT=2)
 
   
   
