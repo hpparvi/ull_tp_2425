@@ -141,14 +141,14 @@ PROGRAM ex1
      t_out = t_out + dt 
      ! If t_out is bigger than the increments at which we want output:
      IF (t_out >= dt_out) THEN
-        WRITE (2, '(A, F5.2)') "t=", dt*time_counter
+        WRITE (2, '(F9.2)', ADVANCE='no') dt*time_counter
 	! For each of the particles
 	DO i = 1,n 
            ! Print ALL the positions if it is time to do so
-           WRITE (2, '(F7.3, F7.3, F7.3)') particles(i)%p%x, &
+           WRITE (2, '(F9.3, F9.3, F9.3)', ADVANCE='no') particles(i)%p%x, &
                 particles(i)%p%y, particles(i)%p%z
-           WRITE (2, '(A)') ""
 	END DO
+        WRITE (2, '(A)') ""
         t_out = 0.0
      END IF
 
