@@ -1,0 +1,6 @@
+0.001	!dt
+0.1	!dt_out
+10.0	!t_end
+2	!n
+1,1,1.5,1,1,1,10	! Particle n1. Format x,y,z,vx,vy,vz,m
+1,1,0.5,-1,-1,0,10	! Particle n2. Format x,y,z,vx,vy,vz,m
