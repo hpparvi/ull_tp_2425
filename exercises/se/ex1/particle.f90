@@ -5,7 +5,7 @@ MODULE particle
   TYPE particle3d
      TYPE(point3d)  :: p ! Position
      TYPE(vector3d) :: v ! Velocity
-     DOUBLE PRECISION :: m ! Mass
+     REAL :: m ! Mass
   END TYPE particle3d
 
 
