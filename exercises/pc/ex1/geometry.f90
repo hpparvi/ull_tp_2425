@@ -14,7 +14,7 @@ module geometry
   end interface operator(+)
 
   interface operator(-)
-     module procedure subvp, subpv, subvv
+     module procedure subvp, subpv, subvv, subpp
   end interface operator(-)
 
   interface operator(*)
@@ -57,8 +57,13 @@ contains
 
   pure type(vector3d) function subvv(v1, v2) !substracts two 3d vectors
     type(vector3d), intent(in) :: v1, v2
-    subvv = vector3d(v2%x - v1%x, v2%y - v1%y, v2%z - v1%z)
+    subvv = vector3d(v1%x - v2%x, v1%y - v2%y, v1%z - v2%z)
   end function subvv
+
+  pure type(vector3d) function subpp(p1, p2) !substracts two 3d points
+    type(point3d), intent(in) :: p1, p2
+    subpp = vector3d(p1%x - p2%x, p1%y - p2%y, p1%z - p2%z)
+  end function subpp
 
   pure type(vector3d) function mulrv(r, v) !multiplies a real number by a 3d vector
     real, intent(in) :: r
@@ -82,19 +87,14 @@ contains
     end if   
   end function divvr
 
-  pure real function distance_vector(v1, v2) !distance between two 3d vectors
-    type(vector3d), intent(in) :: v1, v2
-    distance_vector = sqrt((v2%x - v1%x)**2  + (v2%y - v1%y)**2 + (v2%z - v1%z)**2)
-  end function distance_vector
-
-  pure type(vector3d) function distance(p1, p2) !distance between two 3d points
+  pure real function distance(p1, p2) !distance between two 3d points
     type(point3d), intent(in) :: p1, p2
-    distance = vector3d(p2%x - p1%x, p2%y - p1%y, p2%z - p1%z)
+    distance = sqrt((p2%x - p1%x)**2 + (p2%y - p1%y)**2 + (p2%z - p1%z))
   end function distance
     
   pure real function norm(v) !norm of a vector
     type(vector3d), intent(in) :: v
-    norm = distance_vector(v, vector3D(0.0, 0.0, 0.0))
+    norm = sqrt(v%x**2 + v%y**2 + v%z**2)
   end function norm
 
   pure type(vector3d) function normalize(v) !normalize a 3d vector
