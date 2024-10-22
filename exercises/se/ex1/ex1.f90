@@ -11,12 +11,12 @@ PROGRAM ex1
   
   ! Timestep, end time, time loop index,
   ! times at which to print
-  DOUBLE PRECISION :: dt, t_end, t, dt_out, t_out
+  REAL :: dt, t_end, t, dt_out, t_out
   INTEGER :: time_counter, total_timesteps
 
   ! Vector related quantities (squared, cubed)
   ! I removed rs because it was not used
-  DOUBLE PRECISION :: r2, r3 
+  REAL :: r2, r3 
 
   ! We will have n instances of the "particle" type
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
