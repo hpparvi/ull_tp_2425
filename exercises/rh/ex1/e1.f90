@@ -76,8 +76,8 @@ program e1
       DO j = i+1,n
         rji = particles(j)%p - particles(i)%p
     	r =  distance(particles(j)%p, particles(i)%p)
-    	a(i) = a(i) + particles(j)%m * rji / (r+1.5)**3
-    	a(j) = a(j) - particles(i)%m * rji / (r+1.5)**3
+    	a(i) = a(i) + particles(j)%m * rji / r**3
+    	a(j) = a(j) - particles(i)%m * rji / r**3
       END DO
     END DO
 
