@@ -162,7 +162,7 @@ contains
   elemental type(vector3d) function cross_product(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
 
-    cross_product%xx = vector1%xx * vector2%zz - vector1%zz * vector2%yy
+    cross_product%xx = vector1%yy * vector2%zz - vector1%zz * vector2%yy
     cross_product%yy = vector1%zz * vector2%xx - vector1%xx * vector2%zz
     cross_product%zz = vector1%xx * vector2%yy - vector1%yy * vector2%xx
   end function cross_product
