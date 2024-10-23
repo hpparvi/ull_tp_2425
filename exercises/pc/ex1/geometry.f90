@@ -1,12 +1,13 @@
 module geometry
+  use iso_fortran_env
   implicit none
 
   type :: vector3d !3d vector
-     real :: x, y, z
+     real(real64) :: x, y, z
   end type vector3d
 
   type :: point3d !3d point
-     real :: x, y, z
+     real(real64) :: x, y, z
   end type point3d
 
   interface operator(+) 
@@ -66,20 +67,20 @@ contains
   end function subpp
 
   pure type(vector3d) function mulrv(r, v) !multiplies a real number by a 3d vector
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     type(vector3d), intent(in) :: v
     mulrv = vector3d(r*v%x, r*v%y, r*v%z)
   end function mulrv
 
   pure type(vector3d) function mulvr(v, r) !multiplies a 3d vector by a real number
     type(vector3d), intent(in) :: v
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     mulvr = vector3d(v%x*r, v%y*r, v%z*r)
   end function mulvr
 
   pure type(vector3d) function divvr(v, r) !divides a 3d vector by a real number
     type(vector3d), intent(in) :: v
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     if (r == 0.0) then
        divvr = vector3d(0.0, 0.0, 0.0) !Returns a null 3d vector in case of dividing by zero
     else
@@ -87,12 +88,12 @@ contains
     end if   
   end function divvr
 
-  pure real function distance(p1, p2) !distance between two 3d points
+  pure real(real64) function distance(p1, p2) !distance between two 3d points
     type(point3d), intent(in) :: p1, p2
     distance = sqrt((p2%x - p1%x)**2 + (p2%y - p1%y)**2 + (p2%z - p1%z))
   end function distance
     
-  pure real function norm(v) !norm of a vector
+  pure real(real64) function norm(v) !norm of a vector
     type(vector3d), intent(in) :: v
     norm = sqrt(v%x**2 + v%y**2 + v%z**2)
   end function norm
@@ -106,12 +107,12 @@ contains
     end if
   end function normalize
 
-  pure real function dot_product(v1, v2) !multiplies two 3d vectors
+  pure real(real64) function dot_product(v1, v2) !multiplies two 3d vectors
     type(vector3d), intent(in) :: v1, v2
     dot_product  = v1%x * v2%x + v1%y * v2%y + v1%z * v2%z
   end function dot_product
 
-  pure real function angle(v1, v2) !angle (in radians) between two 3d vectors 
+  pure real(real64) function angle(v1, v2) !angle (in radians) between two 3d vectors 
     type(vector3d), intent(in) :: v1, v2
     angle = acos(dot_product(normalize(v1), normalize(v2)))
   end function angle
