@@ -11,15 +11,23 @@ PROGRAM leapfrog
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: a    !Accelerations
   TYPE(vector3d) :: r                               
   
-  ! Read the control parameters
-  PRINT*, "Value of dt"
-  READ*, dt
-  PRINT*, "Value of dt_out"
-  READ*, dt_out
-  PRINT*, "Value of t_end"
-  READ*, t_end
-  PRINT*, "Number of particles"
-  READ*, n
+  character(len=25) :: input, output, orbit
+  
+  input = "initial_conditions.dat"
+  output = "output.dat"
+  orbit = "orbit.dat"
+  
+  OPEN (1,file = input, status = 'old', action = 'read')
+
+  READ(1,*) dt
+  READ(1,*) dt_out
+  READ(1,*) t_end
+  READ(1,*) n
+  
+  PRINT*, "Value of dt =", dt
+  PRINT*, "Value of dt_out =", dt_out
+  PRINT*, "Value of t_end =", t_end
+  PRINT*, "Value of n =", n
   
   ! Create the particles and acceleration
   ALLOCATE(pt(n))
@@ -27,13 +35,19 @@ PROGRAM leapfrog
   
   ! Read the particles
   DO i = 1, n
+    READ(1,*), pt(i)
     PRINT*, "Particle number ", i,": format x,y,z, vx, vy,vz, m"
-    READ*, pt(i)
+    PRINT*, pt(i)
   END DO
+  CLOSE(1)
   
   ! Initial calculation of acceleration
   CALL calc_acc
   
+  
+  
+  OPEN(2, file = output, status = 'replace', action = 'write')
+  OPEN(3, file = orbit, status = 'replace', action = 'write')
   ! Init output parameters
   t = 0.0
   t_out = 0.0
@@ -51,7 +65,10 @@ PROGRAM leapfrog
     ! Condicion for save the position
     IF (t_out >= dt_out) THEN
       DO i = 1,n
-        PRINT*, pt(i)
+        write (2, '(3F12.6)', advance='no') pt(i)%p
+        write (2, '(3F12.6)', advance='no') pt(i)%v
+        write (2, '(3F12.6)') pt(i)%m
+        write (3, '(3F12.6)') pt(i)%p
       END DO
       t_out = 0.0 ! reset of output parameter 
     END IF

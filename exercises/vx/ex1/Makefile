@@ -1,5 +1,6 @@
 FC = gfortran
 FCFLAGS = -c
+
 OBJECTS = geometry.o particle.o ex1.o
 
 
