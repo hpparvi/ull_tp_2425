@@ -9,7 +9,7 @@ PROGRAM ex1
   CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'result.dat'
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: aa
   TYPE(vector3d) :: rji
-  REAL(real64) :: r2
+  REAL(real64) :: r2, r3
 
   
 
@@ -55,12 +55,12 @@ PROGRAM ex1
 
   DO WHILE (t .LT. t_end)
 
-     particles%v = particles%v + aa * dt/2
+     particles%v = particles%v + aa * (dt/2)
      particles%p = particles%p + particles%v * dt
      aa = vector3d(0., 0., 0.)
      CALL calculate_accelerations(particles, aa)
 
-     particles%v = particles%v + aa * dt/2
+     particles%v = particles%v + aa * (dt/2)
      t_out = t_out + dt
 
      IF (t_out >= dt_out) THEN
@@ -86,7 +86,7 @@ CONTAINS
     DO i = 1, n
        DO j = i+1, n
           rji =  normalize(bodies(j)%p - bodies(i)%p)
-          r2 = distance(bodies(j)%p, bodies(i)%p)
+          r2 = distance(bodies(j)%p, bodies(i)%p)**2.
           accelerations(i) = accelerations(i) + bodies(j)%m * rji/r2
           accelerations(j) = accelerations(j) - bodies(i)%m * rji/r2
        END DO
