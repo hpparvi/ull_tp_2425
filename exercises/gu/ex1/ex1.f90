@@ -1,16 +1,15 @@
 PROGRAM ex1
-  USE geometry
   USE particle
   IMPLICIT NONE
-  REAL :: dt, t_end, dt_out, t_out
-  REAL :: t
+  REAL(real64) :: dt, t_end, dt_out, t_out
+  REAL(real64) :: t
   TYPE(particle3d), ALLOCATABLE :: particles(:)
   INTEGER :: rc, stat, i, j
   INTEGER :: n = 0
   CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'result.dat'
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: aa
   TYPE(vector3d) :: rji
-  REAL :: r2
+  REAL(real64) :: r2
 
   
 
