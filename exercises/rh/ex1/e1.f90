@@ -7,12 +7,12 @@ program e1
   INTEGER :: i, j ! loop indexes
   INTEGER :: rc 
   INTEGER :: n = 0 ! number of particles
-  REAL :: dt, t_end, t, dt_out, t_out ! time variables
-  type(particle3d), dimension(:), allocatable :: particles ! particle type array (contains the particles info)
-  type(vector3d), dimension(:), allocatable :: a ! aceleration array (for each particle) 
+  REAL :: dt, t_end, t, dt_out, t_out = real64 ! time variables
+  REAL :: r = real64
+  type(particle3d), dimension(:), allocatable :: particles ! particle type array (contains particles info)
+  type(vector3d), dimension(:), allocatable :: a ! acceleration array (for each particle) 
   type(vector3d) :: rji
-  REAL :: r
-  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'result.dat'
+  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'results.dat'
 
 
   OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = rc)
@@ -40,7 +40,7 @@ program e1
   t_out = 0.0
   t = 0.0
   
-  OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) !?
+  OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
     IF (rc/=0) WRITE (*,*) 'Cannot open file ' , outname
   
   WRITE(4, *) particles%p

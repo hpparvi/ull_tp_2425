@@ -1,13 +1,13 @@
 module geometry
-
+  use iso_fortran_env
   implicit none
 
   type :: vector3d
-     real :: x, y, z
+     real :: x, y, z = real64
   end type vector3d
 
   type :: point3d 
-     real :: x, y, z
+     real :: x, y, z = real64
   end type point3d
 
 ! Operators assignment
