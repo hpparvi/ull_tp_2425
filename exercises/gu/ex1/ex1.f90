@@ -66,7 +66,7 @@ PROGRAM ex1
 
      IF (t_out >= dt_out) THEN
         DO i = 1, n
-           WRITE(4, *) particles(i)
+           WRITE(4, *) particles(i)%p
         END DO
      t_out = 0.0
      END IF
@@ -86,10 +86,10 @@ CONTAINS
 
     DO i = 1, n
        DO j = i+1, n
-          rji =  normalize(bodies(i)%p - bodies(j)%p)
-          r2 = distance(bodies(i)%p, bodies(j)%p)
-          accelerations(i) = accelerations(i) - bodies(j)%m * rji/r2
-          accelerations(j) = accelerations(j) + bodies(i)%m * rji/r2
+          rji =  normalize(bodies(j)%p - bodies(i)%p)
+          r2 = distance(bodies(j)%p, bodies(i)%p)
+          accelerations(i) = accelerations(i) + bodies(j)%m * rji/r2
+          accelerations(j) = accelerations(j) - bodies(i)%m * rji/r2
        END DO
     END DO
 
