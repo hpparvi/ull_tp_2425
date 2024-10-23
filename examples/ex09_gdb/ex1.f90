@@ -1,14 +1,3 @@
-module t1
-  implicit none
-
-contains
-  subroutine mt(v, x)
-    real, pointer :: v
-    real :: x
-    v = sin(x)
-  end subroutine mt
-end module t1
-
 program ex1
   use t1
   implicit none
@@ -27,8 +16,10 @@ program ex1
      if (i>3) deallocate(x)
   end do
 
+  print *, "sum of 1.2 and 4.3 is", bad_sum(1.2, 4.3)
   print *, "Factorial of 5 is", fac(5)
-    
+  print *, "Factorial of 0 is", fac(0)
+
 contains
 
   integer function fac(n) result(f)
