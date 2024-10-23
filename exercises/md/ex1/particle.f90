@@ -35,4 +35,21 @@ module particle
                 particles(i)%v = particles(i)%v + particles(i)%a * dt * 0.5
             end do
         end subroutine update_vel
+
+        subroutine update_a(particles)
+            type(particle3d), intent(inout) :: particles(:)
+            integer :: i, j
+            real :: r2, r3
+            type(vector3d):: rji
+            
+            do i = 1, size(particles)
+                do j = i+1, size(particles)
+                    rji = particles(j)%p - particles(i)%p
+                    r2 = normsquare(rji)
+                    r3 = r2 * sqrt(r2)
+                    particles(i)%a = particles(i)%a + particles(j)%m * rji / r3
+                    particles(j)%a = particles(j)%a - particles(i)%m * rji / r3
+                end do
+            end do
+        end subroutine update_a
 end module particle
