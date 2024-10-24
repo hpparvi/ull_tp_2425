@@ -1,47 +1,47 @@
 !Time step, Out time step, Final time, Number of bodies
-0.00001, 0.01, 10, 5
+0.0001, 0.01, 5, 5
 
 !First body's mass
-1000
+100
 
-!First body's position (x, y, z) 
+!First body's position (x, y, z)
 0, 0, 0
 
 !First body's velocity (vx, vy, vz)
 0, 0, 0
 
 !Second body's mass
-0.001
+0.000001
 
 !Second body's position (x, y, z)
-0, 5, 0
+1, 0.5, 0.2
 
 !Second body's velocity (vx, vy, vz)
-0, 20, 0
+-1.5, 8.16, 1.5
 
 !Third body's mass
-0.002
+0.000001
 
 !Third body's position (x, y, z)
-1, 0.5, 2
+1.5, -0.5, -0.3
 
 !Third body's velocity (vx, vy, vz)
--6, 3, 0
+1.2, 6.67, -1.2
 
 !Fourth body's mass
-0.0005
+0.000001
 
 !Fourth body's position (x, y, z)
-0, 3, 0
+2, 1, 0.4
 
 !Fourth body's velocity (vx, vy, vz)
--6, 0, 0
+-1.1, 5.77, 1.1
 
 !Fifth body's mass
-0.001
+0.000001
 
 !Fifth body's position (x, y, z)
-8, 0, 0
+2.5, -1.2, -0.5
 
 !Fifth body's velocity (vx, vy, vz)
-0, 5, 0
+1.0, 5.16, -1.0
