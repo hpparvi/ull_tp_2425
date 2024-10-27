@@ -148,6 +148,6 @@ PROGRAM ex1
 
   CLOSE(13) !Close the output file
 
-  PRINT*, "Data calculated stored in file: final_data.dat" !End of program message
+  PRINT*, "Data calculated stored in file: ", output !End of program message
 
 END PROGRAM ex1
