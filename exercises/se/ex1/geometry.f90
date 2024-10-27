@@ -16,11 +16,11 @@ MODULE geometry
 
   ! Operators for code clarity
   INTERFACE OPERATOR(+)
-     MODULE PROCEDURE sumvp, sumpv
+     MODULE PROCEDURE sumvp, sumpv, sumvv
   END INTERFACE
 
   INTERFACE OPERATOR(-)
-     MODULE PROCEDURE subvp, subpv
+     MODULE PROCEDURE subvp, subpv, subvv, distance_vector
   END INTERFACE
 
   INTERFACE OPERATOR(*)
@@ -38,7 +38,7 @@ CONTAINS
   
   ! Adding a vector and a point
   ELEMENTAL FUNCTION sumvp(vec, poi)
-    TYPE(vector3d) :: sumvp
+    TYPE(point3d) :: sumvp
     TYPE(vector3d), INTENT(IN) :: vec
     TYPE(point3d), INTENT(IN)  :: poi
 
@@ -47,12 +47,11 @@ CONTAINS
     sumvp%z = vec%z + poi%z
     
   END FUNCTION sumvp
-
-
+    
   ! Adding a point and a vector
   ! (Fortran does not assume commutative property)
   ELEMENTAL FUNCTION sumpv(poi, vec)
-    TYPE(vector3d) :: sumpv
+    TYPE(point3d) :: sumpv
     TYPE(vector3d), INTENT(IN) :: vec
     TYPE(point3d), INTENT(IN)  :: poi
     
@@ -63,9 +62,21 @@ CONTAINS
   END FUNCTION sumpv
 
   
+  ! Adding two vectors together
+  ELEMENTAL FUNCTION sumvv(vec1, vec2)
+    TYPE(vector3d) :: sumvv
+    TYPE(vector3d), INTENT(IN) :: vec1, vec2
+
+    sumvv%x = vec1%x + vec2%x
+    sumvv%y = vec1%y + vec2%y
+    sumvv%z = vec1%z + vec2%z
+
+  END FUNCTION sumvv
+
+  
   ! Subtracting a vector minus a point
   ELEMENTAL FUNCTION subvp(vec, poi)
-    TYPE(vector3d) :: subvp
+    TYPE(point3d) :: subvp
     TYPE(vector3d), INTENT(IN) :: vec
     TYPE(point3d), INTENT(IN)  :: poi
     
@@ -78,7 +89,7 @@ CONTAINS
   
   ! Subtracting a point minus a vector
   ELEMENTAL FUNCTION subpv(poi, vec)
-    TYPE(vector3d) :: subpv
+    TYPE(point3d) :: subpv
     TYPE(vector3d), INTENT(IN) :: vec
     TYPE(point3d), INTENT(IN)  :: poi
     
@@ -87,6 +98,18 @@ CONTAINS
     subpv%z = poi%z - vec%z
     
   END FUNCTION subpv
+
+
+  ! Subtracting two vectors
+  ELEMENTAL FUNCTION subvv(vec1, vec2)
+    TYPE(vector3d) :: subvv
+    TYPE(vector3d), INTENT(IN) :: vec1, vec2
+
+    subvv%x = vec1%x - vec2%x
+    subvv%y = vec1%y - vec2%y
+    subvv%z = vec1%z - vec2%z
+
+  END FUNCTION subvv
 
   
   ! Multiplying a real and a vector
@@ -126,6 +149,18 @@ CONTAINS
     divvr%z = vec%z / re
     
   END FUNCTION divvr
+
+
+  ! Distance vector
+  FUNCTION distance_vector(poi1, poi2)
+    TYPE(vector3d) :: distance_vector
+    TYPE(point3d), INTENT(IN) :: poi1, poi2
+
+    distance_vector%x = poi1%x - poi2%x
+    distance_vector%y = poi1%y - poi2%y
+    distance_vector%z = poi1%z - poi2%z
+
+  END FUNCTION distance_vector
 
 
   ! Getting the magnitude of a vector
