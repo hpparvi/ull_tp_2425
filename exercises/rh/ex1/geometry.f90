@@ -1,7 +1,8 @@
 module geometry
-  use iso_fortran_env
+  use iso_fortran_env ! this module allows to have double-precision real variables
   implicit none
-
+  
+! 3-dimensional vectors and points type  
   type :: vector3d
      real :: x, y, z = real64
   end type vector3d
@@ -11,7 +12,6 @@ module geometry
   end type point3d
 
 ! Operators assignment
-
   interface operator(+)
      module procedure sumvv, sumvp, sumpv
   end interface
@@ -144,6 +144,11 @@ contains
     cross_product%z = vector1%x*vector2%y - vector1%y*vector2%x
   end function cross_product
 
+! Takes two vectors and returns a vector orthogonal to them
+  elemental type(vector3d) function orthv(vector1, vector2)
+    type(vector3d), intent(in) :: vector1, vector2
+    orthv = normalize(cross_product(vector1, vector2))
+  end function orthv
   
 end module geometry
 
