@@ -1,55 +1,32 @@
 module geometry
+  use iso_fortran_env
   implicit none
-
-  type :: vector2d
-     real :: x, y
-  end type vector2d
+  
   
   type :: vector3d
-     real :: x, y, z
+     real(real64) :: x, y, z
   end type vector3d
 
   type :: point3d
-     real :: x, y, z
+     real(real64) :: x, y, z
   end type point3d
 
-  interface operator (.vsp.)
-     module procedure sumvp
-  end interface operator (.vsp.)
+  interface operator (+)
+     module procedure sumvp, sumpv, sumpp, sumvv
+  end interface operator (+)
 
-  interface operator (.psv.)
-     module procedure sumpv
-  end interface operator (.psv.)
+  interface operator (-)
+     module procedure subvp, subpv, subpp, subvv
+  end interface operator (-)
 
-  interface operator (.vrp.)
-     module procedure subvp
-  end interface operator (.vrp.)
+  interface operator (*)
+     module procedure mulrv, mulvr
+  end interface operator (*)
 
-  interface operator (.prv.)
-     module procedure subpv
-  end interface operator (.prv.)
-
-  interface operator (.rpv.)
-     module procedure mulrv
-  end interface operator (.rpv.)
-
-  interface operator (.vpr.)
-     module procedure mulvr
-  end interface operator (.vpr.)
-
-  interface operator (.ver.)
+  interface operator (/)
      module procedure divvr
-  end interface operator (.ver.)
-
-  interface operator (.vsv.)                          !also added
-     module procedure sumvv
-  end interface operator (.vsv.)
-
-  interface operator (.vrv.)                          !also added
-     module procedure subvv
-  end interface operator (.vrv.)
-
-
+  end interface operator (/)
+  
   
 
 contains
@@ -70,6 +47,11 @@ contains
     sumvv = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
   end function sumvv
 
+  pure type(vector3d) function sumpp(a, b)
+    type(point3d), intent(in) :: a, b
+    sumpp = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
+  end function sumpp
+
   pure type(vector3d) function subvv(a, b)            !added function
     type(vector3d), intent(in) :: a, b
     subvv = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
@@ -87,21 +69,26 @@ contains
     subpv = vector3d(p%x - v%x, p%y - v%y, p%z - v%z)
   end function subpv
 
+  pure type(vector3d) function subpp(a, b)
+    type(point3d), intent(in) :: a, b
+    subpp = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
+  end function subpp
+
   pure type(vector3d) function mulrv(r, v)
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     type(vector3d), intent(in) :: v
     mulrv = vector3d(r*v%x, r*v%y, r*v%z)
   end function mulrv
 
   pure type(vector3d) function mulvr(v, r)
     type(vector3d), intent(in) :: v
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     mulvr = vector3d(v%x*r, v%y*r, v%z*r)
   end function mulvr
 
   pure type(vector3d) function divvr(v, r)
     type(vector3d), intent(in) :: v
-    real, intent(in) :: r
+    real(real64), intent(in) :: r
     divvr = vector3d(v%x/r, v%y/r, v%z/r)
   end function divvr
 
@@ -110,9 +97,9 @@ contains
     distance = vector3d(b%x - a%x, b%y - a%y, b%z - a%z)
   end function distance
 
-  pure real function modulus(a)
+  pure real(real64) function modulus(a)
     type(vector3d), intent(in) :: a
-    modulus = sqrt(a%x**2 + a%y**2 + a%z**2)
+    modulus = sqrt((-a%x)**2 + (-a%y)**2 + (-a%z)**2)
   end function modulus
   
   pure type(vector3d) function normalize(a)
@@ -120,12 +107,12 @@ contains
     normalize = divvr(a, modulus(a))
   end function normalize
 
-  pure real function dotproduct(a, b)
+  pure real(real64) function dotproduct(a, b)
     type(vector3d), intent(in) :: a, b
     dotproduct = a%x*b%x + a%y*b%y + a%z*b%z
   end function dotproduct
 
-  pure real function angle(a, b)
+  pure real(real64) function angle(a, b)
     type(vector3d), intent(in) :: a, b
     angle = acos(dotproduct(normalize(a),  normalize(b)))
   end function angle
