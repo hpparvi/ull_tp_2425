@@ -1,12 +1,13 @@
 MODULE geometry
   
+  USE ISO_FORTRAN_ENV
   ! Point and vector have different behavior in maths operations
   TYPE vector3d
-    REAL :: x,y,z
+    REAL(REAL64) :: x,y,z
   END TYPE vector3d
 
   TYPE point3d
-    REAL :: x,y,z
+    REAL(REAL64) :: x,y,z
   END TYPE point3d
 
   INTERFACE operator(+)
@@ -95,7 +96,7 @@ CONTAINS
   
   !Mults and division are done coordinate to coordinate
   TYPE(vector3d) ELEMENTAL FUNCTION mulrv(r,v)
-    REAL, INTENT(IN) :: r
+    REAL(REAL64), INTENT(IN) :: r
     TYPE(vector3d), INTENT(IN) :: v
     mulrv%x = r * v%x
     mulrv%y = r * v%y
@@ -103,7 +104,7 @@ CONTAINS
   END FUNCTION mulrv
   
   TYPE(vector3d) ELEMENTAL FUNCTION mulvr(v,r)
-    REAL, INTENT(IN) :: r
+    REAL(REAL64), INTENT(IN) :: r
     TYPE(vector3d), INTENT(IN) :: v
     mulvr%x = r * v%x
     mulvr%y = r * v%y
@@ -111,7 +112,7 @@ CONTAINS
   END FUNCTION mulvr
   
   TYPE(vector3d) ELEMENTAL FUNCTION divpr(p,r)
-    REAL, INTENT(IN) :: r
+    REAL(REAL64), INTENT(IN) :: r
     TYPE(point3d), INTENT(IN) :: p
     divpr%x = p%x / r
     divpr%y = p%y / r
@@ -119,7 +120,7 @@ CONTAINS
   END FUNCTION divpr
   
   TYPE(vector3d) ELEMENTAL FUNCTION divvr(v,r)
-    REAL, INTENT(IN) :: r
+    REAL(REAL64), INTENT(IN) :: r
     TYPE(vector3d), INTENT(IN) :: v
     divvr%x = v%x / r
     divvr%y = v%y / r
@@ -127,25 +128,25 @@ CONTAINS
   END FUNCTION divvr
   
   ! definition of the norm of a vector
-  REAL ELEMENTAL FUNCTION norm(v)
+  REAL(REAL64) ELEMENTAL FUNCTION norm(v)
     TYPE(vector3d), INTENT(IN) :: v
     norm = SQRT(v%x**2 + v%y**2 + v%z**2)
   END FUNCTION norm
   
   !Distance between two point is the norm of the vector that separates them
-  REAL ELEMENTAL FUNCTION distance(p1,p2)
+  REAL(REAL64) ELEMENTAL FUNCTION distance(p1,p2)
     TYPE(point3d), INTENT(IN) :: p1, p2
     distance = norm(p1-p2) !SQRT((p1%x-p2%x)**2 + (p1%y-p2%y)**2 + (p1%z-p2%z)**2)
   END FUNCTION distance
   
   ! Definition of dot product
-  REAL ELEMENTAL FUNCTION dotmul(v1,v2)
+  REAL(REAL64) ELEMENTAL FUNCTION dotmul(v1,v2)
     TYPE(vector3d), INTENT(IN) :: v1, v2
     dotmul = v1%x * v2%x + v1%y * v2%y + v1%z * v2%z
   END FUNCTION dotmul
   
   ! Sefinition of angle between two vector
-  REAL ELEMENTAL FUNCTION angle(v1, v2)
+  REAL(REAL64) ELEMENTAL FUNCTION angle(v1, v2)
     TYPE(vector3d), INTENT(IN) :: v1, v2
     angle = ACOS((v1*v2)/(norm(v1)*norm(v2)))
   END FUNCTION angle
