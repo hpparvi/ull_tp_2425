@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib.colors import to_hex
 
 
+# To generate a list of colors, based in a colormap
 def generate_colors(N, cmap='jet'):
     values = np.linspace(0, 1, N)
     cmap = plt.get_cmap(cmap)
@@ -12,6 +13,7 @@ def generate_colors(N, cmap='jet'):
     return colors_hex
 
 
+# To read the data from the output file
 def read_data(file):
     if '.txt' not in file:
         file += '.txt'
@@ -25,6 +27,7 @@ def read_data(file):
     return pos, ids, mass
 
 
+# To read the input file
 def read_input_file(filename):
     data = np.genfromtxt(
         filename, comments='!', dtype=None, encoding='utf-8', delimiter='\n'
@@ -42,6 +45,7 @@ def read_input_file(filename):
     return sim_info
 
 
+# To label the plots
 def labels_plots(fig, ax):
     # XY plot
     ax[0].set_xlabel('$X$')

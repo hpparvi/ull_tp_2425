@@ -1,9 +1,10 @@
 module particle
     use iso_fortran_env
     use geometry
-    
+
     implicit none
 
+    !Particle type: it has position, velocity, aceleration and mass
     type :: particle3d
         type(point3d) :: p
         type(vector3d) :: v
@@ -12,6 +13,7 @@ module particle
     end type particle3d
 
     contains
+        !Reset acceleration of the particles to zero
         subroutine reset_a(particles)
             type(particle3d), intent(inout) :: particles(:)
             integer :: i
@@ -20,6 +22,7 @@ module particle
             end do
         end subroutine reset_a
 
+        !Update the position of the particles
         subroutine update_pos(particles, dt)
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
@@ -29,6 +32,7 @@ module particle
             end do
         end subroutine update_pos
 
+        !Update the velocity of the particles in a middle step
         subroutine update_vel(particles, dt)
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
@@ -38,6 +42,7 @@ module particle
             end do
         end subroutine update_vel
 
+        !Update the acceleration of the particles
         subroutine update_a(particles)
             type(particle3d), intent(inout) :: particles(:)
             integer :: i, j
