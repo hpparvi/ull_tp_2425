@@ -1,5 +1,7 @@
 module calcs
-  use particle !Only importing the particle module because it also imports the geometry module
+  use geometry !Importing the geometry module
+  use particle !Importing the particle module
+  use iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
   implicit none
 
   !Define integer variables for loop indexing
