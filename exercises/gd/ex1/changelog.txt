@@ -10,3 +10,10 @@
 [v0.9]
 	* Added read file for particles
 	* Added write file of positions.
+	
+[v1.0]
+	* Fixed particle type names
+	* Fixed size of REAL
+	* Add figure and initial conditions
+	* Change write file format
+	* Add python rutine for plotting
