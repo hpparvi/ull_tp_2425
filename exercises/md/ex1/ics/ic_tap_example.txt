@@ -1,0 +1,29 @@
+! Simulation name:
+tap_example
+
+! Time step:
+0.001
+
+! Output time step:
+0.1
+
+! Final time:
+100
+
+! Number of particles:
+3
+
+! Positions (x,y,z) (each line, a particle):
+0.9700436 -0.24308753 0.0
+-0.9700436 0.24308753 0.0
+0.0 0.0 0.0
+
+! Velocity (vx, vy, vz) (each line, a particle):
+0.466203685 0.43236573 0.0
+0.466203685 0.43236573 0.0
+-0.93249737 -0.86473146 0.0
+
+! Mass (each line, a particle):
+1.0
+1.0
+1.0

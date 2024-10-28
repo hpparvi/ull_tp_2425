@@ -1,0 +1,30 @@
+\input{../common}
+\subtitle{Course exercise 2\\ multithreaded dynamical simulation using Barnes-Hut and OpenMP}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}
+  \textbf{Exercise:} Multithreaded numerical integration of a system consisting of gravitationally interacting particles using the leapfrog integration method and Barnes-Hut algorigthm.
+  \begin{itemize}
+   \item See TAP p. 37-47 and p. 74-85
+  \end{itemize}
+
+
+  \textbf{To do}
+  \begin{enumerate}
+   \item Create makefile for the project.
+   \item Separate the main program into its own program source code file.
+   \item Separate the Barnes-Hut algorigthm into its own module.
+   \item Modify the code to use the types and routines in the geometry and particle modules.
+   \item Modify the program to write the simulation data into a file “output.dat”, where each line contains the simulation state as ``time p1x p1y p1z p2x p2y p2z ... pnx pny pnz''.
+   \item Parallelise the code using OpenMP making sure that the code can be compiled with and without OpenMP support.
+   \item Store your code in your personal ex2 directory, make pull requests as often as you feel like.
+  \end{enumerate}
+\end{frame}
+
+\end{document}
