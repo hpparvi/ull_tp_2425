@@ -3,6 +3,9 @@ import subprocess
 import os
 import sys
 
+# This script have been used in other topics and subjects,
+# here it is useful to concatenate images in a video
+
 
 class ImageToVideoConverter:
     @staticmethod
@@ -70,10 +73,15 @@ if __name__ == "__main__":
         )
         sys.exit(1)
 
+    # File of images to concatenate
     dic = str(sys.argv[1])
+    # Frames per second of the video
     fps = sys.argv[2]
+    # Directory to save the video
     dic_guardado = str(sys.argv[3])
+    # Title of the video
     titulo = sys.argv[4]
+    # Resize factor of the images
     resize = float(sys.argv[5])
 
     if not (os.path.exists(dic_guardado)):

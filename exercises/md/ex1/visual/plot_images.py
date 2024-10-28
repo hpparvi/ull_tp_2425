@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 
 import utils
 
+# This script generates a set of images from the output file
+# These images can be used to generate a video with the script image_to_video.py
+# It uses parallel processing to generate images with different threads
+# I mean, each image can be generated in a different thread, and not in sequence
+# The main thing is to numerate the images in the correct order
+
 plt.rcParams['figure.figsize'] = (8, 6)
 plt.rcParams['savefig.dpi'] = 200
 plt.rcParams['text.usetex'] = True
@@ -34,18 +40,23 @@ if len(sys.argv) not in [3, 4]:
     )
     sys.exit(1)
 
+# Reading the output file and the input file
 output_file = str(sys.argv[1])
 input_file = str(sys.argv[2])
 if len(sys.argv) == 4:
+    # Number of cores (threads) to use
     num_cores = int(sys.argv[3])
 else:
     num_cores = os.cpu_count()
 
+# Positions, identification of the particles and mass
 pos, ids, mass = utils.read_data(output_file)
+# Simulation information
 sim_info = utils.read_input_file(input_file)
 dt = sim_info['time_step']
 dt_out = sim_info['output_time_step']
 
+# To set the limits of the plots, all the images must have the same limits
 x_min, x_max = np.min(pos[:, 0]) - 0.2 * np.abs(np.min(pos[:, 0])), np.max(
     pos[:, 0]
 ) + 0.2 * np.abs(np.max(pos[:, 0]))
@@ -60,12 +71,17 @@ xyz = [(0, 1), (0, 2), (1, 2)]
 colors = utils.generate_colors(len(ids), cmap='gnuplot_r')
 
 
+# Function to save one image at an specific time of the simulation
 def save_figure(t):
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
     fig.suptitle(f'$t={t* dt_out:.3f}$', fontsize=20)
+    # Loop over all the particles types
     for i, particle in enumerate(ids):
+        # Distance between the initial and final position of the particle
         dist_in_fin = np.linalg.norm(pos[particle, :][0] - pos[particle, :][-1])
         for j in range(3):
+            # If the particle is at the same position at the beginning and at the
+            # end of the simulation, don't plot the trajectory
             if dist_in_fin < 1e-3:
                 ax[j].plot(
                     pos[particle, xyz[j][0]][t],
@@ -106,7 +122,7 @@ def save_figure(t):
 
 if __name__ == '__main__':
     time_indexs = range(int(sim_info['final_time'] // dt_out))
-
+    # Parallelization: each image is generated in a different thread
     with ProcessPoolExecutor(max_workers=num_cores) as executor:
         futures = [executor.submit(save_figure, t) for t in time_indexs]
         for _ in tqdm(as_completed(futures), total=len(time_indexs)):
