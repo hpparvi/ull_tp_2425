@@ -13,7 +13,9 @@ def generate_colors(N, cmap='jet'):
 
 
 def read_data(file):
-    data = np.loadtxt('../output/' + file + '.txt')
+    if '.txt' not in file:
+        file += '.txt'
+    data = np.loadtxt('../output/' + file)
     unique_ids = np.unique(data[:, 0])
     ids = [data[:, 0] == u_id for u_id in unique_ids]
     pos = data[:, 1:4]
