@@ -1,8 +1,9 @@
-module geometry
-  use iso_fortran_env
+module geometry        !This module defines 3D vector and point operations for vector3d and point3d types.
+  use iso_fortran_env  !This module ensures all variables are defined as 64-bit.
   implicit none
+
   
-  
+  !Definition of types.
   type :: vector3d
      real(real64) :: x, y, z
   end type vector3d
@@ -11,6 +12,8 @@ module geometry
      real(real64) :: x, y, z
   end type point3d
 
+  
+  !Definition of custom operators.
   interface operator (+)
      module procedure sumvp, sumpv, sumpp, sumvv
   end interface operator (+)
@@ -30,19 +33,21 @@ module geometry
   
 
 contains
-  pure type(point3d) function sumvp(v, p)            !changed point + vector = point
+  
+  !Definition of sums between points and vectors.
+  pure type(point3d) function sumvp(v, p)            
     type(vector3d), intent(in) :: v
     type(point3d), intent(in) :: p
     sumvp = point3d(v%x + p%x, v%y + p%y, v%z + p%z)
   end function sumvp
 
-  pure type(point3d) function sumpv(p, v)             !same change as ^
+  pure type(point3d) function sumpv(p, v)             
     type(point3d), intent(in) :: p
     type(vector3d), intent(in) :: v
     sumpv = point3d(p%x + v%x, p%y + v%y, p%z + v%z)
   end function sumpv
 
-  pure type(vector3d) function sumvv(a, b)            !added function
+  pure type(vector3d) function sumvv(a, b)            
     type(vector3d), intent(in) :: a, b
     sumvv = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
   end function sumvv
@@ -52,7 +57,9 @@ contains
     sumpp = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
   end function sumpp
 
-  pure type(vector3d) function subvv(a, b)            !added function
+  
+  !Definition of substractions between points and vectors.
+  pure type(vector3d) function subvv(a, b)            
     type(vector3d), intent(in) :: a, b
     subvv = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
   end function subvv
@@ -74,6 +81,8 @@ contains
     subpp = vector3d(a%x - b%x, a%y - b%y, a%z - b%z)
   end function subpp
 
+
+  !Definition of multiplication between reals and vectors.
   pure type(vector3d) function mulrv(r, v)
     real(real64), intent(in) :: r
     type(vector3d), intent(in) :: v
@@ -86,46 +95,54 @@ contains
     mulvr = vector3d(v%x*r, v%y*r, v%z*r)
   end function mulvr
 
+
+  !Definition of division between reals and vectors.
   pure type(vector3d) function divvr(v, r)
     type(vector3d), intent(in) :: v
     real(real64), intent(in) :: r
-    divvr = vector3d(v%x/r, v%y/r, v%z/r)
+    if (r == 0) then
+       divvr = vector3d(0.0, 0.0, 0.0)
+    else
+       divvr = vector3d(v%x/r, v%y/r, v%z/r)
+    end if
   end function divvr
 
-  pure type(vector3d) function distance(a, b)
+
+  !Definition of functions.
+  pure type(vector3d) function distance(a, b)          !Calculates the distance vector between two 3d points.
     type(point3d), intent(in) :: a, b
     distance = vector3d(b%x - a%x, b%y - a%y, b%z - a%z)
   end function distance
 
-  pure real(real64) function modulus(a)
+  pure real(real64) function modulus(a)                !Calculates the magnitude of a vector.
     type(vector3d), intent(in) :: a
     modulus = sqrt((-a%x)**2 + (-a%y)**2 + (-a%z)**2)
   end function modulus
   
-  pure type(vector3d) function normalize(a)
+  pure type(vector3d) function normalize(a)            !Normalizes a vector.
     type(vector3d), intent(in) :: a
     normalize = divvr(a, modulus(a))
   end function normalize
 
-  pure real(real64) function dotproduct(a, b)
+  pure real(real64) function dotproduct(a, b)          !Calculates the dot product of two vectors.
     type(vector3d), intent(in) :: a, b
     dotproduct = a%x*b%x + a%y*b%y + a%z*b%z
   end function dotproduct
 
-  pure real(real64) function angle(a, b)
+  pure real(real64) function angle(a, b)               !Calculates the angle between two vectors in radians.
     type(vector3d), intent(in) :: a, b
     angle = acos(dotproduct(normalize(a),  normalize(b)))
   end function angle
 
-  pure type(vector3d) function cross_product(a, b)
+  pure type(vector3d) function cross_product(a, b)     !Calculates the cross product of two vectors.
     type(vector3d), intent(in) :: a, b
     cross_product = vector3d(a%y*b%z - a%z*b%y, a%z*b%x - a%x*b%z, a%x*b%y - a%y*b%x)
   end function cross_product
   
-!  pure type(vector3d) function orthv(a, b)
-!    type(vector3d), intent(in) :: a, b
-!    orthv = vector3d
-!  end function orthv
+  pure type(vector3d) function orthv(a, b)             !Returns a vector orthogonal to two given vectors.
+    type(vector3d), intent(in) :: a, b
+    orthv = cross_product(a, b)
+  end function orthv
 
   
 end module geometry
