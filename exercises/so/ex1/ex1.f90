@@ -10,6 +10,7 @@ PROGRAM leapfrog
   INTEGER :: num_args       ! to count the number of given arguments
   character(len=100) :: filename     ! to import the stars data
   character(len=256) :: dummy_line ! to ignore first line of file when reading data
+  character(len=100)  :: output_file = "output.txt"
   real :: dt, t_end, t, dt_out, t_out
   real :: rs, r2, r3
   
@@ -54,14 +55,15 @@ PROGRAM leapfrog
     rewind(10) !so that pointer is at the beginnin for reading and importing data later
 
     ! Allocate arrays based on the number of stars
+! Particle method for calculations
  allocate(partics(n))
-!  allocate(a_v(n))
+! No particle method (original one) used for checking. Results must match
  ALLOCATE(m(n))
  ALLOCATE(r(n,3))
  ALLOCATE(v(n,3))
  ALLOCATE(a(n,3))
     
- ! Read the data into arrays
+ ! Read the data into arrays (no particle method)
  read(10, '(A)', iostat=ios) dummy_line
  if (ios /= 0) then
         print *, "Error: Could not read the first line"
@@ -78,7 +80,7 @@ PROGRAM leapfrog
      print *, "Values saved to stars (no particle method)"
 rewind(10)
      
-    ! Repeat reading for particle variables
+! Repeat reading for particle variables
 read(10, *, iostat = ios) dt, dt_out, t_end
  if (ios /= 0) then
         print *, "Error: Could not read the first line"
@@ -104,32 +106,25 @@ read(10, *, iostat = ios) dt, dt_out, t_end
 
   n_t = t_end/dt
   
- ! allocate(partics(n))
-!  allocate(a_v(n))
-  
- ! ALLOCATE(m(n))
- ! ALLOCATE(r(n,3))
- ! ALLOCATE(v(n,3))
- ! ALLOCATE(a(n,3))
-  
  ! DO i = 1, n
  !    READ*, m(i), r(i,:), v(i,:)
  !    print*, "Write again for checks"
  !    READ*, partics(i)%m, partics(i)%p, partics(i)%v
  ! END DO
   
-
+! initialize accelerations
   do i = 1,n
      partics(i)%a = vector3d(0,0,0)
   end do
-  
+! initialize values
   DO i = 1,n
      DO j = i+1,n
-        rji_v = vecpp(partics(j)%p, partics(i)%p)
+        ! Particles method
+        rji_v = vecpp(partics(i)%p, partics(j)%p)
         r3_2 = norm(rji_v)**3
         partics(i)%a = partics(i)%a + (partics(j)%m * rji_v / r3_2)
         partics(j)%a = partics(j)%a - (partics(i)%m * rji_v / r3_2)
-        
+        ! Original method
         rji = r(j,:) - r(i,:)
         r2 = SUM(rji**2)
         r3 = r2 * SQRT(r2)
@@ -140,6 +135,14 @@ read(10, *, iostat = ios) dt, dt_out, t_end
   
   t_out = 0.0
   
+  ! Open the output file
+  open(unit=20, file=output_file, status="replace", action="write", iostat=ios)
+     if (ios /= 0) then
+        print *, "Error: Could not open file ", filename
+        stop
+     end if
+     
+! start all calculations
   DO i_t = 0, n_t
      t = i_t * dt
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
@@ -148,10 +151,11 @@ read(10, *, iostat = ios) dt, dt_out, t_end
      v = v + a * dt/2
      r = r + v * dt
 
+     partics(:)%a = vector3d(0,0,0)
      a = 0.0
      DO i = 1,n
         DO j = i+1,n
-           rji_v = vecpp(partics(j)%p, partics(i)%p)
+           rji_v = vecpp(partics(i)%p, partics(j)%p)
            r3_2 = norm(rji_v)**3
            partics(i)%a = partics(i)%a + (partics(j)%m * rji_v / r3_2)
            partics(j)%a = partics(j)%a - (partics(i)%m * rji_v / r3_2)
@@ -162,6 +166,9 @@ read(10, *, iostat = ios) dt, dt_out, t_end
            a(i,:) = a(i,:) + m(j) * rji / r3
            a(j,:) = a(j,:) - m(i) * rji / r3
         END DO
+        ! Store all values of positions:
+     write(20, '(I5, F12.2, 3F12.6)') i_t, t, partics(i)%p
+     write(20, '(I5, F12.2, 3F12.6)') i_t, t, r(i,:)
      END DO
      
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
@@ -170,15 +177,17 @@ read(10, *, iostat = ios) dt, dt_out, t_end
      
      t_out = t_out + dt
      IF (t_out >= dt_out) THEN
-        print*, "Time = ", t
+        print*, "Time = ", t, "", "Iteration = ", i_t
         DO i = 1,n
            print*, "Particle ", i
-           PRINT*, r(i,:)
            print*, partics(i)%p
+           print*, r(i,:)
         END DO
         t_out = 0.0
      END IF
      
   END DO
+
+  close(20)
   
 END PROGRAM leapfrog
