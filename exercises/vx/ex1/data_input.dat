@@ -12,6 +12,6 @@
 1.0           ! Masa del cuerpo 2
 
 
-0.0 0.0 0.0   ! Posición del cuerpo 2
+0.0 0.0 0.0  ! Posición del cuerpo 2
 -0.93249737 -0.86473146 0.0  ! Velocidad del cuerpo 2
 1.0           ! Masa del cuerpo 2
