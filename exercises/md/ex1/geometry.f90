@@ -1,12 +1,15 @@
 module geometry
+    use iso_fortran_env
+    
     implicit none
+    
 
     type :: vector3d
-        real :: x, y, z
+        real(real64) :: x, y, z
     end type vector3d
 
     type :: point3d
-        real :: x, y, z
+        real(real64) :: x, y, z
     end type point3d
 
     interface operator(+)
@@ -73,21 +76,21 @@ module geometry
         end function subpp
 
         function mulrv(r, v)
-            real, intent(in) :: r
+            real(real64), intent(in) :: r
             type(vector3d), intent(in) :: v
             type(vector3d) :: mulrv
             mulrv = vector3d(r * v%x, r * v%y, r * v%z)
         end function mulrv
 
         function mulvr(v, r)
-            real, intent(in) :: r
+            real(real64), intent(in) :: r
             type(vector3d), intent(in) :: v
             type(vector3d) :: mulvr
             mulvr = vector3d(v%x * r, v%y * r, v%z * r)
         end function mulvr
 
         function divvr(v, r)
-            real, intent(in) :: r
+            real(real64), intent(in) :: r
             type(vector3d), intent(in) :: v
             type(vector3d) :: divvr
             divvr = vector3d(v%x / r, v%y / r, v%z / r)
@@ -95,19 +98,19 @@ module geometry
         
         function distance(p1, p2)
             type(point3d), intent(in) :: p1, p2
-            real :: distance
+            real(real64) :: distance
             distance = sqrt((p1%x - p2%x)**2 + (p1%y - p2%y)**2 + (p1%z - p2%z)**2)
         end function distance
 
         function normsquare(v)
             type(vector3d), intent(in) :: v
-            real :: normsquare
+            real(real64) :: normsquare
             normsquare = v%x**2 + v%y**2 + v%z**2
         end function normsquare
 
         function angle(a, b)
             type(vector3d), intent(in) :: a, b
-            real :: angle, ab
+            real(real64) :: angle, ab
             ab = a%x * b%x + a%y * b%y + a%z * b%z
             angle = acos(ab / (normsquare(a)**2 * normsquare(b)**2))
         end function angle
