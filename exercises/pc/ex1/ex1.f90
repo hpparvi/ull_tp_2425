@@ -1,5 +1,8 @@
 PROGRAM ex1
-  USE calcs !Only importing the calcs module because it also imports the particle and geometry modules
+  USE geometry !Importing the geometry module
+  USE particle !Importing the particle module
+  USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
+  USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
   IMPLICIT NONE
   
   INTEGER(INT64) :: n !Number of bodies

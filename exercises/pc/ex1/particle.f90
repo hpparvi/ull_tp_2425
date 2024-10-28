@@ -1,5 +1,6 @@
 module particle
-  use geometry
+  use geometry !Importing the geometry module
+  use iso_fortran_env !Importing iso_fortran_env to specify the number of bits of variables
   implicit none
 
   !Define a type for a 3D particle with position, velocity, acceleration and mass
