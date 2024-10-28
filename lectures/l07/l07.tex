@@ -1,0 +1,208 @@
+\input{../common}
+\subtitle{Lecture 7: Input/Output in Fortran: Read, Print, Write, and Formatting}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction to I/O in Fortran}
+
+\begin{frame}[fragile]
+  \frametitle{Introduction to I/O in Fortran}
+  \begin{columns}[T]
+  \begin{column}{0.5\textwidth}
+    Fortran provides three main IO statements
+      \begin{itemize}
+        \item \texttt{read}: Input
+        \item \texttt{print}: Output to the console
+        \item \texttt{write}: Output to files or console
+      \end{itemize}
+
+    \vspace*{2mm}
+    IO formatting allows for better control over how input and output data is handled.
+
+        \end{column}
+    \begin{column}{0.5\textwidth}
+\begin{lstlisting}
+read *, v1, v2 ,v3, ...
+read fmt, v1, v2 ,v3, ...
+read (unit, fmt) v1, v2, v3, ...
+
+print *, v1, v2, v3, ...
+print fmt, v1, v2, v3, ...
+
+write (unit, *) v1, v2, v3, ...
+write (unit, fmt, advance, ...) v1, v2, v3, ...
+\end{lstlisting}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using the \texttt{read} Statement}
+  The \texttt{read} statement is used for reading input from the user or files.
+
+  \vspace*{2mm}
+  Syntax:
+      \begin{lstlisting}
+read fmt, variable
+read(unit, fmt) variable
+      \end{lstlisting}
+    \texttt{*} stands for default formatting and input and output (usually the terminal).
+
+      \vspace*{2mm}
+  Example:
+  \begin{lstlisting}
+program example_read
+  implicit none
+  integer :: a
+  print *, "Enter an integer: "
+  read(*, *) a
+  print *, "You entered: ", a
+end program example_read
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using the \texttt{print} Statement}
+  The \texttt{print} statement is used for output to the console.
+
+  \vspace*{2mm}
+  Syntax:
+      \begin{lstlisting}
+print fmt, "Message"
+      \end{lstlisting}
+
+\vspace*{2mm}
+  Example:
+  \begin{lstlisting}
+program example_print
+  implicit none
+  integer :: num = 10
+  print *, "The value of num is: ", num
+end program example_print
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using the \texttt{write} Statement}
+  The \texttt{write} statement is more flexible than \texttt{print} and allows output to different IO units, like files or other devices than the console.
+
+  \vspace*{2mm}
+  Syntax:
+      \begin{lstlisting}
+write(unit, format) variable
+      \end{lstlisting}
+
+  \vspace*{2mm}
+  Example:
+  \begin{lstlisting}
+program example_write
+  implicit none
+  integer :: i
+  open(unit=10, file='output.txt')  ! Open a file
+  do i = 1, 5
+    write(10, *) "Line number: ", i
+  end do
+  close(10)  ! Close the file
+end program example_write
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{IO Formatting in Fortran}
+  Formatting is controlled with format descriptors.
+
+    \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+  \begin{itemize}
+    \item Format descriptors:
+      \begin{itemize}
+        \item \texttt{rIw}: integer.
+        \item \texttt{rFw.d} floating point.
+        \item \texttt{rEw.d} real in exponential notation.
+        \item \texttt{rESw.d} real in scientific notation.
+        \item \texttt{rAw} character string.
+        \item \texttt{X} space.
+        \item \texttt{/} blank line.
+      \end{itemize}
+
+    \item Modifiers:
+      \begin{itemize}
+        \item \texttt{r}: repeat count.
+        \item \texttt{w}: field width.
+        \item \texttt{d}: num. digits after the decimal point.
+      \end{itemize}
+  \end{itemize}
+        \end{column}
+    \begin{column}{0.5\textwidth}
+  \begin{lstlisting}
+program format_example
+  implicit none
+  integer :: a = 123
+  real :: b = 456.789
+  real, dimension(3) :: c = [1.2, 2.2, 1.2]
+  print '(I5, 10X, F8.2, /, 3F8.1)', a, b, c
+end program format_example
+  \end{lstlisting}
+
+  \begin{lstlisting}
+     123            456.79
+     1.2     2.2     1.2
+  \end{lstlisting}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+\section{Reading and Writing to Files}
+
+\begin{frame}[fragile]
+  \frametitle{Reading and Writing to Files}
+
+      \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+
+    The \texttt{read} and \texttt{write} statements can be used to interact with files.
+  \vspace*{2mm}
+
+    Use the \texttt{open} statement to open a file and associate it with a unit number.
+
+  \begin{itemize}
+    \item \texttt{open(unit, file, status, action, ...)}
+    \item \texttt{close(unit, ...)}
+    \item \texttt{inquire(file, exists)}
+  \end{itemize}
+
+  \vspace*{2mm}
+ \texttt{status} can be \texttt{new}, \texttt{old}, or \texttt{replace}.
+
+   \vspace*{2mm}
+  \texttt{action} can be \texttt{read}, \texttt{write}, or \texttt{readwrite}.
+        \end{column}
+    \begin{column}{0.45\textwidth}
+  \begin{lstlisting}
+program file_io
+  implicit none
+  integer :: i
+  open(unit=20, file='data.txt', status='replace')
+  do i = 1, 5
+    write(20, '(I5)') i
+  end do
+  close(20)
+end program file_io
+  \end{lstlisting}
+    \end{column}
+    \end{columns}
+
+
+\end{frame}
+
+
+\end{document}

@@ -7,7 +7,7 @@ all: ex1
 test: ex1
 	./ex1
 
-e1: $(OBJECTS)
+ex1: $(OBJECTS)
 	$(FC) -o ex1 $(OBJECTS)
 
 %.o: %.f90
