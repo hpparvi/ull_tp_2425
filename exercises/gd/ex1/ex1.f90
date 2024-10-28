@@ -1,13 +1,14 @@
 PROGRAM leapfrog
 
   USE geometry
-  USE particlepvm
+  USE particle
+  USE ISO_FORTRAN_ENV
 
   IMPLICIT NONE
   INTEGER :: i,j                                    !counters
   INTEGER :: n                                      !Number of particles
-  REAL :: dt, t_end, dt_out, t, t_out               !Control params
-  TYPE(particle), DIMENSION(:), ALLOCATABLE :: pt   !Particles
+  REAL(REAL64) :: dt, t_end, dt_out, t, t_out       !Control params
+  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: pt   !Particles
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: a    !Accelerations
   TYPE(vector3d) :: r                               
   
@@ -24,10 +25,11 @@ PROGRAM leapfrog
   READ(1,*) t_end
   READ(1,*) n
   
-  PRINT*, "Value of dt =", dt
-  PRINT*, "Value of dt_out =", dt_out
-  PRINT*, "Value of t_end =", t_end
-  PRINT*, "Value of n =", n
+  ! Show the reading values in screen
+  WRITE(*,'(A,3F12.4)') "Value of dt =" ,dt
+  WRITE(*,'(A,3F12.4)') "Value of dt_out =", dt_out
+  WRITE(*,'(A,3F12.4)') "Value of t_end =", t_end
+  WRITE(*,'(A,I3)') "Value of n =", n
   
   ! Create the particles and acceleration
   ALLOCATE(pt(n))
@@ -35,9 +37,9 @@ PROGRAM leapfrog
   
   ! Read the particles
   DO i = 1, n
-    READ(1,*), pt(i)
-    PRINT*, "Particle number ", i,": format x,y,z, vx, vy,vz, m"
-    PRINT*, pt(i)
+    READ(1,*) pt(i)
+    WRITE(*,'(A,I3,A)') "Particle number ", i,": format x,y,z, vx, vy,vz, m"
+    WRITE(*,'(3F12.6)') pt(i)
   END DO
   CLOSE(1)
   
@@ -64,11 +66,23 @@ PROGRAM leapfrog
     pt%v = pt%v + a * (dt/2)
     ! Condicion for save the position
     IF (t_out >= dt_out) THEN
+      write (3, '(3F12.4)', advance='no') t
       DO i = 1,n
-        write (2, '(3F12.6)', advance='no') pt(i)%p
-        write (2, '(3F12.6)', advance='no') pt(i)%v
-        write (2, '(3F12.6)') pt(i)%m
-        write (3, '(3F12.6)') pt(i)%p
+        IF(i<n) THEN
+          write (2, '(3F12.4)', advance='no') t
+          write (2, '(I3)', advance='no') i
+          write (2, '(3F12.6)', advance='no') pt(i)%p
+          write (2, '(3F12.6)', advance='no') pt(i)%v
+          write (2, '(3F12.6)') pt(i)%m
+          write (3, '(3F12.6)', advance='no') pt(i)%p
+        ELSE
+          write (2, '(3F12.4)', advance='no') t
+          write (2, '(I3)', advance='no') i
+          write (2, '(3F12.6)', advance='no') pt(i)%p
+          write (2, '(3F12.6)', advance='no') pt(i)%v
+          write (2, '(3F12.6)') pt(i)%m
+          write (3, '(3F12.6)') pt(i)%p
+        END IF
       END DO
       t_out = 0.0 ! reset of output parameter 
     END IF
