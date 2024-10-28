@@ -4,7 +4,7 @@ program n_body
     implicit none
 
     integer :: i, n
-    real :: dt, t_end, t, dt_out, t_out
+    real(real64) :: dt, t_end, t, dt_out, t_out
     character(len=100) :: sim_name, file_out
 
     type(particle3d), allocatable :: particles(:)
