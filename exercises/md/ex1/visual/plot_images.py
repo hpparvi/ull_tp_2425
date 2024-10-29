@@ -14,26 +14,6 @@ import utils
 # I mean, each image can be generated in a different thread, and not in sequence
 # The main thing is to numerate the images in the correct order
 
-plt.rcParams['figure.figsize'] = (8, 6)
-plt.rcParams['savefig.dpi'] = 200
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = 'Charter'
-plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}\usepackage{bm}'
-plt.rcParams['font.size'] = 16
-plt.rcParams['axes.titlesize'] = 18
-plt.rcParams['axes.labelsize'] = 18
-plt.rcParams['xtick.minor.visible'] = True
-plt.rcParams['ytick.minor.visible'] = True
-plt.rcParams['legend.edgecolor'] = 'black'
-plt.rcParams['legend.frameon'] = True
-plt.rcParams['legend.framealpha'] = 1
-plt.rcParams['legend.fancybox'] = False
-plt.rcParams['text.antialiased'] = True
-plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['lines.antialiased'] = True
-plt.rcParams['text.antialiased'] = True
-
 if len(sys.argv) not in [3, 4]:
     print(
         "Use: python plot_images.py <output_file> <input_file> (optional):<num_cores>"
@@ -45,7 +25,13 @@ output_file = str(sys.argv[1])
 input_file = str(sys.argv[2])
 if len(sys.argv) == 4:
     # Number of cores (threads) to use
-    num_cores = int(sys.argv[3])
+    if str(sys.argv[3]) == 'None':
+        num_cores = os.cpu_count()
+    elif sys.argv[3].isnumeric() and int(sys.argv[3]) <= os.cpu_count():
+        num_cores = int(sys.argv[3])
+    else:
+        print("Core number is invalid. Try it again")
+        sys.exit(1)
 else:
     num_cores = os.cpu_count()
 
@@ -117,7 +103,7 @@ def save_figure(t):
     output_dir = './output/images_' + sim_info['simulation_name']
     os.makedirs(output_dir, exist_ok=True)
     fig.savefig(os.path.join(output_dir, f'im_{t:01d}.png'))
-    fig.close()
+    plt.close(fig)
 
 
 if __name__ == '__main__':
