@@ -10,17 +10,17 @@ module geometry
         real(kind=8) :: x, y, z
     end type point3d
 
-    ! operator functions
+    ! function operators
     interface operator(+)
-        module procedure sumvp, sumpv
+        module procedure sumvp, sumpvv
     end interface operator(+)
 
     interface operator(-)
-        module procedure subvp
+        module procedure subvp, subvv
     end interface operator(-)
 
     interface operator(*)
-        module procedure mulvr
+        module procedure mulvr !mulvr y mulrv es lo mismo por propiedad conmutativa
     end interface operator(*)
 
     interface operator(/)
@@ -39,14 +39,13 @@ contains
         r%z = p%z + v%z
     end function sumvp
 
-    function sumpv(p, v) result(r)
-        type(vector3d), intent(in) :: p
-        type(vector3d), intent(in) :: v
+    function sumpvv(v1, v2) result(r)
+        type(vector3d), intent(in) :: v1, v2
         type(vector3d) :: r
-        r%x = p%x + v%x
-        r%y = p%y + v%y
-        r%z = p%z + v%z
-    end function sumpv
+        r%x = v1%x + v2%x
+        r%y = v1%y + v2%y
+        r%z = v1%z + v2%z
+    end function sumpvv
 
     function subvp(p, v) result(r)
         type(point3d), intent(in) :: p
@@ -56,6 +55,14 @@ contains
         r%y = p%y - v%y
         r%z = p%z - v%z
     end function subvp
+
+    function subvv(v1, v2) result(r)
+        type(vector3d), intent(in) :: v1, v2
+        type(vector3d) :: r
+        r%x = v1%x - v2%x
+        r%y = v1%y - v2%y
+        r%z = v1%z - v2%z
+    end function subvv
 
     function mulvr(v, s) result(r)
         type(vector3d), intent(in) :: v
@@ -105,7 +112,7 @@ contains
         n = divvr(v, length)
     end function normalize
 
-    ! function cross_profuct
+    ! function cross_product
     function cross_product(a, b) result(c)
         type(vector3d), intent(in) :: a, b
         type(vector3d) :: c
@@ -122,3 +129,4 @@ contains
     end function orthv
 
 end module geometry
+
