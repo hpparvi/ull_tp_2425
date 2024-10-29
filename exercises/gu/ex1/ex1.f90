@@ -1,4 +1,5 @@
 PROGRAM ex1
+  use, intrinsic :: iso_fortran_env
   USE particle
   IMPLICIT NONE
   REAL(real64) :: dt, t_end, dt_out, t_out
@@ -55,12 +56,12 @@ PROGRAM ex1
 
   DO WHILE (t .LT. t_end) !this is the actual leapfrog loop
 
-     particles%v = particles%v + aa * (dt/2)
+     particles%v = particles%v + aa * dt/2
      particles%p = particles%p + particles%v * dt
      aa = vector3d(0., 0., 0.)
      CALL calculate_accelerations(particles, aa)
 
-     particles%v = particles%v + aa * (dt/2)
+     particles%v = particles%v + aa * dt/2
      t_out = t_out + dt
 
      IF (t_out >= dt_out) THEN ! checks whether to print to file
