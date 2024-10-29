@@ -7,9 +7,9 @@ ics_dir = ex1_dir + "/data/ics/"
 ics_filename = "ics_broucke_a2.dat"
 
 N = 3  # Number of particles
-T = 10  # Integration time
-DT = 0.01  # Time-step
-EPSILON = 0.01  # Smoothing length
+T = 7.702408  # Integration time
+DT = 0.001  # Time-step
+EPSILON = 0.001  # Smoothing length
 
 N_SNAPSHOTS = 100
 
