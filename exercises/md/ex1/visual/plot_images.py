@@ -45,7 +45,13 @@ output_file = str(sys.argv[1])
 input_file = str(sys.argv[2])
 if len(sys.argv) == 4:
     # Number of cores (threads) to use
-    num_cores = int(sys.argv[3])
+    if str(sys.argv[3]) == 'None':
+        num_cores = os.cpu_count()
+    elif sys.argv[3].isnumeric() and int(sys.argv[3]) <= os.cpu_count():
+        num_cores = int(sys.argv[3])
+    else:
+        print("Core number is invalid. Try it again")
+        sys.exit(1)
 else:
     num_cores = os.cpu_count()
 
@@ -117,7 +123,7 @@ def save_figure(t):
     output_dir = './output/images_' + sim_info['simulation_name']
     os.makedirs(output_dir, exist_ok=True)
     fig.savefig(os.path.join(output_dir, f'im_{t:01d}.png'))
-    fig.close()
+    plt.close(fig)
 
 
 if __name__ == '__main__':
