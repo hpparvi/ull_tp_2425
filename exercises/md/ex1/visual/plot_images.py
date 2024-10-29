@@ -14,26 +14,6 @@ import utils
 # I mean, each image can be generated in a different thread, and not in sequence
 # The main thing is to numerate the images in the correct order
 
-plt.rcParams['figure.figsize'] = (8, 6)
-plt.rcParams['savefig.dpi'] = 200
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = 'Charter'
-plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}\usepackage{bm}'
-plt.rcParams['font.size'] = 16
-plt.rcParams['axes.titlesize'] = 18
-plt.rcParams['axes.labelsize'] = 18
-plt.rcParams['xtick.minor.visible'] = True
-plt.rcParams['ytick.minor.visible'] = True
-plt.rcParams['legend.edgecolor'] = 'black'
-plt.rcParams['legend.frameon'] = True
-plt.rcParams['legend.framealpha'] = 1
-plt.rcParams['legend.fancybox'] = False
-plt.rcParams['text.antialiased'] = True
-plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['lines.antialiased'] = True
-plt.rcParams['text.antialiased'] = True
-
 if len(sys.argv) not in [3, 4]:
     print(
         "Use: python plot_images.py <output_file> <input_file> (optional):<num_cores>"
