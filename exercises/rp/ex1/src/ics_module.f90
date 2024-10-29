@@ -33,6 +33,7 @@ contains
       real, intent(out) :: integration_time
       real, intent(out) :: time_step
       real, intent(out) :: smoothing_length
+
       type(particle3d), allocatable, intent(out) :: particles(:)
       integer :: i
 
