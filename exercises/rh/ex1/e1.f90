@@ -1,5 +1,6 @@
 program e1
   ! Import the modules that we are going to use
+  !use iso_fortran_env
   use geometry
   use particle
   implicit none
@@ -7,7 +8,7 @@ program e1
   INTEGER :: i, j ! loop indexes
   INTEGER :: rc ! variable to read line of input file (with the i.c.)
   INTEGER :: n = 0 ! number of particles
-  REAL :: dt, t_end, t, dt_out, t_out = real64 ! time variables
+  REAL(kind = 8) :: dt, t_end, t, dt_out, t_out ! time variables
   type(particle3d), dimension(:), allocatable :: particles ! particle type array (contains particles info)
   type(vector3d), dimension(:), allocatable :: acc ! acceleration array (for each particle) 
   CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'results.dat' ! i.c. input/output files names
@@ -58,13 +59,13 @@ program e1
     t = t + dt ! add a time step to the time counter
     
     ! calculate the movement of the particles using leapfrog algorithm:  
-    particles%v = particles%v + acc * dt/2.  
+    particles%v = particles%v + acc * (dt/2.0)  
     particles%p = particles%p + particles%v * dt 
     
     acc = vector3d(0.0,0.0,0.0) 
     CALL accelerations(particles, acc) 
     
-    particles%v = particles%v + acc * dt/2.
+    particles%v = particles%v + acc * (dt/2.0)
   
     t_out = t_out + dt ! add to the output counter
     
@@ -87,7 +88,7 @@ program e1
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles 
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: a
     TYPE(vector3d) :: rji ! vector that goes from one particle to another 
-    REAL :: r = real64 ! distance between particles
+    REAL(kind = 8) :: r ! distance between particles
     INTEGER :: i,j ! loop indexes
     
     ! loop to calculate the effect of each particle in the acceleration of themselves	
