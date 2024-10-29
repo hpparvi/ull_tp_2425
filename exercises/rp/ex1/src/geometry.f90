@@ -15,13 +15,21 @@ module geometry
    interface operator (+)
       module procedure sumpv  ! point + vector
    end interface
+   interface operator (+)
+      module procedure sumvv  ! point + vector
+   end interface
    interface operator (-)
       module procedure subvp  ! vector - point
    end interface
    interface operator (-)
       module procedure subpv  ! point - vector
    end interface
-
+   interface operator (-)
+      module procedure subpp  ! point - point
+   end interface
+   interface operator (-)
+      module procedure subvv  ! point + vector
+   end interface
    interface operator (*)
       module procedure mulrv  ! constant * vector
    end interface
@@ -57,6 +65,17 @@ contains
       r%z = p%z + v%z
    end function sumpv
 
+   pure function sumvv(v1, v2) result(r)
+      ! vector + vector
+      type(vector3d), intent(in) :: v1
+      type(vector3d), intent(in) :: v2
+      type(vector3d) :: r
+
+      r%x = v1%x + v2%x
+      r%y = v1%y + v2%y
+      r%z = v1%z + v2%z
+   end function sumvv
+
    pure function subvp(v, p) result(r)
       ! vector - point
       type(vector3d), intent(in) :: v
@@ -78,6 +97,30 @@ contains
       r%y = p%y - v%y
       r%z = p%z - v%z
    end function subpv
+
+
+   pure function subpp(p1, p2) result(r)
+      ! point - point
+      type(point3d), intent(in) :: p1
+      type(point3d), intent(in) :: p2
+      type(vector3d) :: r
+
+      r%x = p1%x - p2%x
+      r%y = p1%y - p2%y
+      r%z = p1%z - p2%z
+   end function subpp
+
+
+   pure function subvv(v1, v2) result(r)
+      ! point - point
+      type(vector3d), intent(in) :: v1
+      type(vector3d), intent(in) :: v2
+      type(vector3d) :: r
+
+      r%x = v1%x - v2%x
+      r%y = v1%y - v2%y
+      r%z = v1%z - v2%z
+   end function subvv
 
    pure function mulrv(s, v) result(r)
       ! constant * vector
