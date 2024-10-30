@@ -1,5 +1,5 @@
 FC = gfortran
-FCFLAGS = -c -fdefault-real-8
+FCFLAGS = -c
 OBJECTS = geometry.o particle.o ex1.o
 
 all: ex1

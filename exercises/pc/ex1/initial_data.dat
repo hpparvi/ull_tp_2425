@@ -1,3 +1,47 @@
-0.01, 0.1, 1, 2 !dt, dt_out, t_end, n 
-10, 0, 0, 0, 0, 0, 1
-1, 0, 0, 1, 0, 0, 1
+!Time step, Out time step, Final time, Number of bodies
+0.0001, 0.01, 5, 5
+
+!First body's mass
+100
+
+!First body's position (x, y, z)
+0, 0, 0
+
+!First body's velocity (vx, vy, vz)
+0, 0, 0
+
+!Second body's mass
+0.000001
+
+!Second body's position (x, y, z)
+1, 0.5, 0.2
+
+!Second body's velocity (vx, vy, vz)
+-1.5, 8.16, 1.5
+
+!Third body's mass
+0.000001
+
+!Third body's position (x, y, z)
+1.5, -0.5, -0.3
+
+!Third body's velocity (vx, vy, vz)
+1.2, 6.67, -1.2
+
+!Fourth body's mass
+0.000001
+
+!Fourth body's position (x, y, z)
+2, 1, 0.4
+
+!Fourth body's velocity (vx, vy, vz)
+-1.1, 5.77, 1.1
+
+!Fifth body's mass
+0.000001
+
+!Fifth body's position (x, y, z)
+2.5, -1.2, -0.5
+
+!Fifth body's velocity (vx, vy, vz)
+1.0, 5.16, -1.0
