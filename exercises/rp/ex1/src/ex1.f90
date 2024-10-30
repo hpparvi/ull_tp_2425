@@ -8,6 +8,7 @@ program ex1
    character(len=200) :: ics_file
    character(len=300) :: savefolder
    logical :: read_from_file
+   real :: G ! Gravitational constant (default to 1)
    integer :: N ! number of particles
    real :: T ! Total integration time
    real :: dt ! Time-step
@@ -17,12 +18,14 @@ program ex1
    integer :: N_snapshots ! Number of snapshots
    integer :: snap_step
 
-   integer :: i, j, k, ii, jj, kk
+   integer :: i, k, ii, jj, kk
    type(vector3d) :: d_vec ! Relatve position between particles
    real :: d ! Relatve distance between particles
    type(vector3d), allocatable :: a(:) ! accelerations
 
+   G = 1  ! Unit gravitational Constant
 
+   ! Either provide ICS in prompt or from file 
    call ask_ics(answer, read_from_file, ics_file)
 
    if (read_from_file .eqv. .false.) then
@@ -31,9 +34,8 @@ program ex1
       call get_ics_from_file(ics_file, N, T, dt, e, bodies)
    end if
 
-
    print*, ' '
-   print*, "Let's integrate trajectories for', N, ' particles."
+   print*, "Let's integrate trajectories for", N, " particles."
    print*, 'Total integration time ', T
    print*, 'Time step:', dt
    M = int(T/dt)
@@ -44,30 +46,33 @@ program ex1
    print*, 'How many snapshots do you want to save?'
    read*, N_snapshots
 
-   allocate(a(N))
-
+   ! Create folder to save data
+   savefolder = create_snapshot_folder()
+   
+   
    ! Initialize accelerations before loop
+   allocate(a(N))
    call compute_accelerations()
-   savefolder = create_results_folder()
 
+   ! Save IC
+   call save_data(0)
+
+   ! variables for saving data
+   k = 1
    snap_step = int(M/N_snapshots)
-   k = 0
+
+   print*, 'Integrating...'
    do i = 1, M
       call leapfrog_step()
-      if (MOD(i, snap_step) == 0) then
+      if (MOD(i-1, snap_step) == 0) then
          call save_data(k)
          k=k+1
       end if
    end do
-
-
-
-
-
+   print*, 'Done!'
 
 
 contains
-
    subroutine compute_accelerations()
       implicit none
 
@@ -83,13 +88,9 @@ contains
          do jj = ii + 1, N
             d_vec = bodies(jj)%p - bodies(ii)%p
             d = norm(d_vec)
-            d = d**3
-
-            ! Update acceleration for particle i
-            a(ii) = a(ii) + (bodies(jj)%m * d_vec) / d
-
-            ! Update acceleration for particle j (Newton's third law)
-            a(jj) = a(jj) - (bodies(ii)%m * d_vec) / d
+            d = (d**2 + e**2)**(1.5)  ! Smoothing length!
+            a(ii) = a(ii) + G * (bodies(jj)%m * d_vec) / d
+            a(jj) = a(jj) - G * (bodies(ii)%m * d_vec) / d
          end do
       end do
 
@@ -109,7 +110,7 @@ contains
 
    end subroutine leapfrog_step
 
-   function create_results_folder() result(savepath)
+   function create_snapshot_folder() result(savepath)
       implicit none
       character(len=300) :: savepath
       character(len=300) :: temp_path
@@ -132,7 +133,7 @@ contains
       print*, "Saving data in..."
       print *, TRIM(savepath)
 
-   end function create_results_folder
+   end function create_snapshot_folder
 
    subroutine save_data(s)
       implicit none
@@ -144,7 +145,7 @@ contains
       open(unit=1, file=filename, status="unknown")
 
       do kk=1, N
-      write(1, *) bodies(kk)%p 
+         write(1, *) bodies(kk)%p
       end do
       close(1)
 
