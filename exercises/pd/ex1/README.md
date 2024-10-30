@@ -12,21 +12,21 @@ gfortran -o ex1 ex1.f90 particle.o geometry.o
 
 When executing the program, you will be prompted to enter values directly in the terminal. Each value should be entered one at a time, pressing Enter after each input. For example, if you select the option to simulate with two particles, you will need to enter each particle’s mass, coordinates, and initial velocities in the following order:
 For Particle 1:
-  Mass
-  X coordinate
-  Y coordinate
-  Z coordinate
-  Velocity in X direction
-  Velocity in Y direction
-  Velocity in Z direction
+  - Mass
+  - X coordinate
+  - Y coordinate
+  - Z coordinate
+  - Velocity in X direction
+  - Velocity in Y direction
+  - Velocity in Z direction
 For Particle 2:
-  Mass
-  X coordinate
-  Y coordinate
-  Z coordinate
-  Velocity in X direction
-  Velocity in Y direction
-  Velocity in Z direction
+  - Mass
+  - X coordinate
+  - Y coordinate
+  - Z coordinate
+  - Velocity in X direction
+  - Velocity in Y direction
+  - Velocity in Z direction
 
 Each prompt will ask for a single value in the sequence shown above. Once you input the value, press Enter, and then proceed to the next.
 
