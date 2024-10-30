@@ -15,9 +15,6 @@ test: $(PROG)
 $(PROG): $(OBJECTS)
 	$(FC) $(DOUBLE_PRECISION_FLAG) -o $@ $(OBJECTS)
 
-#particles: $(OBJECTS)
-#	$(FC) -o particles $(OBJECTS)
-
 $(OBJECTS): %.o: %.f90
 	$(FC) $(FCFLAGS) $(DOUBLE_PRECISION_FLAG) -o $@ $<
 

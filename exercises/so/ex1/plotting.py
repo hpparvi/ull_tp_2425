@@ -19,11 +19,12 @@ with open('stars.txt', 'w') as file:
     file.write('%s %s %s\n'%(dt, print_t, final_t))
     file.writelines(parts)
 
-
+# For executing
 os.system('make clean')
 os.system('make')
 os.system('./ex1 stars.txt')
 
+# Data reading and plotting
 data  = np.loadtxt('output.txt')
 plt.close(1)
 
@@ -43,7 +44,7 @@ ax.set_ylabel('y')
 
 ax.legend()
 plt.tight_layout()
-#%% Comparison of methods
+
 plt.close(2)
 fig, ax = plt.subplots(num = 2)
 for i in range(n_parts):

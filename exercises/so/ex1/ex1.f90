@@ -15,7 +15,6 @@ PROGRAM leapfrog
   real :: rs, r2, r3
   
   type(particle), dimension(:), allocatable :: partics
-!  type(vector3d), dimension(:), allocatable :: a_v
   type(vector3d)                            :: rji_v
   real                                      :: r3_2
   
@@ -99,18 +98,7 @@ read(10, *, iostat = ios) dt, dt_out, t_end
     ! Close the file
     close(10)
 
-!  READ*, dt
-!  READ*, dt_out
-!  READ*, t_end
-!  READ*, n
-
   n_t = t_end/dt
-  
- ! DO i = 1, n
- !    READ*, m(i), r(i,:), v(i,:)
- !    print*, "Write again for checks"
- !    READ*, partics(i)%m, partics(i)%p, partics(i)%v
- ! END DO
 
 ! initialize accelerations
   do i = 1,n
@@ -145,21 +133,23 @@ read(10, *, iostat = ios) dt, dt_out, t_end
 ! start all calculations
   DO i_t = 0, n_t
      t = i_t * dt
+     ! Particles method
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
      partics(:)%p = partics(:)%p + (partics(:)%v * dt)
-     
+     partics(:)%a = vector3d(0,0,0)
+     ! Original method
      v = v + a * dt/2
      r = r + v * dt
-
-     partics(:)%a = vector3d(0,0,0)
      a = 0.0
+     
      DO i = 1,n
         DO j = i+1,n
+           ! Particles method
            rji_v = vecpp(partics(i)%p, partics(j)%p)
            r3_2 = norm(rji_v)**3
            partics(i)%a = partics(i)%a + (partics(j)%m * rji_v / r3_2)
            partics(j)%a = partics(j)%a - (partics(i)%m * rji_v / r3_2)
-        
+           ! Original method
            rji = r(j,:) - r(i,:)
            r2 = SUM(rji**2)
            r3 = r2 * SQRT(r2)
@@ -170,9 +160,9 @@ read(10, *, iostat = ios) dt, dt_out, t_end
      write(20, '(I5, F12.2, 3F20.15)') i_t, t, partics(i)%p
      write(20, '(I5, F12.2, 3F20.15)') i_t, t, r(i,:)
      END DO
-     
+     !Particles method
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
-     
+     ! Original method
      v = v + a * dt/2
      
      t_out = t_out + dt
