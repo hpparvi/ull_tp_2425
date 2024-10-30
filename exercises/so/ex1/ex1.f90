@@ -111,7 +111,7 @@ read(10, *, iostat = ios) dt, dt_out, t_end
  !    print*, "Write again for checks"
  !    READ*, partics(i)%m, partics(i)%p, partics(i)%v
  ! END DO
-  
+
 ! initialize accelerations
   do i = 1,n
      partics(i)%a = vector3d(0,0,0)
@@ -167,8 +167,8 @@ read(10, *, iostat = ios) dt, dt_out, t_end
            a(j,:) = a(j,:) - m(i) * rji / r3
         END DO
         ! Store all values of positions:
-     write(20, '(I5, F12.2, 3F12.6)') i_t, t, partics(i)%p
-     write(20, '(I5, F12.2, 3F12.6)') i_t, t, r(i,:)
+     write(20, '(I5, F12.2, 3F20.15)') i_t, t, partics(i)%p
+     write(20, '(I5, F12.2, 3F20.15)') i_t, t, r(i,:)
      END DO
      
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
