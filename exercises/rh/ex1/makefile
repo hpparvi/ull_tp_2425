@@ -5,7 +5,7 @@ OBJECTS = geometry.o particle.o e1.o
 
 # do make 
 # then make test (in order to test the executable)
-# and make clean (remove files module files and the executable)
+# and make clean (remove module files and the executable)
 
 all: e1
 
