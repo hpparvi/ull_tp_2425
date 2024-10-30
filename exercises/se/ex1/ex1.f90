@@ -59,8 +59,6 @@ PROGRAM ex1
   ALLOCATE(particles(n))
   ALLOCATE(a(n))
 
-  print *, 'bits in dt =', precision(dt)
-
   ! Assign the masses & initial conditions
   DO i = 1, n
      READ (1, *, IOSTAT=readstatus) particles(i)%m, & 
@@ -70,7 +68,6 @@ PROGRAM ex1
 
      PRINT '(A, I2)', "This is the initial position for particle", i
      PRINT '(F7.3)', particles(i)%p
-
      PRINT '(A, I2)', "This is the initial velocity for particle", i
      PRINT '(F7.3)', particles(i)%v
      PRINT*, "" ! Blank space
@@ -88,19 +85,7 @@ PROGRAM ex1
   END DO
   
   ! For each particle
-  DO i = 1,n 
-     ! And each of its neighbors...
-     DO j = i+1,n 
-	! Determine difference vector
-	rji = particles(j)%p - particles(i)%p
-	! The cube of the distance
-        r3 = magnitude(rji)**3
-
-	! Compute the accelerations for i, j. Adding to previous value
-	a(i) = a(i) + particles(j)%m * rji / r3
-	a(j) = a(j) - particles(i)%m * rji / r3 
-    END DO
-  END DO
+  CALL calculate_accelerations(particles, n, a)
 
   ! Now, compute the velocities and positions after one timestep
   t_out = 0.0 
@@ -128,16 +113,7 @@ PROGRAM ex1
 
      
      ! Same as before
-     DO i = 1,n 
-	DO j = i+1,n
-           rji = particles(j)%p - particles(i)%p
-    
-           r3 = magnitude(rji)**3
-
-           a(i) = a(i) + particles(j)%m * rji / r3 
-	   a(j) = a(j) - particles(i)%m * rji / r3 
-	END DO 
-     END DO
+     CALL calculate_accelerations(particles, n, a)
 
      ! Update velocity once again
      particles%v = particles%v + a * (dt/2)
@@ -163,6 +139,32 @@ PROGRAM ex1
 
   CLOSE (UNIT=2)
 
-  
+
+CONTAINS
+
+  ! Subroutine that calculates accelerations
+  SUBROUTINE calculate_accelerations(particles, n, a)
+    TYPE(vector3d),  DIMENSION(:) :: a
+    INTEGER :: i,j,n
+    TYPE(particle3d), DIMENSION(:) :: particles
+    TYPE(vector3d) :: rji
+    REAL(real64) :: r3
+
+    DO i = 1,n 
+      DO j = i+1,n
+        rji = particles(j)%p - particles(i)%p
+
+        r3 = magnitude(rji)**3
+
+        a(i) = a(i) + particles(j)%m * rji / r3 
+
+        a(j) = a(j) - particles(i)%m * rji / r3
+        
+      END DO
+    END DO
+
+  END SUBROUTINE calculate_accelerations
+
+
   
 END PROGRAM ex1
