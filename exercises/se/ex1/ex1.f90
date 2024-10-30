@@ -1,4 +1,5 @@
 PROGRAM ex1
+  USE, INTRINSIC :: iso_fortran_env
   USE GEOMETRY
   USE PARTICLE
   IMPLICIT NONE
@@ -11,12 +12,12 @@ PROGRAM ex1
   
   ! Timestep, end time, time loop indices,
   ! times at which to print
-  REAL :: dt, t_end, t, dt_out, t_out
+  REAL(real64) :: dt, t_end, t, dt_out, t_out
   INTEGER :: time_counter, total_timesteps
 
   ! Vector related quantities (squared, cubed)
   ! I removed rs because it was not used
-  REAL :: r2, r3 
+  REAL(real64) :: r2, r3 
 
   ! We will have n instances of the "particle" type
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
@@ -56,7 +57,9 @@ PROGRAM ex1
 
   ! Allocate arrays once the dimension is known
   ALLOCATE(particles(n))
-  ALLOCATE(a(n)) 
+  ALLOCATE(a(n))
+
+  print *, 'bits in dt =', precision(dt)
 
   ! Assign the masses & initial conditions
   DO i = 1, n
