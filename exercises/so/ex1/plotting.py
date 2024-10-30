@@ -6,7 +6,8 @@ os.chdir('/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex1')
 
 dt = 0.01
 print_t = 100
-final_t = 200
+final_t = 500
+#final_t = 2 #for the shorter time figures...
 parts = ['1.0 .9700436 -.24308753 0.0 .466203685 0.43236573 0.0\n',
          '1.0 -.9700436 .24308753 0.0 .466203685 0.43236573 0.0\n',
          '1.0 0.0 0.0 0.0 -0.93249737 -0.86473146 0.0\n']
