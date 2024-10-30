@@ -1,14 +1,14 @@
 module geometry
-  ! use iso_fortran_env ! this module allows to have double-precision real variables (not necessary with kind)
+  use iso_fortran_env ! this module allows to have double-precision real variables 
   implicit none
   
 ! 3-dimensional vectors and points type  
   type :: vector3d
-     real(kind = 8) :: x, y, z
+     real(real64) :: x, y, z
   end type vector3d
 
   type :: point3d 
-     real(kind = 8) :: x, y, z
+     real(real64) :: x, y, z
   end type point3d
 
 ! Operators assignment
@@ -79,14 +79,14 @@ contains
 
 ! Multiplication of a vector with a real number function  
   elemental type(vector3d) function mulvr(vector, sreal) 
-    real(kind = 8), intent(in) :: sreal
+    real(real64), intent(in) :: sreal
     type(vector3d), intent(in) :: vector
     mulvr = vector3d(vector%x*sreal, vector%y*sreal, vector%z*sreal)
   end function mulvr
 
 ! Multiplication of real number with a vector function  
   elemental type(vector3d) function mulrv(sreal, vector) 
-    real(kind = 8), intent(in) :: sreal
+    real(real64), intent(in) :: sreal
     type(vector3d), intent(in) :: vector
     mulrv = vector3d(sreal*vector%x, sreal*vector%y, sreal*vector%z)
   end function mulrv
@@ -100,7 +100,7 @@ contains
   
 ! Division of a vector with a real number function
   elemental type(vector3d) function divvr(vector, sreal)
-    real(kind = 8), intent(in) :: sreal
+    real(real64), intent(in) :: sreal
     type(vector3d), intent(in) :: vector
     divvr = vector3d(vector%x/sreal, vector%y/sreal, vector%z/sreal)
   end function divvr
@@ -113,26 +113,26 @@ contains
   end function divvi
 
 ! Distance between two points function  
-  elemental type(real(kind = 8)) function distance(point1, point2)
+  elemental type(real(real64)) function distance(point1, point2)
     type(point3d), intent(in) :: point1, point2
     distance = ((point1%x - point2%x)**2 + (point1%y - point2%y)**2 + (point1%z - point2%z)**2)**0.5
   end function distance
   
 ! Module of a vector function  
-  elemental type(real(kind = 8)) function modulev(vector)
+  elemental type(real(real64)) function modulev(vector)
     type(vector3d), intent(in) :: vector
     modulev = ((vector%x)**2 + (vector%y)**2 + (vector%z)**2)**0.5
   end function modulev 
   
 ! Scalar product of two vectors function
-  elemental type(real(kind = 8)) function dot_prod(vector1, vector2)
+  elemental type(real(real64)) function dot_prod(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
     dot_prod = (vector1%x*vector2%x + vector1%y*vector2%y + vector1%z*vector2%z)
   end function dot_prod
  
   
 ! Angle between two vectors function  
-  elemental type(real) function angle(vector1, vector2)
+  elemental type(real(real64)) function angle(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
     angle = acos(dot_prod(vector1,vector2)/(modulev(vector1)*modulev(vector2)))
   end function angle
