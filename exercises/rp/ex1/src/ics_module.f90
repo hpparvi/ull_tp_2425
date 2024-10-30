@@ -5,6 +5,7 @@ module ics_module
 contains
 
    recursive subroutine ask_ics(answer, read_from_file, filename)
+      ! Either provide ICS in prompt or from file
       implicit none
       character(len=3), intent(inout) :: answer
       character(len=200), intent(out) :: filename
@@ -28,6 +29,7 @@ contains
    end subroutine ask_ics
 
    subroutine get_manual_ics(n_particles, integration_time, time_step, smoothing_length, particles)
+      ! Provide ICS in prompt
       implicit none
       integer, intent(out) :: n_particles
       real, intent(out) :: integration_time
@@ -76,6 +78,7 @@ contains
 
 
    subroutine get_ics_from_file(filename, n_particles, integration_time, time_step, smoothing_length, particles)
+      ! Provide file of ICS
       implicit none
       character(len=200), intent(out) :: filename
       integer, intent(out) :: n_particles
@@ -91,7 +94,6 @@ contains
       read(unit_num, *) integration_time
       read(unit_num, *) time_step
       read(unit_num, *) smoothing_length
-
 
       allocate(particles(n_particles))
 

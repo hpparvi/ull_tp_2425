@@ -3,6 +3,9 @@ SRC = src/geometry.f90 src/particle.f90 src/ics_module.f90 src/ex1.f90
 OBJ = obj/geometry.o obj/particle.o obj/ics_module.o obj/ex1.o  
 EXEC = bin/ex1  
 
+# SINGLE_PRECISION_FLAG =
+DOUBLE_PRECISION_FLAG = -fdefault-real-8
+
 all: $(EXEC)
 
 $(EXEC): $(OBJ)
