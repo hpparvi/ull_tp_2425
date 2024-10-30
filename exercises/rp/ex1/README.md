@@ -2,6 +2,8 @@
 
 N-body simulator written in Fortran. Initial conditions are either read from file or provided in terminal. Output is saved. Optionally, plot the orbits with a python script. 
 
+Double precision set in the Makefile.
+
 ## Structure 
 
 Fortran:
