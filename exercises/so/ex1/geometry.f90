@@ -17,11 +17,11 @@ module geometry
   implicit none
 
   type :: vector3d
-     double precision :: x, y, z
+     real :: x, y, z
   end type vector3d
 
   type :: point3d
-     double precision :: x, y, z
+     real :: x, y, z
   end type point3d
 
   interface operator(+)
@@ -84,14 +84,14 @@ contains
   
 ! Multiplication of real number and vector
   elemental type(vector3d) function mulrv(a, b)
-    double precision, intent(in) :: a
+    real, intent(in) :: a
     type(vector3d), intent(in) :: b
     mulrv = vector3d(a*b%x, a*b%y, a*b%z)
   end function mulrv
 
   elemental type(vector3d) function mulvr(a, b)
     type(vector3d), intent(in) :: a
-    double precision, intent(in) :: b
+    real, intent(in) :: b
     mulvr = vector3d(b*a%x, b*a%y, b*a%z)
   end function mulvr
 
@@ -103,13 +103,13 @@ contains
 
 ! Division of vector by real
   elemental type(vector3d) function divvr(v, r)
-    double precision, intent(in) :: r
+    real, intent(in) :: r
     type(vector3d), intent(in) :: v
     divvr = vector3d(v%x/r, v%y/r, v%z/r)
   end function divvr
 
 ! Norm of a vector
-  pure double precision function norm(a)
+  pure real function norm(a)
     type(vector3d), intent(in) :: a
     norm = sqrt(a%x**2 + a%y**2 + a%z**2)
   end function norm
@@ -121,20 +121,20 @@ contains
   end function vecpp
 
 ! Dot product of two vectors
-  pure double precision function dotvv(a,b)
+  pure real function dotvv(a,b)
     type(vector3d), intent(in)  :: a, b
     dotvv = a%x*b%x +a%y*b%y + a%z*b%z
   end function dotvv
     
 ! Distance calculation between two points,
 !i.e. norm of the vector that joins the two points
-  pure double precision function distance(a, b)
+  pure real function distance(a, b)
     type(point3d), intent(in) :: a, b
     distance = norm(vecpp(a,b))
   end function distance
 
 ! Angle between two vectors (in radians)
-  pure double precision function angle(a,b)
+  pure real function angle(a,b)
     type(vector3d), intent(in)  :: a, b
     angle = acos(a.dot.b / (norm(a) * norm(b)))
   end function angle

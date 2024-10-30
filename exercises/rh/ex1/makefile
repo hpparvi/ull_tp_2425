@@ -16,7 +16,7 @@ e1: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
     
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod e1
     
 test: e1
 	./e1
