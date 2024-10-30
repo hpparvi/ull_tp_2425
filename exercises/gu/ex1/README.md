@@ -14,3 +14,5 @@ with n the number of particles we are considering.
 
 ## Output files
 ### result.dat
+The file result.dat contains the output data. Each line has the following format:\
+t  px1  py1  pz1  px2  py2  pz2  ...  pxn  pyn  pzn
