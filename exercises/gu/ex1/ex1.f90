@@ -65,9 +65,11 @@ PROGRAM ex1
      t_out = t_out + dt
 
      IF (t_out >= dt_out) THEN ! checks whether to print to file
+        WRITE(4, fmt='(F11.3)', advance='no') t
         DO i = 1, n
-           WRITE(4, *) particles(i)%p
+           WRITE(4, fmt='(4ES11.2)', advance='no') particles(i)%p
         END DO
+        WRITE(4, *) ''
         t_out = 0.0 !if it prints, resets t_out
      END IF
 
