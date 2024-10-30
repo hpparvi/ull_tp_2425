@@ -34,7 +34,6 @@ program ex1
       call get_ics_from_file(ics_file, N, T, dt, e, bodies)
    end if
 
-
    print*, ' '
    print*, "Let's integrate trajectories for", N, " particles."
    print*, 'Total integration time ', T
@@ -50,8 +49,7 @@ program ex1
    ! Create folder to save data
    savefolder = create_snapshot_folder()
    
-
-
+   
    ! Initialize accelerations before loop
    allocate(a(N))
    call compute_accelerations()
