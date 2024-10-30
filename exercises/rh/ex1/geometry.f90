@@ -64,7 +64,7 @@ contains
   end function subvp
   
   ! Subtraction of a point with a vector
-  pure type(point3d) function subpv(point, vector)
+  elemental type(point3d) function subpv(point, vector)
     type(vector3d), intent(in) :: vector
     type(point3d), intent(in) :: point
     subpv = point3d(point%x - vector%x, point%y - vector%y, point%z - vector%z)
