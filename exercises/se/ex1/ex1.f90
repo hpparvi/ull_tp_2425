@@ -76,7 +76,6 @@ PROGRAM ex1
   CLOSE (UNIT=1) ! Close the file
   
 
-  ! MISSING:  Make this big block into a function or subroutine
   ! Set all accelerations at 0 initially
   DO i = 1, n
      a(i)%x = 0.
