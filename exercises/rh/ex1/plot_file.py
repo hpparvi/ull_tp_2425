@@ -1,4 +1,4 @@
-#python program to make a 3dimentional plot with the results
+#python program to make a 3dimentional plot with the results of 3 particles
 import numpy as np
 import matplotlib.pyplot as plt
 
