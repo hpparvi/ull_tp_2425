@@ -72,6 +72,7 @@ program e1
     ! if dt_out is greater than dt_out, we save the position of the particles
     IF (t_out >= dt_out) THEN
       WRITE(4, *) particles%p ! positions in one row (one particle position after another)
+      ! note: it's possible to modify and include velocities of the particles to the output file
       t_out = 0.0 ! put the counter to zero 
     END IF
     
@@ -98,6 +99,8 @@ program e1
     	r =  distance(particles(j)%p, particles(i)%p)
     	a(i) = a(i) + particles(j)%m * rji / r**3 ! calculate attraction made by other particles 
     	a(j) = a(j) - particles(i)%m * rji / r**3 ! calculate attraction of that particle to the rest of them
+        ! note: this code could have issues in the integration if the particles are close enough (r aprox 0),
+        ! so it could be necessary to add a softening length in some cases 
       END DO
     END DO
 
