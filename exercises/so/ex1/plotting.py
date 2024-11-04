@@ -6,7 +6,8 @@ os.chdir('/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex1')
 
 dt = 0.01
 print_t = 100
-final_t = 200
+final_t = 500
+#final_t = 2 #for the shorter time figures...
 parts = ['1.0 .9700436 -.24308753 0.0 .466203685 0.43236573 0.0\n',
          '1.0 -.9700436 .24308753 0.0 .466203685 0.43236573 0.0\n',
          '1.0 0.0 0.0 0.0 -0.93249737 -0.86473146 0.0\n']
@@ -18,11 +19,12 @@ with open('stars.txt', 'w') as file:
     file.write('%s %s %s\n'%(dt, print_t, final_t))
     file.writelines(parts)
 
-
+# For executing
 os.system('make clean')
 os.system('make')
 os.system('./ex1 stars.txt')
 
+# Data reading and plotting
 data  = np.loadtxt('output.txt')
 plt.close(1)
 
@@ -42,7 +44,7 @@ ax.set_ylabel('y')
 
 ax.legend()
 plt.tight_layout()
-#%% Comparison of methods
+
 plt.close(2)
 fig, ax = plt.subplots(num = 2)
 for i in range(n_parts):

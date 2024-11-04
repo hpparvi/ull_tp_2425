@@ -95,12 +95,6 @@ contains
     mulvr = vector3d(b*a%x, b*a%y, b*a%z)
   end function mulvr
 
-!  elemental function mulvr(a, b)
-!    type(vector3d), intent(in) :: a
-!    double precision, intent(in) :: b
-!    mulvr = vector3d(b*a%x, b*a%y, b*a%z)
-!  end function mulvr
-
 ! Division of vector by real
   elemental type(vector3d) function divvr(v, r)
     real, intent(in) :: r
