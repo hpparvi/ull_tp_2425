@@ -18,9 +18,6 @@ e3: e3.o
 e4: e4.o
 	$(FC) -o e4 e4.o
 
-e5: e5.o
-	$(FC) -o e5 e5.o
-
 %.o: %.f90
 	$(FC) $(FCFLAGS) $<
 
