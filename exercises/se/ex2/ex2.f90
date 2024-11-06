@@ -77,7 +77,86 @@ PROGRAM ex2
      PRINT*, "" ! Blank space
   END DO
 
-  CLOSE (UNIT=1) ! Close the file  
+  CLOSE (UNIT=1) ! Close the file
+
+  ! Initialize the head node
+  ALLOCATE(head)
+
+  CALL Calculate_ranges(head) ! space occupied by the head node
+  head%type = 0 ! no particle (initialization)
+  CALL Nullify_Pointers(head) ! remove all pointers
+  
+
+  ! Create the initial tree
+  DO i = 1,n ! For all particles
+     
+     ! Locate the cell where this particle should go
+     CALL Find_Cell(head, temp_cell, particles(i)%p)
+     
+     ! Place the particle inside said cell
+     CALL Place_Cell(temp_cell, particles(i)%p, i) ! i is the ID of the particle
+                                         ! (called n or pos in the subroutine)
+     
+  END DO
+
+  
+  ! Remove subcells with no particles inside
+  CALL Delete_empty_leaves(head)
+
+  ! Calculate the masses (recursively)
+  CALL Calculate_masses(head)
+
+  ! Get the initial accelerations (recursive)
+  a = 0.0
+  CALL Calculate_forces(head)
+
+
+  ! Main loop
+  t_out = 0.0
+  DO time_counter = 0, total_timesteps
+  ! DO t = 0.0, t_end, dt
+     particles%v = particles%v + a * (dt/2) 
+     particles%p = particles%p + particles%v * dt 
+
+     ! Delete the tree because the positions have changed
+     CALL Delete_tree(head)
+
+     ! Re-generate the tree
+     CALL Calculate_ranges(head)
+     head%type = 0
+     CALL Nullify_Pointers(head)
+
+     ! This updates the tree
+     DO i = 1,n
+        CALL Find_Cell(head,temp_cell, particles(i)%p)
+        CALL Place_Cell(temp_cell, particles(i)%p, i)
+     END DO
+
+     ! Remove the leaves with no particles
+     CALL Delete_empty_leaves(head)
+     
+     CALL Calculate_masses(head, particles)
+
+     a = 0.0
+     CALL Calculate_forces(head, particles, a)
+     particles%v = particles%v + a * (dt/2)
+     
+     t_out = t_out + dt
+     ! If t_out is bigger than the increments at which we want output:
+     IF (t_out >= dt_out) THEN
+        WRITE (2, '(F9.2)', ADVANCE='no') dt*time_counter
+	! For each of the particles
+	DO i = 1,n 
+           ! Print ALL the positions if it is time to do so
+           WRITE (2, '(F9.3, F9.3, F9.3)', ADVANCE='no') particles(i)%p%x, &
+                particles(i)%p%y, particles(i)%p%z
+	END DO
+        WRITE (2, '(A)') "" ! Just to advance to the next line
+        t_out = 0.0
+     END IF
+     
+  END DO
+  ! End of main loop
 
 
 
