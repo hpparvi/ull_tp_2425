@@ -6,7 +6,7 @@ MODULE barnes_hut
 
   ! Contains the edges of the cell
   TYPE range
-     TYPE(point3d) :: min_val,max_val
+     REAL(real64), DIMENSION(3) :: min_val,max_val
   END TYPE range
 
   
@@ -43,8 +43,8 @@ CONTAINS
   
   SUBROUTINE Calculate_Ranges(goal, particles)
     TYPE(CELL),POINTER :: goal
-    REAL, DIMENSION(3) :: mins,maxs,medios
-    REAL :: span
+    REAL(real64), DIMENSION(3) :: mins,maxs,medios
+    REAL(real64) :: span
     TYPE(particle3d), DIMENSION(:) :: particles
 
   
@@ -92,7 +92,7 @@ CONTAINS
     INTEGER :: i,j,k
 
     SELECT CASE (root%type)
-       ! More than one particle
+    ! More than one particle
     CASE (2)
        ! Check every cell of the octant
        out: DO i = 1,2
@@ -112,7 +112,7 @@ CONTAINS
           END DO
        END DO out
 
-       ! Case of only one particle   
+    ! Case of only one particle   
     CASE DEFAULT
        goal => root ! then, the cell we are in needs no more subdivision
     END SELECT
@@ -247,12 +247,12 @@ CONTAINS
     TYPE(CELL), POINTER :: goal
     LOGICAL :: Belongs
 
-    IF ((part%p%x >= goal%range%min_val%x) .AND. &
-         (part%p%x <= goal%range%max_val%x) .AND. &
-         (part%p%y >= goal%range%min_val%y) .AND. &
-         (part%p%y <= goal%range%max_val%y) .AND. &
-         (part%p%z >= goal%range%min_val%z) .AND. &
-         (part%p%z <= goal%range%max_val%z)) THEN
+    IF ((part%p%x >= goal%range%min_val(1)) .AND. &
+         (part%p%x <= goal%range%max_val(1)) .AND. &
+         (part%p%y >= goal%range%min_val(2)) .AND. &
+         (part%p%y <= goal%range%max_val(2)) .AND. &
+         (part%p%z >= goal%range%min_val(3)) .AND. &
+         (part%p%z <= goal%range%max_val(3))) THEN
 
        Belongs = .TRUE.
 
@@ -277,7 +277,7 @@ CONTAINS
     INTEGER :: what,n
     TYPE(CELL), POINTER :: goal
     INTEGER, DIMENSION(3) :: octant
-    REAL, DIMENSION(3) :: Calculate_Range, valor_medio
+    REAL(real64), DIMENSION(3) :: Calculate_Range, valor_medio
     valor_medio = (goal%range%min_val + goal%range%max_val) / 2.0
     SELECT CASE (what)
     CASE (0)
@@ -368,9 +368,10 @@ CONTAINS
   RECURSIVE SUBROUTINE Calculate_masses(goal, particles)
     TYPE(CELL),POINTER :: goal
     INTEGER :: i,j,k
-    REAL :: mass
+    REAL(real64) :: mass
     TYPE(point3d) :: c_o_m
     TYPE(particle3d), DIMENSION(:) :: particles
+    TYPE(vector3d) :: com_vec_s, com_vec_g
 
     goal%part%m = 0
     goal%c_o_m%x = 0
@@ -380,12 +381,12 @@ CONTAINS
    
 
     SELECT CASE (goal%type)
-       ! If there is one particle
+    ! If there is one particle
     CASE (1)
        goal%part%m = particles(goal%pos)%m
        goal%c_o_m = particles(goal%pos)%p
 
-       ! If there is an agglomerate
+    ! If there is an agglomerate
     CASE (2)
        ! For all subcells
        DO i = 1,2
@@ -394,18 +395,34 @@ CONTAINS
                 ! If the cell has subcells, use recursivity
                 IF (ASSOCIATED(goal%subcell(i,j,k)%ptr)) THEN
 
-                   CALL Calculate_masses(goal%subcell(i,j,k)%ptr)
+                   CALL Calculate_masses(goal%subcell(i,j,k)%ptr, particles)
 
                    mass = goal%part%m
 
                    goal%part%m = goal%part%m + goal%subcell(i,j,k)%ptr%part%m
 
+                   ! Change the CoMs to a vector to operate: subcell
+                   com_vec_s%x = goal%subcell(i,j,k)%ptr%c_o_m%x
+                   com_vec_s%y = goal%subcell(i,j,k)%ptr%c_o_m%y
+                   com_vec_s%z = goal%subcell(i,j,k)%ptr%c_o_m%z
+
+                   ! Same as previous, but for goal
+                   com_vec_g%x = goal%c_o_m%x
+                   com_vec_g%y = goal%c_o_m%y
+                   com_vec_g%z = goal%c_o_m%z
+                   
+                   
                    ! c_o_m = m*vec(r); add the considered particle
                    ! and the other subcells at the same level
-                   goal%c_o_m = (mass * goal%c_o_m + &
+                   com_vec_g = (mass * com_vec_g + &
                         goal%subcell(i,j,k)%ptr%part%m * &
-                        goal%subcell(i,j,k)%ptr%c_o_m) / goal%part%m
+                        com_vec_s) / goal%part%m
 
+                   ! Change back to a point
+                   goal%c_o_m%x = com_vec_g%x
+                   goal%c_o_m%y = com_vec_g%y                   
+                   goal%c_o_m%z = com_vec_g%z
+                   
                 END IF
              END DO
           END DO
@@ -431,10 +448,11 @@ CONTAINS
     INTEGER :: i,n
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
-    
+
+    n = SIZE(particles)
 
     DO i = 1,n
-       CALL Calculate_forces_aux(i,head, particles, a)
+       CALL Calculate_forces_aux(i, head, particles, a)
     END DO
 
   END SUBROUTINE Calculate_forces
@@ -458,41 +476,40 @@ CONTAINS
     INTEGER :: i,j,k,goal
     REAL(real64) :: l,D, theta=1
     TYPE(vector3d) :: rji
-    REAL(real64) :: r2, r3
+    REAL(real64) :: r3
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
 
     SELECT CASE (tree%type)
-       ! One particle
+    ! One particle
     CASE (1)
        IF (goal .NE. tree%pos) THEN
-          rji = tree%c_o_m - particles(goal)%p%x
-          r2 = SUM(rji**2)
-          r3 = r2 * SQRT(r2)
+          rji = tree%c_o_m - particles(goal)%p
+          r3 = magnitude(rji)**3
           a(goal) = a(goal) + particles(tree%pos)%m * rji / r3
        END IF
 
-       ! An agglomerate; check how to treat it
+    ! An agglomerate; check how to treat it
     CASE (2)
        !! The range is the same (span) in all 3 dimensions.
        !! Any dimension works to find the side length.
-       l = tree%range%max_val%x - tree%range%min_val%x
+       l = tree%range%max_val(1) - tree%range%min_val(1)
        rji = tree%c_o_m - particles(goal)%p
-       r2 = SUM(rji**2)
-       D = SQRT(r2)
+       D = magnitude(rji)
 
        ! Case l/D < theta: calculate as if it was one particle
        IF (l/D < theta) THEN
-          r3 = r2 * D
+          r3 = D**3
           a(goal) = a(goal) + tree%part%m * rji / r3
 
-          ! Case l/D > theta: Calculate the forces using all subcells
+       ! Case l/D > theta: Calculate the forces using all subcells
        ELSE
           DO i = 1,2
              DO j = 1,2
                 DO k = 1,2
                    IF (ASSOCIATED(tree%subcell(i,j,k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal,tree%subcell(i,j,k)%ptr, particles, a)
+                      CALL Calculate_forces_aux(goal,&
+                           tree%subcell(i,j,k)%ptr, particles, a)
                    END IF
                 END DO
              END DO
