@@ -5,7 +5,7 @@ OBJECTS = geometry.o particle.o e1.o
 
 # do make 
 # then make test (in order to test the executable)
-# and make clean or clean (I am not sure)
+# and make clean (remove module files and the executable)
 
 all: e1
 
@@ -16,7 +16,7 @@ e1: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
     
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod e1
     
 test: e1
 	./e1

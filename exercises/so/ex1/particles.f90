@@ -10,7 +10,7 @@ module particles
      type(point3d)     :: p  ! position
      type(vector3d)    :: v  ! velocity
      type(vector3d)    :: a  ! acceleration
-     double precision  :: m  ! mass
+     real  :: m  ! mass
   end type particle
 
   !pure 

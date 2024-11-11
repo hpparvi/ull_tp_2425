@@ -6,3 +6,14 @@
 	* Added the manual insertion of particles
 	* Added the process of calculating the acceleration and position of the particles.
 	* Added the console display of the positions and velocities of the particles.
+
+[v0.9]
+	* Added read file for particles
+	* Added write file of positions.
+	
+[v1.0]
+	* Fixed particle type names
+	* Fixed size of REAL
+	* Add figure and initial conditions
+	* Change write file format
+	* Add python rutine for plotting
