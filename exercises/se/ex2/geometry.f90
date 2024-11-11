@@ -125,7 +125,7 @@ CONTAINS
     
   END FUNCTION mulrv
 
-  
+
   ! Multiplying a vector and a real
   ELEMENTAL FUNCTION mulvr(vec, re)
     TYPE(vector3d) :: mulvr

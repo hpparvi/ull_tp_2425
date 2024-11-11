@@ -14,7 +14,8 @@ PROGRAM ex2
 
   ! Time parameters
   REAL(real64) :: dt, t_end, t, dt_out, t_out
-
+  INTEGER :: time_counter, total_timesteps
+  
   ! Vector quantities (magnitudes)
   REAL(real64) :: rs, r2, r3
 
@@ -82,7 +83,7 @@ PROGRAM ex2
   ! Initialize the head node
   ALLOCATE(head)
 
-  CALL Calculate_ranges(head) ! space occupied by the head node
+  CALL Calculate_ranges(head, particles) ! space occupied by the head node
   head%type = 0 ! no particle (initialization)
   CALL Nullify_Pointers(head) ! remove all pointers
   
@@ -91,10 +92,10 @@ PROGRAM ex2
   DO i = 1,n ! For all particles
      
      ! Locate the cell where this particle should go
-     CALL Find_Cell(head, temp_cell, particles(i)%p)
+     CALL Find_Cell(head, temp_cell, particles(i))
      
      ! Place the particle inside said cell
-     CALL Place_Cell(temp_cell, particles(i)%p, i) ! i is the ID of the particle
+     CALL Place_Cell(temp_cell, particles(i), i) ! i is the ID of the particle
                                          ! (called n or pos in the subroutine)
      
   END DO
@@ -104,12 +105,25 @@ PROGRAM ex2
   CALL Delete_empty_leaves(head)
 
   ! Calculate the masses (recursively)
-  CALL Calculate_masses(head)
+  CALL Calculate_masses(head, particles)
 
   ! Get the initial accelerations (recursive)
-  a = 0.0
-  CALL Calculate_forces(head)
+  DO i = 1, n
+     a(i)%x = 0.
+     a(i)%y = 0. 
+     a(i)%z = 0.
+  END DO
+  
+  CALL Calculate_forces(head, particles, a)
 
+
+  ! Open output file
+  OPEN (UNIT=2, FILE=resultfile, STATUS="replace", &
+       ACTION="write", POSITION="rewind", &
+       IOSTAT=openstatus_output)
+  IF (openstatus_output > 0) stop "Cannot open file."
+
+  
 
   ! Main loop
   t_out = 0.0
@@ -122,14 +136,14 @@ PROGRAM ex2
      CALL Delete_tree(head)
 
      ! Re-generate the tree
-     CALL Calculate_ranges(head)
+     CALL Calculate_ranges(head, particles)
      head%type = 0
      CALL Nullify_Pointers(head)
 
      ! This updates the tree
      DO i = 1,n
-        CALL Find_Cell(head,temp_cell, particles(i)%p)
-        CALL Place_Cell(temp_cell, particles(i)%p, i)
+        CALL Find_Cell(head,temp_cell, particles(i))
+        CALL Place_Cell(temp_cell, particles(i), i)
      END DO
 
      ! Remove the leaves with no particles
@@ -137,18 +151,24 @@ PROGRAM ex2
      
      CALL Calculate_masses(head, particles)
 
-     a = 0.0
+     ! Set all accelerations at 0
+     DO i = 1, n
+        a(i)%x = 0.
+        a(i)%y = 0. 
+        a(i)%z = 0.
+     END DO
+     
      CALL Calculate_forces(head, particles, a)
      particles%v = particles%v + a * (dt/2)
      
      t_out = t_out + dt
      ! If t_out is bigger than the increments at which we want output:
      IF (t_out >= dt_out) THEN
-        WRITE (2, '(F9.2)', ADVANCE='no') dt*time_counter
+        WRITE (2, '(F10.2)', ADVANCE='no') dt*time_counter
 	! For each of the particles
 	DO i = 1,n 
-           ! Print ALL the positions if it is time to do so
-           WRITE (2, '(F9.3, F9.3, F9.3)', ADVANCE='no') particles(i)%p%x, &
+           ! Store ALL the positions if it is time to do so
+           WRITE (2, '(F15.3, F15.3, F15.3)', ADVANCE='no') particles(i)%p%x, &
                 particles(i)%p%y, particles(i)%p%z
 	END DO
         WRITE (2, '(A)') "" ! Just to advance to the next line
@@ -158,8 +178,7 @@ PROGRAM ex2
   END DO
   ! End of main loop
 
-
-
+  CLOSE (UNIT=2)
 
 
   
