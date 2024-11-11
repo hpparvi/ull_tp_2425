@@ -66,11 +66,11 @@ logical FUNCTION Belongs (part, goal)
     TYPE(CELL), POINTER, intent(inout) :: goal
 
     IF (part%p%xx .GE. goal%range%rmin(1) .AND. &
-         part%p%xx .LE. goal%range%rmax(1) .AND. &
+         part%p%xx .LT. goal%range%rmax(1) .AND. &
          part%p%yy .GE. goal%range%rmin(2) .AND. &
-         part%p%yy .LE. goal%range%rmax(2) .AND. &
+         part%p%yy .LT. goal%range%rmax(2) .AND. &
          part%p%zz .GE. goal%range%rmin(3) .AND. &
-         part%p%zz .LE. goal%range%rmax(3)) THEN
+         part%p%zz .LT. goal%range%rmax(3)) THEN
        Belongs = .TRUE.
     ELSE
        Belongs = .FALSE.
@@ -360,12 +360,11 @@ logical FUNCTION Belongs (part, goal)
     INTEGER :: i, j, k
     REAL(real64) :: l, D, r2
     type(vector3d) :: rji
-
-    
     
     SELECT CASE (tree%TYPE)
-
+      
     CASE (1)
+      
        IF (goal .NE. tree%pos) THEN !checks it's not the particle w itself
           rji = normalize(tree%part%p - parts(goal)%p)
           r2 = distance(parts(goal)%p, tree%part%p)**2
@@ -382,7 +381,6 @@ logical FUNCTION Belongs (part, goal)
        D = distance(tree%center_of_mass, parts(goal)%p)
        IF (l/D < theta) THEN
           !! Si conglomerado, tenemos que ver si se cumple l/D < theta
-          
           aa(goal) = aa(goal) + tree%mass * rji / r2
        ELSE
           DO i = 1,2
