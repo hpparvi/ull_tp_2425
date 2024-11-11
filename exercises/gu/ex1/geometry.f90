@@ -1,12 +1,13 @@
 module geometry
+  use, intrinsic :: iso_fortran_env
   implicit none
 
   type point3d
-     real :: xx, yy, zz
+     real(real64) :: xx, yy, zz
   end type point3d
   
   type vector3d
-     real :: xx, yy, zz
+     real(real64) :: xx, yy, zz
   end type vector3d
 
   interface operator(+)
@@ -22,7 +23,7 @@ module geometry
   end interface operator(*)
 
   interface operator(/)
-     module procedure divvr
+     module procedure divvr, divvi
   end interface operator(/)
   
 
@@ -91,7 +92,7 @@ contains
 
   elemental type(vector3d) function mulrv(scalar1, vector1) !does a*v1
     type(vector3d), intent(in) :: vector1
-    real, intent(in)           :: scalar1
+    real(real64), intent(in)           :: scalar1
 
     mulrv%xx = vector1%xx * scalar1
     mulrv%yy = vector1%yy * scalar1
@@ -100,21 +101,31 @@ contains
 
   elemental type(vector3d) function mulvr(vector1, scalar1) !v1*a
     type(vector3d), intent(in) :: vector1
-    real, intent(in) :: scalar1
+    real(real64), intent(in) :: scalar1
 
     mulvr = mulrv(scalar1, vector1)
   end function mulvr
 
   elemental type(vector3d) function divvr(vector1, scalar1) !v1/a
     type(vector3d), intent(in) :: vector1
-    real, intent(in)           :: scalar1
+    real(real64), intent(in)           :: scalar1
 
     divvr%xx = vector1%xx / scalar1
     divvr%yy = vector1%yy / scalar1
     divvr%zz = vector1%zz / scalar1
   end function divvr
 
-  elemental real function dotprod(vector1, vector2) !(v1, v2)
+  elemental type(vector3d) function divvi(vector1, scalar1) !v1/a
+    type(vector3d), intent(in) :: vector1
+    integer, intent(in)           :: scalar1
+
+    divvi%xx = vector1%xx / scalar1
+    divvi%yy = vector1%yy / scalar1
+    divvi%zz = vector1%zz / scalar1
+  end function divvi
+  
+
+  elemental real(real64) function dotprod(vector1, vector2) !(v1, v2)
     type(vector3d), intent(in) :: vector1, vector2
 
     dotprod = vector1%xx * vector2%xx + &
@@ -122,7 +133,7 @@ contains
          &vector1%zz * vector2%zz
   end function dotprod
 
-  elemental real function distance(point1, point2)
+  elemental real(real64) function distance(point1, point2)
     type(point3d), intent(in) :: point1, point2
 
     distance = sqrt((point1%xx - point2%xx)**2 + &
@@ -130,13 +141,13 @@ contains
          &(point1%zz - point2%zz)**2)
   end function distance
 
-  elemental real function vecnorm(vector1) !norm(v1) for later use
+  elemental real(real64) function vecnorm(vector1) !norm(v1) for later use
     type(vector3d), intent(in) :: vector1
 
     vecnorm = sqrt(vector1%xx**2 + vector1%yy**2 + vector1%zz**2)
   end function vecnorm
 
-  elemental real function angle(vector1, vector2) !inner angle between v1, v2, in radians.
+  elemental real(real64) function angle(vector1, vector2) !inner angle between v1, v2, in radians.
     type(vector3d), intent(in) :: vector1, vector2
 
     angle = acos(dotprod(vector1, vector2)/(vecnorm(vector1)*vecnorm(vector2)))
@@ -151,7 +162,7 @@ contains
   elemental type(vector3d) function cross_product(vector1, vector2)
     type(vector3d), intent(in) :: vector1, vector2
 
-    cross_product%xx = vector1%xx * vector2%zz - vector1%zz * vector2%yy
+    cross_product%xx = vector1%yy * vector2%zz - vector1%zz * vector2%yy
     cross_product%yy = vector1%zz * vector2%xx - vector1%xx * vector2%zz
     cross_product%zz = vector1%xx * vector2%yy - vector1%yy * vector2%xx
   end function cross_product

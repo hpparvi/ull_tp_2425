@@ -1,86 +1,115 @@
-PROGRAM leapfrog
-  use particl
+PROGRAM leapfrog       !This program does the calculations for solving the N-body problem.
+  use iso_fortran_env  !This module ensures all variables are defined as 64-bit.
+  use geometry         !This module defines 3D vector and point operations for vector3d and point3d types.
+  use particle         !This module defines the particle structure with position, velocity, and mass.
   IMPLICIT NONE
 
+  INTEGER(int64) :: i, j, k
+  INTEGER(int64) :: n                                 !Number of bodies.
+  REAL(real64) :: dt, t_end, t, dt_out, t_out         !Time step, total simulation time, output time step.
+  REAL(real64) :: rs, r2, r3                          !Position, squared distance between two points and cubed distance.
+  type(vector3d) :: rji                               !Distance between two bodies.
   
-  INTEGER :: i,j,k
-  INTEGER :: n                                !número de cuerpos
-  REAL :: dt, t_end, t, dt_out, t_out         !paso temporal, ...
-  REAL :: rs, r2, r3                          !posicion sun??, r al cuadrado y al cubo
-  type(vector3d) :: rji                       !posición entre dos cuerpos
+  type(particle3d), allocatable :: p(:)               !Particles of the problem.
+  type(vector3d), allocatable :: a(:)                 !Their accelerations.
 
-  type(particle), allocatable :: p(:)         !particulas p tienen (%p, v, a, m)
 
-  print*, 'Por favor, introduzca el salto temporal: '
-  READ*, dt
-  print*, 'Por favor, introduza el dt_out: '
-  READ*, dt_out
-  print*, 'Por favor, introduzca el tiempo final: '
-  READ*, t_end
-  print*, 'Por favor, introduzca el numero de cuerpos: '
-  READ*, n
+  !Input and output files.
+  character(len=30) :: data                          
+  character(len=30) :: orbits
+
+  data = 'data_input.dat'                            
+  orbits = 'data_output.dat'
 
   
+  !Read the needed parameters.
+  OPEN(10, file=data, status='old', action='read')
+
+  READ(10, *) dt
+  print *, "The read value of the time step (dt) is ", dt
+
+  READ(10, *) dt_out
+  print *, "The read value of the output time step (dt_out) is", dt_out
+
+  READ(10, *) t_end
+  print *, "The read value of the total simulation time (t_end) is ", t_end
+
+  READ(10, *) n
+  print *, "The read value of the number of bodies (n) is ", n
+
+  !Allocate memory for particles.
   ALLOCATE(p(n))
+  ALLOCATE(a(n))
 
+  !Read positions, velocities, and masses of particles.
   DO i = 1, n
-     print*, 'Por favor, introduzca la posicion (tres numeros)',i,':'
-     read*, p(i)%p
+     READ(10, *) p(i)%p
+     print *, "The read value of the position of particle", i, "is:", p(i)%p
+
+     READ(10, *) p(i)%v
+     print *, "The read value of the velocity of particle", i, "is:", p(i)%v
+
+     READ(10, *) p(i)%m
+     print *, "The read value of the mass of particle", i, "is:", p(i)%m
   END DO
 
+  CLOSE(10)
+
+
+  !Initialize acceleration to zero.
   DO i = 1, n
-     print*, 'Por favor, introduzca la velocidad (tres numeros)',i,':'
-     read*,  p(i)%v
+     a(i) = vector3d(0.0, 0.0, 0.0)
   END DO
 
-  DO i = 1, n
-     print*, 'Por favor, introduzca la masa del cuerpo (un numero)',i,':'
-     read*, p(i)%m
-  END DO
-
-  do i = 1, n
-     p(i)%a = vector3d(0.0, 0.0, 0.0)
-  end do
   
+  OPEN(11, file=orbits, status='old', action='write')  !Open the file where output data will be written.
+
+
+  !Main code.
   DO i = 1, n
-     DO j = i+1, n
-        rji = distance(p(j)%p, p(i)%p)
-        r2 = modulus(rji)
-        r3 = r2 * SQRT(r2)
-        p(i)%a = p(i)%a .vsv. (p(j)%m .rpv. rji) .ver. r3
-        p(j)%a = p(j)%a .vrv. (p(i)%m .rpv. rji) .ver. r3
+     DO j = i + 1, n
+        rji = distance(p(i)%p, p(j)%p)
+        r2 = rji%x**2 + rji%y**2 + rji%z**2
+        r3 = r2 * sqrt(r2)
+        a(i) = a(i) + ((p(j)%m * rji) / r3)
+        a(j) = a(j) - ((p(i)%m * rji) / r3)
      END DO
   END DO
 
-  t = 0.0                                                  !new
+  t = 0.0                                                  
   t_out = 0.0
-  DO while (t <= t_end)                                    !changed bc fortran doesnt allow non-entire variables at do-loops
-     do i = 1, n                                           !added
-     p(i)%v = p(i)%v .vsv. (p(i)%a .vpr. (dt/2))
-     p(i)%p = p(i)%p .psv. (p(i)%v .vpr. dt)
-     p(i)%a = vector3d(0.0, 0.0, 0.0)
-     end do
+  DO WHILE (t <= t_end)                                    
+     DO i = 1, n                                           
+        p(i)%v = p(i)%v + (a(i) * (dt / 2))
+        p(i)%p = p(i)%p + (p(i)%v * dt)
+        a(i) = vector3d(0.0, 0.0, 0.0)
+     END DO
+
      DO i = 1, n
-        DO j = i+1, n
-        rji = distance(p(j)%p, p(i)%p)
-        r2 = modulus(rji)
-        r3 = r2 * SQRT(r2)
-        p(i)%a = p(i)%a .vsv. (p(j)%m .rpv. rji) .ver. r3
-        p(j)%a = p(j)%a .vrv. (p(i)%m .rpv. rji) .ver. r3
+        DO j = i + 1, n
+           rji = distance(p(i)%p, p(j)%p)
+           r2 = rji%x**2 + rji%y**2 + rji%z**2
+           r3 = r2 * sqrt(r2)
+           a(i) = a(i) + ((p(j)%m * rji) / r3)
+           a(j) = a(j) - ((p(i)%m * rji) / r3)
         END DO
      END DO
-     do i = 1, n                                            !added
-      p(i)%v = p(i)%v .vsv. (p(i)%a .vpr. (dt/2))
-     end do
+
+     DO i = 1, n                                            
+        p(i)%v = p(i)%v + (a(i) * (dt / 2))
+     END DO
    
      t_out = t_out + dt
-      IF (t_out >= dt_out) THEN
-         DO i = 1,n
-            PRINT*, p(i)%p
-         END DO
+     IF (t_out >= dt_out) THEN
+        DO i = 1, n
+           WRITE(11, '(E12.6, 3X, E12.6, 3X, E12.6)') p(i)%p%x, p(i)%p%y, p(i)%p%z  !Write output data.
+        END DO
 
-         t_out = 0.0
-      END IF
+        t_out = 0.0
+     END IF
+     t = t + dt
   END DO
+
+  CLOSE(11)
   
 END PROGRAM leapfrog
