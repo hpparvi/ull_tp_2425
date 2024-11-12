@@ -4,33 +4,32 @@ program e2
   use particle
   IMPLICIT NONE
   
-  INTEGER :: i,j,k,n, rc
+  INTEGER :: i,j,k,n,rc
   REAL (real64):: dt, t_end, t, dt_out, t_out
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles !p,v,m position, velocity and mass of each particles
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
-  CHARACTER(len=*), PARAMETER :: filename = 'particle_position.dat', outname = 'results.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'results.dat' ! i.c. input/output files names
   
   TYPE RANGE
-    REAL, DIMENSION(3) :: min_val,max_val ! it should be a vector, shouldn't be? REAL, DIMENSION(3)
+    REAL, DIMENSION(3) :: min_val,max_val ! it should be a vector, shouldn't be?
   END TYPE RANGE
   
   ! new type cell as a pointer
   TYPE CPtr
-    TYPE(CELL), POINTER :: ptr 
+    TYPE(CELL), POINTER :: ptr !pointer of the 'target' cell
   END TYPE CPtr
  
   TYPE CELL
     TYPE (RANGE) :: range
-    TYPE(point3d) :: part !(particle position for the cell)
+    TYPE(particle3d) :: part!(particle info in the cell)
     INTEGER :: pos  !! id of the particle
     INTEGER :: type !! 0 = no particle; 1 = particle; 2 = conglomerado
-    REAL (real64) :: mass 
-    TYPE(point3d) :: c_o_m ! center of mass
-    TYPE (CPtr), DIMENSION(2,2,2) :: subcell  
+    TYPE(point3d) :: c_o_m ! center of mass of that cell
+    TYPE (CPtr), DIMENSION(2,2,2) :: subcell ! subcells in main cell
+    ! that contains cells as well 
   END TYPE CELL
 
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
-  
   
   
   !! Lectura de datos
@@ -50,7 +49,6 @@ program e2
           & particles(i)%v%x, particles(i)%v%y, particles(i)%v%z
   END DO
   
-  print *, n
   
   !! Inicialización head node
   !!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -61,9 +59,11 @@ program e2
   
   !! Creación del árbol inicial
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  print*, n
   DO i = 1,n
-    CALL Find_Cell(head,temp_cell,particles(i)%p) 
-    CALL Place_Cell(temp_cell,particles(i)%p,i)
+    CALL Find_Cell(head,temp_cell,particles(i)) 
+    CALL Place_Cell(temp_cell,particles(i),i)
+
   END DO
 
   CALL Borrar_empty_leaves(head)
@@ -93,12 +93,12 @@ program e2
 !! y reinicializar el árbol
       CALL Borrar_tree(head) !remove previous tree
       CALL Calculate_ranges(head) !calculate head range again
-      head%type = 0 
-      CALL Nullify_Pointers(head)
+      head%type = 0 !return to 0 head type
+      CALL Nullify_Pointers(head) 
       
       DO i = 1,n
-        CALL Find_Cell(head,temp_cell,particles(i)%p)
-        CALL Place_Cell(temp_cell,particles(i)%p,i)
+        CALL Find_Cell(head,temp_cell,particles(i))
+        CALL Place_Cell(temp_cell,particles(i),i)
       END DO
       
       CALL Borrar_empty_leaves(head)
@@ -135,23 +135,22 @@ program e2
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE Calculate_Ranges(goal)
     TYPE(CELL), POINTER :: goal
-    REAL, DIMENSION(3):: mins,maxs,medios !should be vector? 
+    REAL(real64), DIMENSION(3):: mins,maxs,medios !should be vectors? 
     REAL (real64) :: span
-    !REAL(real64), DIMENSION(3) :: maxs_mins 
-    mins(1) = MINVAL(particles%p%x,DIM=1) 
-    maxs(1) = MAXVAL(particles%p%x,DIM=1)
-    mins(2) = MINVAL(particles%p%y,DIM=1) 
-    maxs(2) = MAXVAL(particles%p%y,DIM=1)
-    mins(3) = MINVAL(particles%p%z,DIM=1) 
-    maxs(3) = MAXVAL(particles%p%z,DIM=1)
+
+    mins(1) = MINVAL(particles%p%x) 
+    maxs(1) = MAXVAL(particles%p%x)
+    mins(2) = MINVAL(particles%p%y) 
+    maxs(2) = MAXVAL(particles%p%y)
+    mins(3) = MINVAL(particles%p%z) 
+    maxs(3) = MAXVAL(particles%p%z)
     
 ! Al calcular span le sumo un 10% para que las
 ! particulas no caigan justo en el borde
-    !maxs_mins = (/maxs%x - mins%x, maxs%y - mins%y, maxs%z - mins%z/)
+
     span = MAXVAL(maxs - mins) * 1.1
-    !span_vector = span*vector3d(1.,1.,1.) 
-    medios = (maxs + mins)/2. ! and the addition?
-    goal%range%min_val = medios - span/2. ! doesnt work if use 2. (as a real)
+    medios = (maxs + mins)/2. 
+    goal%range%min_val = medios - span/2.  
     goal%range%max_val = medios + span/2. 
   END SUBROUTINE Calculate_Ranges
 
@@ -176,24 +175,25 @@ program e2
 !! todo el árbol ha sido ya creado.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   RECURSIVE SUBROUTINE Find_Cell(root,goal,part)
-    type(point3d) :: part
+    type(particle3d) :: part
     TYPE(CELL),POINTER :: root,goal,temp
     INTEGER :: i,j,k
     SELECT CASE (root%type)
-    CASE (2)
-      out: DO i = 1,2
-   	DO j = 1,2
-	  DO k = 1,2
-	    IF (Belongs(part,root%subcell(i,j,k)%ptr)) THEN
-	      CALL Find_Cell(root%subcell(i,j,k)%ptr,temp,part)
-	      goal => temp
-	      EXIT out
-	    END IF
+      CASE (2)
+        out: DO i = 1,2
+   	  DO j = 1,2
+	    DO k = 1,2
+	      IF (Belongs(part,root%subcell(i,j,k)%ptr)) THEN
+	        CALL Find_Cell(root%subcell(i,j,k)%ptr,temp,part)
+	        goal => temp
+	        EXIT out
+	      END IF
+	    END DO
 	  END DO
-	END DO
-      END DO out
-    CASE DEFAULT
-    goal => root
+        END DO out
+    
+      CASE DEFAULT
+        goal => root
     END SELECT
   END SUBROUTINE Find_Cell
   
@@ -212,8 +212,10 @@ program e2
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   RECURSIVE SUBROUTINE Place_Cell(goal,part,n)
     TYPE(CELL),POINTER :: goal,temp
-    TYPE(point3d) :: part
+    TYPE(particle3d) :: part
     INTEGER :: n
+    print *, goal%type
+    print *, goal%pos
     SELECT CASE (goal%type)
     
     CASE (0)
@@ -249,7 +251,7 @@ program e2
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE Crear_Subcells(goal)
     TYPE(CELL), POINTER :: goal
-    TYPE(point3d) :: part
+    TYPE(particle3d) :: part
     INTEGER :: i,j,k,n
     INTEGER, DIMENSION(3) :: octant !stays as an array because just aim which octant is
     part = goal%part
@@ -309,18 +311,20 @@ program e2
 !! Utilizada por FIND_CELL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   FUNCTION Belongs (part,goal)
-    TYPE(point3d) :: part
+    TYPE(particle3d) :: part
     TYPE(CELL), POINTER :: goal
     LOGICAL :: Belongs
-    IF ((part%x >= goal%range%min_val(1)) .AND. &
-      (part%x < goal%range%max_val(1)) .AND. &!part(1) <= goal%range%max(1) .AND. & (the same for (2) et (3))
-      (part%y >= goal%range%min_val(2)) .AND. &! change bc if not if a particle is in the middle u have issues to assign a subcell
-      (part%y < goal%range%max_val(2)) .AND. &
-      (part%z >= goal%range%min_val(3)) .AND. &
-      (part%z < goal%range%max_val(3))) THEN
+    IF ((part%p%x >= goal%range%min_val(1)) .AND. &
+      (part%p%x < goal%range%max_val(1)) .AND. &
+      (part%p%y >= goal%range%min_val(2)) .AND. &! change bc if not if a particle is in the middle u have issues to assign a subcell
+      (part%p%y < goal%range%max_val(2)) .AND. &
+      (part%p%z >= goal%range%min_val(3)) .AND. &
+      (part%p%z < goal%range%max_val(3))) THEN
       Belongs = .TRUE.
+      print *, 'found it'
     
     ELSE
+    print *, 'not here bro'
       Belongs = .FALSE.
     END IF
   END FUNCTION Belongs
@@ -341,22 +345,22 @@ program e2
     TYPE(CELL), POINTER :: goal
     INTEGER, DIMENSION(3) :: octant
     INTEGER, DIMENSION(3) :: Calcular_Range, valor_medio
-    valor_medio = (goal%range%min_val + goal%range%max_val) / 2
+    valor_medio = (goal%range%min_val + goal%range%max_val) / 2.
 
     SELECT CASE (what)
     CASE (0)
-    WHERE (octant == 1)
-      Calcular_Range = goal%range%min_val
-    ELSEWHERE
-      Calcular_Range = valor_medio
-    END WHERE
+      WHERE (octant == 1)
+        Calcular_Range = goal%range%min_val
+      ELSEWHERE
+        Calcular_Range = valor_medio
+      END WHERE
     
     CASE (1)
-    WHERE (octant == 1)
-      Calcular_Range = valor_medio
-    ELSEWHERE
-      Calcular_Range = goal%range%max_val
-    END WHERE
+      WHERE (octant == 1)
+        Calcular_Range = valor_medio
+      ELSEWHERE
+        Calcular_Range = goal%range%max_val
+      END WHERE
     END SELECT
   END FUNCTION Calcular_Range
 
@@ -423,11 +427,11 @@ program e2
     INTEGER :: i,j,k
     REAL(real64) :: mass
     type(point3d) :: c_o_m
-    goal%mass = 0
+    goal%part%m = 0
     goal%c_o_m = point3d(0.,0.,0.)
     SELECT CASE (goal%type)
     CASE (1) !only one particle
-    goal%mass = particles(goal%pos)%m !is the mass of the particle in the cell 
+    goal%part%m = particles(goal%pos)%m !is the mass of the particle in the cell 
     goal%c_o_m= particles(goal%pos)%p !is position of the particle
     CASE (2) !in case of a conglomerate
     DO i = 1,2
@@ -435,14 +439,14 @@ program e2
         DO k = 1,2
           IF (ASSOCIATED(goal%subcell(i,j,k)%ptr)) THEN
             CALL Calculate_masses(goal%subcell(i,j,k)%ptr)
-            mass = goal%mass 
-            goal%mass = goal%mass + goal%subcell(i,j,k)%ptr%mass
+            mass = goal%part%m 
+            goal%part%m = goal%part%m + goal%subcell(i,j,k)%ptr%part%m
 	    goal%c_o_m%x = (mass * goal%c_o_m%x + &
-	    goal%subcell(i,j,k)%ptr%mass * goal%subcell(i,j,k)%ptr%c_o_m%x) / goal%mass
+	    goal%subcell(i,j,k)%ptr%part%m * goal%subcell(i,j,k)%ptr%c_o_m%x) / goal%part%m
 	    goal%c_o_m%y = (mass * goal%c_o_m%y + &
-	    goal%subcell(i,j,k)%ptr%mass * goal%subcell(i,j,k)%ptr%c_o_m%y) / goal%mass
+	    goal%subcell(i,j,k)%ptr%part%m * goal%subcell(i,j,k)%ptr%c_o_m%y) / goal%part%m
 	    goal%c_o_m%z = (mass * goal%c_o_m%z + &
-	    goal%subcell(i,j,k)%ptr%mass * goal%subcell(i,j,k)%ptr%c_o_m%z) / goal%mass
+	    goal%subcell(i,j,k)%ptr%part%m * goal%subcell(i,j,k)%ptr%c_o_m%z) / goal%part%m
 	  END IF
 	END DO
       END DO
@@ -515,7 +519,7 @@ program e2
     IF (l/r < 1.) THEN
 !! Si conglomerado, tenemos que ver si se cumple l/D < theta
       !r3 = r**2 * D 
-      acc(goal) = acc(goal) + tree%mass * rji / r**3
+      acc(goal) = acc(goal) + tree%part%m * rji / r**3
       
     ELSE
       DO i = 1,2
