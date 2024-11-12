@@ -113,7 +113,7 @@ PROGRAM ex2
      a(i)%y = 0. 
      a(i)%z = 0.
   END DO
-  
+
   CALL Calculate_forces(head, particles, a)
 
 
@@ -141,6 +141,7 @@ PROGRAM ex2
      CALL Nullify_Pointers(head)
 
      ! This updates the tree
+     !here
      DO i = 1,n
         CALL Find_Cell(head,temp_cell, particles(i))
         CALL Place_Cell(temp_cell, particles(i), i)
@@ -152,6 +153,7 @@ PROGRAM ex2
      CALL Calculate_masses(head, particles)
 
      ! Set all accelerations at 0
+     !here (not too necessary)
      DO i = 1, n
         a(i)%x = 0.
         a(i)%y = 0. 
