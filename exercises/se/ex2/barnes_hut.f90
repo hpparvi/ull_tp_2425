@@ -248,11 +248,11 @@ CONTAINS
     LOGICAL :: Belongs
 
     IF ((part%p%x >= goal%range%min_val(1)) .AND. &
-         (part%p%x <= goal%range%max_val(1)) .AND. &
+         (part%p%x < goal%range%max_val(1)) .AND. &
          (part%p%y >= goal%range%min_val(2)) .AND. &
-         (part%p%y <= goal%range%max_val(2)) .AND. &
+         (part%p%y < goal%range%max_val(2)) .AND. &
          (part%p%z >= goal%range%min_val(3)) .AND. &
-         (part%p%z <= goal%range%max_val(3))) THEN
+         (part%p%z < goal%range%max_val(3))) THEN
 
        Belongs = .TRUE.
 
