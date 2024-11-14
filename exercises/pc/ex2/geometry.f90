@@ -34,6 +34,18 @@ module geometry
 
 contains
 
+  !Function to convert a 3D point into a 3D vector
+  pure type(vector3d) function point_to_vector(p)
+    type(point3d), intent(in) :: p
+    point_to_vector = vector3d(p%x, p%y, p%z)
+  end function point_to_vector
+
+  !Function to convert a 3D vector into a 3D point
+  pure type(point3d) function vector_to_point(v)
+    type(vector3d), intent(in) :: v
+    vector_to_point = point3d(v%x, v%y, v%z)
+  end function vector_to_point
+
   !Function to add a 3D vector to a 3D point, resulting in a new point
   pure type(point3d) function sumvp(v, p)
     type(vector3d), intent(in) :: v
