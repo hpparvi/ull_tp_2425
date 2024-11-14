@@ -1,4 +1,5 @@
 PROGRAM input_data
+  USE geometry !Importing the geometry module
   USE particle !Importing the particle module 
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
   IMPLICIT NONE
@@ -62,13 +63,13 @@ PROGRAM input_data
      DO
         CALL random_number(ry)
         p(i)%p%y = ry
-        IF ((rx**2 + ry**2) .LE. 1) EXIT
+        IF ((NORM(vector3d(rx, ry, 0))**2) .LE. 1) EXIT
      END DO
      
      DO
         CALL random_number(rz)
         p(i)%p%z = rz
-        IF ((rx**2 + ry**2 + rz**2) .LE. 1) EXIT
+        IF ((NORM(vector3d(rx, ry, rz)))**2 .LE. 1) EXIT
      END DO
      
      WRITE(12, "(I3, 7X, 7ES12.4)") i, p(i)%m, rx, ry, rz, 0.0, 0.0, 0.0 !Write the mass and the current position and velocity of each particle to the input file
