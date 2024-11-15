@@ -1,0 +1,22 @@
+;; Object ex2_Oscar
+;; EDE Project Files are auto generated: Do Not Edit
+(ede-proj-project "ex2_Oscar"
+  :file "Project.ede"
+  :name "ex2_Oscar"
+  :targets
+  (list
+    (ede-proj-target-makefile-program "ex2.f90"
+      :object-name "ex2.f90"
+      :name "ex2.f90"
+      :path ""
+      :source '("ex2.f90" "geometry.f90" "init_conds.f90" "particles.f90")
+      :configuration-variables nil))
+  :configurations '("debug" "release")
+  :object-name "ex2_Oscar"
+  :makefile-type Makefile
+  :configuration-variables nil
+  :inference-rules
+  (list
+    (ede-makefile-rule "ede-makefile-rule-1ff5534f565a"
+      :target "ex2.f90"
+      :dependencies "geometry.f90 particles.f90")))
