@@ -1,0 +1,17 @@
+FC = gfortran
+FCFLAGS = -c
+OBJECTS = geometry.o particle.o input_data.o
+
+all: input_data
+
+input_data: $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
+
+%.o: %.f90
+	$(FC) $(FCFLAGS) $<
+
+clean:
+	del /Q *.o *.mod
+
+test: input_data
+	input_data
