@@ -39,7 +39,6 @@ module tree_algorithm
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles	
     REAL(real64), DIMENSION(3):: mins,maxs,medios !should be vectors? 
     REAL (real64) :: span
-    
     mins(1) = MINVAL(particles%p%x, DIM=1) 
     maxs(1) = MAXVAL(particles%p%x, DIM=1)
     mins(2) = MINVAL(particles%p%y, DIM=1) 
@@ -53,7 +52,10 @@ module tree_algorithm
     span = MAXVAL(maxs - mins) * 1.1
     medios = (maxs + mins)/2. 
     goal%range%min_val = medios - span/2.  
-    goal%range%max_val = medios + span/2. 
+    goal%range%max_val = medios + span/2.
+    print *, goal%range%max_val
+    print *, goal%range%min_val 
+    
   END SUBROUTINE Calculate_Ranges
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -98,6 +100,7 @@ module tree_algorithm
       CASE DEFAULT
         goal => root
     END SELECT
+    print *, goal%type
   END SUBROUTINE Find_Cell
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -251,7 +254,7 @@ module tree_algorithm
     INTEGER :: what
     TYPE(CELL), POINTER :: goal
     INTEGER, DIMENSION(3) :: octant
-    INTEGER, DIMENSION(3) :: Calcular_Range, valor_medio
+    REAL(real64), DIMENSION(3) :: Calcular_Range, valor_medio
     valor_medio = (goal%range%min_val + goal%range%max_val) / 2.0
 
     SELECT CASE (what)
@@ -410,7 +413,7 @@ module tree_algorithm
     TYPE(particle3d), DIMENSION(:), INTENT(in)  :: particles
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
     INTEGER :: i,j,k,goal
-    REAL(real64) :: l,r, theta = 1.
+    REAL(real64) :: l,r,r3, theta = 1.
     TYPE(vector3d) :: rji
     
     SELECT CASE (tree%type)
@@ -420,7 +423,7 @@ module tree_algorithm
           r = distance(tree%c_o_m, particles(goal)%p)
     !r2 = SUM(rji**2) !
     !r3 = r2 * SQRT(r2)
-          acc(goal) = acc(goal) + particles(tree%pos)%m * rji / r**3
+          acc(goal) = acc(goal) + particles(tree%pos)%m * rji / (r**3)
         END IF
     
       CASE (2)
@@ -435,8 +438,8 @@ module tree_algorithm
     !D = r SQRT(r2)
         IF (l/r < theta) THEN
 !! Si conglomerado, tenemos que ver si se cumple l/D < theta
-      !r3 = r**2 * D 
-        acc(goal) = acc(goal) + tree%part%m * rji / r**3
+        r3 = r**3
+        acc(goal) = acc(goal) + tree%part%m * rji / r3
       
         ELSE
           DO i = 1,2

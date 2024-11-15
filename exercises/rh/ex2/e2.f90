@@ -1,4 +1,4 @@
-program e2 
+program e2  
   use, intrinsic ::  iso_fortran_env
   use geometry
   use particle
@@ -40,7 +40,6 @@ program e2
   
   !! Creación del árbol inicial
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  print*, n
   DO i = 1,n
     CALL Find_Cell(head,temp_cell,particles(i)) 
     CALL Place_Cell(temp_cell,particles(i),i)
@@ -54,8 +53,8 @@ program e2
   !! Calcular aceleraciones iniciales
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     acc = vector3d(0.0,0.0,0.0)
-
     CALL Calculate_forces(head,particles,acc)
+    print *, acc
     
   ! open the output file 
   OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
@@ -68,7 +67,7 @@ program e2
   !!!!!!!!!!!!!!!!!!
     t_out = 0.0
     DO  WHILE (t <= t_end)
-      particles%v = particles%v + acc * (dt/2)
+      particles%v = particles%v + acc * (dt/2.)
       particles%p = particles%p + particles%v * dt
 
 !! Las posiciones han cambiado, por lo que tenemos que borrar
@@ -88,7 +87,7 @@ program e2
 
       acc = vector3d(0.0,0.0,0.0)
       CALL Calculate_forces(head,particles,acc)
-      
+      print *, acc
       particles%v = particles%v + acc * (dt/2.)
       
       t_out = t_out + dt
