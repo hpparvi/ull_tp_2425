@@ -1,12 +1,14 @@
 MODULE barnes
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module
-  USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
   IMPLICIT NONE
 
   !Define integer variables for loop indexing
-  INTEGER(INT64) :: k
+  INTEGER(INT64) :: i, j, k
+
+  !Define real variables for squared and cubed distances
+  REAL(REAL64) :: r2, r3
 
   REAL(REAL64), PARAMETER :: theta = 1
 
@@ -27,20 +29,17 @@ MODULE barnes
      TYPE (CPtr), DIMENSION(2, 2, 2) :: subcell
   END TYPE CELL
 
-  
 CONTAINS
   
   SUBROUTINE Calculate_Ranges(goal, p)
     TYPE(CELL), POINTER :: goal
-    REAL(REAL64), DIMENSION(3) :: coords, mins, maxs, medios
+    REAL(REAL64), DIMENSION(3) :: mins, maxs, medios
     REAL(REAL64) :: span
-    TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
+    TYPE(particle3d), INTENT(IN) :: p(:) !Particles
 
-    !Extracts x, y, z coordinates from the goal%p%p 3D point
-    coords = [p%p%x, p%p%y, p%p%z]
-
-    mins = MINVAL(coords)
-    maxs = MAXVAL(coords)
+    
+    mins = [MINVAL([p(:)%p%x]), MINVAL([p(:)%p%y]), MINVAL([p(:)%p%z])]
+    maxs = [MAXVAL([p(:)%p%x]), MAXVAL([p(:)%p%y]), MAXVAL([p(:)%p%z])]
     span = MAXVAL(maxs - mins) * 1.1
     
     medios = (maxs + mins) * 0.5
@@ -53,6 +52,7 @@ CONTAINS
     TYPE(CELL), POINTER :: root, goal, temp
     TYPE(particle3d), INTENT(INOUT) :: part !Particles
 
+   
     SELECT CASE (root%type)
     CASE (2)
        out: DO i = 1, 2
@@ -78,7 +78,7 @@ CONTAINS
   RECURSIVE SUBROUTINE Place_Cell(goal, part, n)
     TYPE(CELL), POINTER :: goal, temp
     TYPE(particle3d), INTENT(INOUT) :: part !Particles
-    INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
+    INTEGER(INT64), INTENT(IN) :: n !Number of bodies
     
     SELECT CASE (goal%type)
     CASE (0)
@@ -100,7 +100,7 @@ CONTAINS
   SUBROUTINE Crear_Subcells(goal, part, n)
     TYPE(CELL), POINTER :: goal
     TYPE(particle3d), INTENT(INOUT) :: part !Particles
-    INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
+    INTEGER(INT64), INTENT(IN) :: n !Number of bodies
     INTEGER, DIMENSION(3) :: octant
     
     part = goal%part
@@ -255,7 +255,7 @@ CONTAINS
 
   SUBROUTINE Calculate_forces(head, n, p, rji)
     TYPE(CELL), POINTER :: head
-    INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
+    INTEGER(INT64), INTENT(IN) :: n !Number of bodies
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
     
@@ -303,5 +303,3 @@ CONTAINS
   END SUBROUTINE Calculate_forces_aux
 
 END MODULE barnes
-
-

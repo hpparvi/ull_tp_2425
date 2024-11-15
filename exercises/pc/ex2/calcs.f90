@@ -1,14 +1,9 @@
 module calcs
   use geometry !Importing the geometry module
   use particle !Importing the particle module
+  use barnes   !Importing the barnes module where the Barnes-Hut algorithm is defined
   use iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
   implicit none
-
-  !Define integer variables for loop indexing
-  integer(int64) :: i, j
-  
-  !Define real variables for squared and cubed distances
-  real(real64) :: r2, r3
 
 contains
 
