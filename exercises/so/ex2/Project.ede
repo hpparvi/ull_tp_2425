@@ -1,0 +1,10 @@
+;; Object ex2_Oscar
+;; EDE Project Files are auto generated: Do Not Edit
+(ede-proj-project "ex2_Oscar"
+  :file "Project.ede"
+  :name "ex2_Oscar"
+  :targets nil
+  :configurations '("debug" "release")
+  :object-name "ex2_Oscar"
+  :makefile-type Makefile
+  :configuration-variables '("debug" (("DEBUG" . "1"))))
