@@ -1,4 +1,5 @@
 MODULE barnes_hut
+  !$ USE omp_lib  ! For OpenMP library
   USE, INTRINSIC :: iso_fortran_env ! for 64-bit reals
   USE geometry
   USE particle
@@ -138,19 +139,19 @@ CONTAINS
     INTEGER :: n
 
     SELECT CASE (goal%type)
-       ! If there was no particle, great!
+    ! If there was no particle, great!
     CASE (0)
        goal%type = 1   
        goal%part = part
        goal%pos  = n
 
-       ! If there was already a particle, create subcells
+    ! If there was already a particle, create subcells
     CASE (1)
        CALL Create_Subcells(goal)
        CALL Find_Cell(goal,temp,part)
        CALL Place_Cell(temp,part,n)
 
-       ! If there is more than one particle, Find_Cell made a mistake
+    ! If there is more than one particle, Find_Cell made a mistake
     CASE DEFAULT
        print*,"SHOULD NOT BE HERE. ERROR!"
 
@@ -274,7 +275,7 @@ CONTAINS
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   FUNCTION Calculate_Range (what,goal,octant)
-    INTEGER :: what,n
+    INTEGER :: what
     TYPE(CELL), POINTER :: goal
     INTEGER, DIMENSION(3) :: octant
     REAL(real64), DIMENSION(3) :: Calculate_Range, valor_medio
@@ -448,12 +449,25 @@ CONTAINS
     INTEGER :: i,n
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
+    ! OpenMP-related variables
+    INTEGER :: tid=1, nt=0
 
     n = SIZE(particles)
 
+
+    !$omp parallel private(i, tid, nt) shared(head, particles, a)
+    !$ nt = omp_get_num_threads()
+    !$ tid = omp_get_thread_num()
+
+    PRINT*, "Thread", tid, "of", nt
+    PRINT*, ""
+    
+    !$omp do
     DO i = 1,n
        CALL Calculate_forces_aux(i, head, particles, a)
     END DO
+    !$omp end do
+    !$omp end parallel
 
   END SUBROUTINE Calculate_forces
 

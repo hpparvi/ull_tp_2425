@@ -1,5 +1,6 @@
 PROGRAM ex2
   ! USE STATEMENTS
+  !$ USE omp_lib ! For OpenMP library
   USE, INTRINSIC :: iso_fortran_env ! for 64-bit reals
   USE geometry
   USE particle
@@ -34,7 +35,8 @@ PROGRAM ex2
   ! To read the necessary inputs from a file
   INTEGER :: openstatus_input, openstatus_output, readstatus
   CHARACTER(13) :: datafile="input.txt"
-  CHARACTER(11) :: resultfile='output.txt'
+  CHARACTER(11) :: resultfile="output.txt"
+
 
   TYPE(cell), POINTER :: head, temp_cell
 
@@ -141,9 +143,8 @@ PROGRAM ex2
      CALL Nullify_Pointers(head)
 
      ! This updates the tree
-     !here
      DO i = 1,n
-        CALL Find_Cell(head,temp_cell, particles(i))
+        CALL Find_Cell(head, temp_cell, particles(i))
         CALL Place_Cell(temp_cell, particles(i), i)
      END DO
 
