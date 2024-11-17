@@ -11,7 +11,7 @@ ex2: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
 
 clean:
-	del /Q *.o *.mod
+	del /Q *.o *.mod ex2.exe
 
 test: ex2
 	ex2
