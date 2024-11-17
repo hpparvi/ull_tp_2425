@@ -1,0 +1,17 @@
+0.001    ! dt
+0.1    ! dt_out
+100   ! t_end
+3      ! número de cuerpos
+
+0.9700436 -0.24308753 0.0   ! Posición del cuerpo 1
+0.466203685 0.43236573 0.0   ! Velocidad del cuerpo 1
+1.0           ! Masa del cuerpo 1
+
+-0.9700436 0.24308753 0.0   ! Posición del cuerpo 2
+0.466203685 0.43236573 0.0  ! Velocidad del cuerpo 2
+1.0           ! Masa del cuerpo 2
+
+
+0.0 0.0 0.0  ! Posición del cuerpo 2
+-0.93249737 -0.86473146 0.0  ! Velocidad del cuerpo 2
+1.0           ! Masa del cuerpo 2
