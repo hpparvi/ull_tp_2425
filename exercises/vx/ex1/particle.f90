@@ -1,12 +1,12 @@
-module particl
-  use geometry
+module particle        !This module defines the particle structure with position, velocity and mass.
+  use iso_fortran_env  !This module ensures all variables are defined as 64-bit.
+  use geometry         !This module defines 3D vector and point operations for vector3d and point3d types.
   implicit none
   
-  type ::  particle
-     type(point3d) :: p
-     type(vector3d) :: v  !vector3d instead of 2d
-     type(vector3d) :: a  !needed for next part
-     real :: m
-  end type particle
+  type ::  particle3d     !Definition of the particle.
+     type(point3d) :: p   !Postion.
+     type(vector3d) :: v  !Velocity.
+     real(real64) :: m    !Mass.
+  end type particle3d
 
-end module particl
+end module particle
