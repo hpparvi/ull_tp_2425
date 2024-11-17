@@ -7,7 +7,7 @@ PROGRAM = ex1.f90
 
 OBJECTS = $(MODULES:.f90=.o) $(PROGRAM:.f90=.o)
 
-EXECUTABLE = leapfrog
+EXECUTABLE = ex1
 
 all: $(EXECUTABLE)
 
