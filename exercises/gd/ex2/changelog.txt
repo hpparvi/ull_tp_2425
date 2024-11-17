@@ -1,0 +1,7 @@
+[v0.7 Initial release]
+	* Import the Gemometry and Particles module
+	* Fixed a bug in the function divpr
+	* Created the Particulas module
+	* Created the main program ex2
+	* Created the makefile
+	* Add python rutine for plotting
