@@ -1,5 +1,5 @@
 PROGRAM particulas
-  USE particle
+  USE EX2_deriv_types
   USE geometry
   IMPLICIT NONE
   

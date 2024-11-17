@@ -5,3 +5,11 @@
 	* Created the main program ex2
 	* Created the makefile
 	* Add python rutine for plotting
+	
+[v0.8]
+	* Change name of Particles module to EX2_deriv_types
+	* Add range, Cell and Cptr to EX2_deriv_types.
+	* Create Barnes_Hut module.
+	* Organice main program ex2
+	* Change output.dat format
+	* Change Makefile to create Clean_all that delete files.
