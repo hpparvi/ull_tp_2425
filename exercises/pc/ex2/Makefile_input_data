@@ -11,7 +11,7 @@ input_data: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
 
 clean:
-	del /Q *.o *.mod
+	del /Q *.o *.mod input_data.exe
 
 test: input_data
 	input_data
