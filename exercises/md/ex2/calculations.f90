@@ -4,7 +4,6 @@ module calculations
     use particle
 
     implicit none
-    real(real64), parameter :: theta = 1.0
 
     type range 
     real(real64), dimension(3) :: min, max
@@ -237,22 +236,23 @@ module calculations
             end select
         end subroutine calculate_masses
 
-        subroutine calculate_forces(particles, head)
+        subroutine calculate_forces(particles, head, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: head
             integer :: i, n
+            real(real64) :: theta
             
             n = size(particles)
             do i = 1, n
-                call calculate_forces_aux(particles, i, head)
+                call calculate_forces_aux(particles, i, head, theta)
             end do
         end subroutine calculate_forces
 
-        recursive subroutine calculate_forces_aux(particles, goal, tree)
+        recursive subroutine calculate_forces_aux(particles, goal, tree, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: tree
             integer :: i, j, k, goal
-            real(real64) :: l, D, r2, r3
+            real(real64) :: l, D, r2, r3, theta
             type(vector3d) :: rji
 
             select case (tree%type)
@@ -276,7 +276,7 @@ module calculations
                         do j = 1,2
                             do k = 1,2
                                 if (associated(tree%subcell(i,j,k)%ptr)) then
-                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr)
+                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr, theta)
                                 end if
                             end do
                         end do

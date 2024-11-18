@@ -1,38 +1,32 @@
 ! Simulation name:
-template
+3part_funny4
 
 ! Time step:
 1E-3
 
 ! Output time step:
-0.1
+0.5
 
 ! Final time:
-5
+100
 
 ! Number of particles:
-5
+3
 
 ! Theta:
-1.0
+0.01
 
 ! Positions (x,y,z) (each line, a particle):
-0, 0, 0
-0.7, 0, 0
-1, 0, 0
-0, 1.5, 0
-1, 0.5, 0.05
+-0.7283341038, 0, 0
+2.8989177778, 0, 0
+-2.1705836741, 0, 0
 
 ! Velocity (vx, vy, vz) (each line, a particle):
-0, 0, 0
-0, 11.95, 0
-0, 10, 0
--8.16497, 0, 0
--8.455, 4.228, 0
+0, 0.8475982451, 0
+0, -0.0255162097, 0
+0, -0.8220820354, 0
 
 ! Mass (each line, a particle):
-100
-0.000001
-0.000001
-0.000001
-0.000001
+1
+1
+1

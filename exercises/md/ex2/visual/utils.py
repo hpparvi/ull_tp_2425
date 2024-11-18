@@ -36,8 +36,8 @@ def generate_colors(N, cmap='jet'):
 
 # To read the data from the output file
 def read_data(file):
-    if '.txt' not in file:
-        file += '.txt'
+    if '.dat' not in file:
+        file += '.dat'
     if 'output' not in file:
         file = '../output/' + file
     data = np.loadtxt(file)
@@ -63,6 +63,7 @@ def read_input_file(filename):
     sim_info['output_time_step'] = float(data[2].strip())
     sim_info['final_time'] = float(data[3].strip())
     sim_info['number_of_particles'] = int(data[4].strip())
+    sim_info['theta'] = float(data[5].strip())
 
     return sim_info
 

@@ -2,7 +2,7 @@
 tap_example
 
 ! Time step:
-0.001
+1E-3
 
 ! Output time step:
 0.1
@@ -12,6 +12,9 @@ tap_example
 
 ! Number of particles:
 3
+
+! Theta:
+1.0
 
 ! Positions (x,y,z) (each line, a particle):
 0.9700436, -0.24308753, 0.0

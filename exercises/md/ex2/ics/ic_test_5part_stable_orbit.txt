@@ -2,7 +2,7 @@
 test_5part_stable_orbit
 
 ! Time step:
-0.00001
+1E-4
 
 ! Output time step:
 0.01
@@ -12,6 +12,9 @@ test_5part_stable_orbit
 
 ! Number of particles:
 5
+
+! Theta:
+1.0
 
 ! Positions (x,y,z) (each line, a particle):
 0, 0, 0

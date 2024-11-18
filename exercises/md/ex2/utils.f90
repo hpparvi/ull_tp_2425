@@ -4,10 +4,10 @@ module utils
     implicit none
     
     contains
-        subroutine read_data(file_in, particles, sim_name, dt, dt_out, t_end, n, in)
+        subroutine read_data(file_in, particles, sim_name, dt, dt_out, t_end, n, in, theta_local)
             character(len=100), intent(in) :: file_in
             character(len=100), intent(inout) :: sim_name
-            real(real64), intent(inout) :: dt, t_end, dt_out
+            real(real64), intent(out) :: dt, t_end, dt_out, theta_local
             integer, intent(inout) :: n
             integer, intent(in) :: in
             integer :: i
@@ -30,27 +30,30 @@ module utils
                 read(in, *)
                 read(in, *) n
                 read(in, *)
+                read(in, *) 
+                read(in, *) theta_local
+                read(in, *)
 
                 !Now I know the number of particles, so I can allocate the array
                 allocate(particles(n))
 
                 !Read particle positions
                 read(in, *)
-                do i = in, n
+                do i = 1, n
                     read(in, *) particles(i)%p%x, particles(i)%p%y, particles(i)%p%z
                 end do
                 read(in, *)
 
                 !Read particle velocities
                 read(in, *)
-                do i = in, n
+                do i = 1, n
                     read(in, *) particles(i)%v%x, particles(i)%v%y, particles(i)%v%z
                 end do
                 read(in, *)
 
                 !Read particle masses
                 read(in, *)
-                do i = in, n
+                do i = 1, n
                     read(in, *) particles(i)%m
                 end do
             close(in)

@@ -2,7 +2,7 @@
 3part_funny3
 
 ! Time step:
-1E-6
+1E-3
 
 ! Output time step:
 0.08
@@ -12,6 +12,9 @@
 
 ! Number of particles:
 3
+
+! Theta:
+0.01
 
 ! Positions (x,y,z) (each line, a particle):
 0.2355245585, 0, 0

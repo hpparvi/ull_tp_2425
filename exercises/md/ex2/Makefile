@@ -1,5 +1,6 @@
 FC = gfortran
 PYTHON = python
+MAKE = make
 FCFLAGS = -c
 OBJECTS = ex2.o barnes_hut.o calculations.o utils.o geometry.o particle.o
 TESTS = tests/test_stable_orbit_file.py
@@ -9,7 +10,7 @@ DELETE_IMAGES_SCRIPT = visual/delete_images.py
 
 # Variables that can be set from the command line
 SIM_NAME ?= test_5part_stable_orbit
-OUTPUT_FILE ?= output/$(SIM_NAME).txt 
+OUTPUT_FILE ?= output/$(SIM_NAME).dat
 INPUT_FILE ?= ics/ic_$(SIM_NAME).txt
 NUM_CORES ?= None
 DIRECTORY_IMAGES = output/images_$(SIM_NAME)
@@ -49,8 +50,21 @@ video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 	@echo "Generating video..."
 	$(PYTHON) $(IMAGE_TO_VIDEO_SCRIPT) $(DIRECTORY_IMAGES) $(FPS) $(DIRECTORY_VIDEO) $(TITLE) $(RESIZE)
 	$(PYTHON) $(DELETE_IMAGES_SCRIPT) $(DIRECTORY_IMAGES) $(DELETE)
-	
+
+all_videos: 
+	for file in output/*.dat; do \
+		SIM_NAME_V=$$(basename $$file .dat); \
+		$(MAKE) video OUTPUT_FILE=$$file SIM_NAME=$$SIM_NAME_V; \
+	done
+	@echo "All videos generated"
+
+all_ics: 
+	for file in ics/*; do \
+		./ex2 $$file; \
+	done
+
 test: 
 	$(PYTHON) $(TESTS)
+
 clean:
 	rm -f $(OBJECTS) ex2
