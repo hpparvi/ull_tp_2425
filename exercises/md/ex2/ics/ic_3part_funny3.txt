@@ -1,0 +1,29 @@
+! Simulation name:
+3part_funny3
+
+! Time step:
+1E-6
+
+! Output time step:
+0.08
+
+! Final time:
+20
+
+! Number of particles:
+3
+
+! Positions (x,y,z) (each line, a particle):
+0.2355245585, 0, 0
+0.9712004534, 0, 0
+-1.2067250118, 0, 0
+
+! Velocity (vx, vy, vz) (each line, a particle):
+0, 1.2795329643, 0
+0, -0.4021329019, 0
+0, -0.8774000623, 0
+
+! Mass (each line, a particle):
+1
+1
+1
