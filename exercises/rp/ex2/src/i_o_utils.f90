@@ -4,13 +4,15 @@ module i_o_utils
    implicit none
 
 contains
-   subroutine read_config(ics_path, G, integration_time, time_step, smoothing_length)
+   subroutine read_config(ics_path, N_snapshots, G, integration_time, time_step, smoothing_length, theta)
       implicit none
       character(len=500), intent(out) :: ics_path
       real, intent(out) :: G
       real, intent(out) :: integration_time
       real, intent(out) :: time_step
       real, intent(out) :: smoothing_length
+      real, intent(out) :: theta
+      integer, intent(out) :: N_snapshots
 
       character(len=500) :: config_path, line, key, value
       integer :: ios, idx
@@ -45,6 +47,10 @@ contains
                read(value, *, iostat=ios) time_step
              case ("EPSILON")
                read(value, *, iostat=ios) smoothing_length
+             case ("THETA")
+               read(value, *, iostat=ios) theta
+            case ("N_SNAPSHOTS")
+               read(value, *, iostat=ios) N_snapshots
              case ("ICS_FILE")
                ics_path = value
              case default
@@ -123,5 +129,28 @@ contains
       close(1)
 
    end subroutine save_data
+
+
+   subroutine get_N_snapshots(N_snapshots, N_timesteps)
+
+      integer, intent(out):: N_snapshots
+      integer :: N_timesteps
+
+      real :: fact
+      
+      fact = real(N_timesteps) / N_snapshots
+
+      if (fact <= 1) then 
+         N_snapshots = N_timesteps
+      else 
+         N_snapshots = int(N_timesteps/fact)
+      end if
+
+
+
+
+
+
+   end subroutine get_N_snapshots
 
 end module i_o_utils
