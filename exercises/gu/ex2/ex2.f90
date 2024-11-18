@@ -1,18 +1,20 @@
-PROGRAM test1
+PROGRAM ex2
   USE, INTRINSIC :: iso_fortran_env
+  !$ use omp_lib
   USE geometry
   USE particle
   USE tree
   IMPLICIT NONE
 
   TYPE(particle3d), ALLOCATABLE :: parts(:)
-  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'result.dat'
+  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'output.dat'
   INTEGER :: n=0
   INTEGER :: i, j, stat
   REAL(real64) :: dt, dt_out, t_end, theta = 1., t_out=0., t=0.
   TYPE(vector3d), ALLOCATABLE :: aa(:)
 
   TYPE(cell), POINTER :: head, temp_cell
+
 
   OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = stat) !opens input file
   IF (stat/=0) WRITE (*,*) 'Cannot open file ' , filename
@@ -41,6 +43,8 @@ PROGRAM test1
   END DO
   CLOSE(3)
 
+  !$omp parallel private(i) shared(parts)
+
   !! Initializing the head node
   ALLOCATE(head)
   CALL calculate_ranges(parts, head)
@@ -67,10 +71,15 @@ PROGRAM test1
 
   !! Main loop
   t_out = 0.0
+
   DO WHILE (t .LE. t_end)
-  
-     parts%v = parts%v + aa * (dt/2.)
-     parts%p = parts%p + parts%v * dt
+
+     !$ omp do
+     do i = 1, n
+        parts(i)%v = parts(i)%v + aa(i) * (dt/2.)
+        parts(i)%p = parts(i)%p + parts(i)%v * dt
+     end do
+     !$ omp end do
 
      !! Redo the tree
      call delete_tree(head)
@@ -80,30 +89,37 @@ PROGRAM test1
      call nullify_pointers(head)
 
      DO i = 1, n
-     CALL find_cell(head, temp_cell, parts(i))
-     CALL place_cell(temp_cell, parts(i), i)
-  END DO
-
-  CALL delete_empty_leaves(head)
-  CALL calculate_masses(head)
-
-  aa = vector3d(0.,0.,0.)
-  call calculate_forces(head, aa, parts, theta)
-
-  parts%v = parts%v + aa * (dt/2.)
-     
-  t_out = t_out + dt
-  IF (t_out .GE. dt_out) THEN
-     WRITE(4, fmt='(F11.3)', advance='no') t
-     DO i = 1, n
-        WRITE(4, fmt='(4ES11.2)', advance='no') parts(i)%p
+        CALL find_cell(head, temp_cell, parts(i))
+        CALL place_cell(temp_cell, parts(i), i)
      END DO
-     WRITE(4,*) ''
-     t_out = 0.0
-  END IF
-  t = t + dt
+     
+     
+     CALL delete_empty_leaves(head)
+     CALL calculate_masses(head)
+
+     aa = vector3d(0.,0.,0.)
+     call calculate_forces(head, aa, parts, theta)
+
+     !$ omp do
+     do i = 1, n
+        parts(i)%v = parts(i)%v + aa(i) * (dt/2.)
+     end do
+     !$ omp end do
+     !$ omp end parallel
+     t_out = t_out + dt
+     IF (t_out .GE. dt_out) THEN
+        WRITE(4, fmt='(F11.3)', advance='no') t
+        DO i = 1, n
+           WRITE(4, fmt='(4ES13.4)', advance='no') parts(i)%p
+        END DO
+        WRITE(4,*) ''
+        t_out = 0.0
+     END IF
+     t = t + dt
 
   END DO
 
+  CLOSE(4)
 
-END PROGRAM test1
+
+END PROGRAM ex2
