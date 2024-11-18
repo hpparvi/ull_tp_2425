@@ -3,6 +3,27 @@ import numpy as np
 from matplotlib.colors import to_hex
 
 
+plt.rcParams['figure.figsize'] = (8, 6)
+plt.rcParams['savefig.dpi'] = 200
+plt.rcParams['text.usetex'] = True
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = 'Charter'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}\usepackage{bm}'
+plt.rcParams['font.size'] = 16
+plt.rcParams['axes.titlesize'] = 18
+plt.rcParams['axes.labelsize'] = 18
+plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['ytick.minor.visible'] = True
+plt.rcParams['legend.edgecolor'] = 'black'
+plt.rcParams['legend.frameon'] = True
+plt.rcParams['legend.framealpha'] = 1
+plt.rcParams['legend.fancybox'] = False
+plt.rcParams['text.antialiased'] = True
+plt.rcParams['axes.labelweight'] = 'bold'
+plt.rcParams['lines.antialiased'] = True
+plt.rcParams['text.antialiased'] = True
+
+
 # To generate a list of colors, based in a colormap
 def generate_colors(N, cmap='jet'):
     values = np.linspace(0, 1, N)
@@ -18,7 +39,7 @@ def read_data(file):
     if '.txt' not in file:
         file += '.txt'
     if 'output' not in file:
-        file = 'output_' + file
+        file = '../output/' + file
     data = np.loadtxt(file)
     unique_ids = np.unique(data[:, 0])
     ids = [data[:, 0] == u_id for u_id in unique_ids]

@@ -34,7 +34,7 @@ make video SIM_NAME=template
 ``` 
 `template` is the name of the simulation, so the input file should be `ics/ic_template.txt`, the output file `output/template.txt`, and the video `videos/template.mp4`.
 
-You can manually change some parameters of the video like `INPUT_FILE`, `OUTPUT_FILE`, `NUM_CORES`, `DIRECTORY_IMAGES` (directory where the images are saved), `DIRECTORY_VIDEO` (directory where the video is saved), `TITLE`, `FPS`, and `RESIZE` (resize factor to reduce the size of the video).
+You can manually change several video parameters such as `INPUT_FILE`, `OUTPUT_FILE`, `NUM_CORES` (defaults to the maximum available), `DIRECTORY_IMAGES` (the directory where images are saved), `DIRECTORY_VIDEO` (the directory where the video is saved), `TITLE`, `FPS`, `RESIZE` (resize factor to reduce the video size), and `DELETE` (whether to delete images created during video creation; defaults to True).
 ```sh
 make video SIM_NAME=template INPUT_FILE=ics/ic_template.txt OUTPUT_FILE=output/template.txt NUM_CORES=8 DIRECTORY_IMAGES=output/images_template/ DIRECTORY_VIDEO=videos/ TITLE=template FPS=30 RESIZE=1
 ``` 
