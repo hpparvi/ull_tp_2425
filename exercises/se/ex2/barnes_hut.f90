@@ -182,27 +182,36 @@ CONTAINS
     INTEGER, DIMENSION(3) :: octant
 
     part = goal%part
-    goal%type=2
+    goal%type=2  ! Contains more than 1 particle
+    
+    ! Go through all octants in the cell
+    ! dont parallelize unless already in a parallel section, because
+    ! opening the threads is expensive for the amount of calculations
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
              octant = (/i,j,k/)
-
+             ! Allocates a pointer: essentially creates the subcell.
              ALLOCATE(goal%subcell(i,j,k)%ptr)
 
+             ! Calculates the ranges of the octant
              goal%subcell(i,j,k)%ptr%range%min_val = Calculate_Range (0,goal,octant)
              goal%subcell(i,j,k)%ptr%range%max_val = Calculate_Range (1,goal,octant)
 
+             ! Check if the particle is inside this octant
              IF (Belongs(part,goal%subcell(i,j,k)%ptr)) THEN
+                ! Update everything to have the cell contain the particle
                 goal%subcell(i,j,k)%ptr%part = part
                 goal%subcell(i,j,k)%ptr%type = 1
                 goal%subcell(i,j,k)%ptr%pos = goal%pos
 
-             ELSE
+             ! No particle in the octant   
+             ELSE 
                 goal%subcell(i,j,k)%ptr%type = 0
 
              END IF
-
+             
+             ! Nullifies the pointers of the subcell 
              CALL Nullify_Pointers(goal%subcell(i,j,k)%ptr)
           END DO
        END DO
@@ -450,12 +459,12 @@ CONTAINS
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
     ! OpenMP-related variables
-    INTEGER :: tid=1, nt=0
+    INTEGER :: tid, nt
 
     n = SIZE(particles)
 
 
-    !$omp parallel private(i, tid, nt) shared(head, particles, a)
+    !(dollarsign)omp parallel private(i, tid, nt) shared(head, particles, a)
     !$ nt = omp_get_num_threads()
     !$ tid = omp_get_thread_num()
 
@@ -467,7 +476,9 @@ CONTAINS
        CALL Calculate_forces_aux(i, head, particles, a)
     END DO
     !$omp end do
-    !$omp end parallel
+    !(dollarsign)omp end parallel
+    ! remove the parallel section initialization here if I put it
+    ! in the program (try without adding anything to see if it works)
 
   END SUBROUTINE Calculate_forces
 

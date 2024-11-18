@@ -34,11 +34,15 @@ PROGRAM ex2
 
   ! To read the necessary inputs from a file
   INTEGER :: openstatus_input, openstatus_output, readstatus
-  CHARACTER(13) :: datafile="input.txt"
+  CHARACTER(13) :: datafile
   CHARACTER(11) :: resultfile="output.txt"
 
 
   TYPE(cell), POINTER :: head, temp_cell
+
+  PRINT '(A)', "Type in the name of the input file with &
+       the initial conditions. Must be in the working directory."
+  READ (*,*) datafile
 
   ! Open the file (already existing)
   OPEN (UNIT=1, FILE=datafile, STATUS="old", &
@@ -109,13 +113,10 @@ PROGRAM ex2
   ! Calculate the masses (recursively)
   CALL Calculate_masses(head, particles)
 
+  ! Set accelerations to 0
+  a = vector3d(0., 0., 0.)
+  
   ! Get the initial accelerations (recursive)
-  DO i = 1, n
-     a(i)%x = 0.
-     a(i)%y = 0. 
-     a(i)%z = 0.
-  END DO
-
   CALL Calculate_forces(head, particles, a)
 
 
@@ -154,15 +155,19 @@ PROGRAM ex2
      CALL Calculate_masses(head, particles)
 
      ! Set all accelerations at 0
-     !here (not too necessary)
-     DO i = 1, n
-        a(i)%x = 0.
-        a(i)%y = 0. 
-        a(i)%z = 0.
-     END DO
+     a = vector3d(0., 0., 0.)
      
+
+     !!!!!! try to parallelize this with workshare approach
+     !$omp parallel shared(head, particles, a)
      CALL Calculate_forces(head, particles, a)
+
+     !$omp workshare
      particles%v = particles%v + a * (dt/2)
+     !$omp end workshare
+     
+     !$omp end parallel
+
      
      t_out = t_out + dt
      ! If t_out is bigger than the increments at which we want output:
@@ -171,7 +176,7 @@ PROGRAM ex2
 	! For each of the particles
 	DO i = 1,n 
            ! Store ALL the positions if it is time to do so
-           WRITE (2, '(F15.3, F15.3, F15.3)', ADVANCE='no') particles(i)%p%x, &
+           WRITE (2, '(F15.5, F15.5, F15.5)', ADVANCE='no') particles(i)%p%x, &
                 particles(i)%p%y, particles(i)%p%z
 	END DO
         WRITE (2, '(A)') "" ! Just to advance to the next line
@@ -182,8 +187,6 @@ PROGRAM ex2
   ! End of main loop
 
   CLOSE (UNIT=2)
-
-
   
 
 END PROGRAM ex2

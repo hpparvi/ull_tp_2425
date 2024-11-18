@@ -14,3 +14,29 @@ conditions may be created using the Python notebook write_particle_file.
 The output is stored in output.txt, which is used in the plot_nbody
 notebook. This notebook shows the trajectories in 2D, 3D and an
 animation.
+
+=========== TO COMPILE AND RUN ===========
+
+For non-parallel version, use the regular makefile, by writing in
+your terminal either:
+>> make 
+or: 
+>> make -f makefile
+
+For parallelized version, use the corresponding makefile by writing:
+>> make -f makefile_parallel
+
+Both should run just fine, as the parallel sections are written
+with magic commands that will be interpreted as comments if the flag
+-fopenmp is not used when compiling. This is what the different 
+makefiles account for. 
+
+To run the exercise, use:
+>> ./ex2 
+or 
+>> make test
+as usual. 
+
+
+=========== Discussion of parallelization ===========
+
