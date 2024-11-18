@@ -63,12 +63,17 @@ CONTAINS
      
   DO I= 1,N
      DO
+        ! uniformly distributed x and y values around (0,1)
         CALL random_number(rx)
         CALL random_number(ry)
+        ! to re-centre around (-1,1)
+        rx = 2*rx -1 
+        ry = 2*ry -1 
         IF ((rx**2 + ry**2) .LE. 1) EXIT
      END DO
      DO
         CALL random_number(rz)
+        rz = 2*rz - 1
         IF ((rx**2 + ry**2 + rz**2) .LE. 1) EXIT
      END DO
      ! Now we have created a point with mass, r coordinates (inside sphere of radius 1)

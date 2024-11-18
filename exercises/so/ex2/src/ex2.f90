@@ -140,7 +140,7 @@ PROGRAM leapfrog
      DO i = 1,n
         DO j = i+1,n
            rji_v = vecpp(partics(i)%p, partics(j)%p)
-           r3_2 = norm(rji_v)**3
+           r3_2 = norm(rji_v)**3 + epsilon ** 2
            partics(i)%a = partics(i)%a + (partics(j)%m * rji_v / r3_2)
            partics(j)%a = partics(j)%a - (partics(i)%m * rji_v / r3_2)
         END DO
