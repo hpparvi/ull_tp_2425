@@ -315,7 +315,7 @@ CONTAINS
     TYPE(CELL), POINTER :: tree !Current cell or subcell being processed
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    REAL(REAL64) :: l, D !Length of the side of the cell and distance between particles
+    REAL(REAL64) :: l, D !Length of the side of the cell and distance between the particle and the center of mass of the cell
 
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
