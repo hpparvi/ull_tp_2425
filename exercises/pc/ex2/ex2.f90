@@ -21,7 +21,15 @@ PROGRAM ex2
   !Read the input file name from the user
   PRINT*, "Insert the input file name: "
   READ*, input
-  output = 'output.dat' !Assigning output file name
+
+  !Assigning output file name
+  IF (input == 'input_angels.dat') THEN
+     output = 'output_angels.dat'
+     
+  ELSE
+     output = 'output.dat'
+     
+  END IF
 
   !Open the input file and check for errors
   OPEN(12, file = input, status = 'old', action = 'read', iostat = io_status)

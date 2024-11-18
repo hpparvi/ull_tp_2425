@@ -168,9 +168,12 @@ CONTAINS
     LOGICAL :: Belongs
     
     !Check if the particle is within the bounds of the cell's range
-    IF ((part%p%x .GE. goal%range%min(1) .AND. part%p%x .LT. goal%range%max(1)) .AND. &
-        (part%p%y .GE. goal%range%min(2) .AND. part%p%y .LT. goal%range%max(2)) .AND. &
-        (part%p%z .GE. goal%range%min(3) .AND. part%p%z .LT. goal%range%max(3))) THEN
+    IF ((part%p%x .GE. goal%range%min(1)) .AND. &
+        (part%p%x .LT. goal%range%max(1)) .AND. &
+        (part%p%y .GE. goal%range%min(2)) .AND. &
+        (part%p%y .LT. goal%range%max(2)) .AND. &
+        (part%p%z .GE. goal%range%min(3)) .AND. &
+        (part%p%z .LT. goal%range%max(3))) THEN
        Belongs = .TRUE.
        
     ELSE
@@ -268,7 +271,7 @@ CONTAINS
     SELECT CASE (goal%type)
     CASE (1) !One particle in the cell
        !Sets the mass and the center of mass
-       goal%mass = goal%part%m
+       goal%mass = p(goal%pos)%m
        goal%c_o_m = point_to_vector(p(goal%pos)%p)
 
     CASE (2) !Conglomerate in the cell
@@ -308,7 +311,7 @@ CONTAINS
 
   !Recursive subroutine to calculate forces between a specific particle and the tree structure
   RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji)
-    INTEGER(INT64) :: goal !Index of the current particle
+    INTEGER(INT64) :: goal, i, j, k !Index of the current particle and loop indexing variables
     TYPE(CELL), POINTER :: tree !Current cell or subcell being processed
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
@@ -328,9 +331,9 @@ CONTAINS
        rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
        D = NORM(rji) !Distance between particle and center of mass
        
-       IF (l/D < theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
+       IF (l/D .LT. theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
           r3 = D**3 !Cube of the distance between particle and center of mass
-          p(goal)%a = p(goal)%a + tree%part%m * rji / r3 !Accelaration of the particle
+          p(goal)%a = p(goal)%a + tree%mass * rji / r3 !Accelaration of the particle
           
        ELSE !Cell too close
           DO i = 1, 2
