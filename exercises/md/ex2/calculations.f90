@@ -137,9 +137,9 @@ module calculations
             type(cell), pointer :: goal
             logical :: belongs
 
-            if (part%x >= goal%range%min(1) .and. part%x <= goal%range%max(1) &
-                .and. part%y >= goal%range%min(2) .and. part%y <= goal%range%max(2) &
-                .and. part%z >= goal%range%min(3) .and. part%z <= goal%range%max(3)) then
+            if (part%x > goal%range%min(1) .and. part%x <= goal%range%max(1) &
+                .and. part%y > goal%range%min(2) .and. part%y <= goal%range%max(2) &
+                .and. part%z > goal%range%min(3) .and. part%z <= goal%range%max(3)) then
                 belongs = .true.
             else
                 belongs = .false.

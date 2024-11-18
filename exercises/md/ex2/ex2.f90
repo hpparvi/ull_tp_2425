@@ -61,8 +61,6 @@ program tree
 
     print*, "Starting simulation..."
 
-    call reset_a(particles)
-
     allocate(head)
 
     call calculate_ranges(particles, head)
@@ -76,6 +74,7 @@ program tree
     
     call borrar_empty_leaves(head)
     call calculate_masses(particles, head)
+    call reset_a(particles)
     call calculate_forces(particles, head)
 
     t_out = 0.0
@@ -96,10 +95,9 @@ program tree
                 call place_cell(temp_cell, particles(i)%p, i)
             end do
 
-            call reset_a(particles)
-
             call borrar_empty_leaves(head)
             call calculate_masses(particles, head)
+            call reset_a(particles)
             call calculate_forces(particles, head)
             call update_vel(particles, dt)
 

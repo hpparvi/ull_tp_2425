@@ -8,7 +8,7 @@ tap_example
 0.1
 
 ! Final time:
-100
+3
 
 ! Number of particles:
 3

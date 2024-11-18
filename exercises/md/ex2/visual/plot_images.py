@@ -36,7 +36,7 @@ else:
     num_cores = os.cpu_count()
 
 # Positions, identification of the particles and mass
-pos, ids, mass = utils.read_data(output_file)
+pos, ids, mass, time = utils.read_data(output_file)
 # Simulation information
 sim_info = utils.read_input_file(input_file)
 dt = sim_info['time_step']
