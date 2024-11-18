@@ -95,6 +95,8 @@ CONTAINS
 !! matriz r en las 3 dimensiones y lo pone en la
 !! variable apuntada por goal
 !!
+! Al calcular span le sumo un 10% para que las
+! particulas no caigan justo en el borde
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    SUBROUTINE Calculate_Ranges(goal)
       TYPE(CELL),POINTER :: goal
@@ -102,8 +104,6 @@ CONTAINS
       REAL :: span
       mins = MINVAL(r,DIM=1)
       maxs = MAXVAL(r,DIM=1)
-! Al calcular span le sumo un 10% para que las
-! particulas no caigan justo en el borde
       span = MAXVAL(maxs - mins) * 1.1
       medios = (maxs + mins) / 2.0
       goal%range%min = medios - span/2.0
