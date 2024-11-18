@@ -1,0 +1,11 @@
+# Simulation parameters
+dt = 0.01       # Time step
+dt_out = 10.00    # Printing time step
+t_end = 10.00     # Final execution time
+epsilon = 0.10   # Softening scale
+
+# File names
+input_file = "data/random_bodies.txt"
+create_bodies = .False. 
+N_bodies = 10 
+output_file = "output/output.txt"
