@@ -45,7 +45,8 @@ def read_data(file):
     ids = [data[:, 0] == u_id for u_id in unique_ids]
     pos = data[:, 1:4]
     mass = data[:, 4]
-    return pos, ids, mass
+    t = data[:, 5]
+    return pos, ids, mass, t
 
 
 # To read the input file

@@ -1,7 +1,8 @@
 FC = gfortran
 PYTHON = python
 FCFLAGS = -c
-OBJECTS = ex2.o geometry.o particle.o
+OBJECTS = ex2.o calculations.o utils.o geometry.o particle.o 
+TESTS = tests/test_2part_stable_orbit_file.py
 PLOT_IMAGES_SCRIPT = visual/plot_images.py
 IMAGE_TO_VIDEO_SCRIPT = visual/image_to_video.py
 DELETE_IMAGES_SCRIPT = visual/delete_images.py
@@ -32,6 +33,12 @@ geometry.o: geometry.f90
 particle.o: particle.f90
 	$(FC) $(FCFLAGS) particle.f90
 
+calculations.o: calculations.f90
+	$(FC) $(FCFLAGS) calculations.f90
+
+utils.o: utils.f90
+	$(FC) $(FCFLAGS) utils.f90
+
 # To make a video. It is needed ffpmeg installed in the system
 video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 	@echo "Generating images..."
@@ -40,5 +47,7 @@ video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 	$(PYTHON) $(IMAGE_TO_VIDEO_SCRIPT) $(DIRECTORY_IMAGES) $(FPS) $(DIRECTORY_VIDEO) $(TITLE) $(RESIZE)
 	$(PYTHON) $(DELETE_IMAGES_SCRIPT) $(DIRECTORY_IMAGES) $(DELETE)
 	
+test: 
+	$(PYTHON) $(TESTS)
 clean:
-	rm -f $(OBJECTS) ex1
+	rm -f $(OBJECTS) ex2
