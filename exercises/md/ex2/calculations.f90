@@ -137,9 +137,9 @@ module calculations
             type(cell), pointer :: goal
             logical :: belongs
 
-            if (part%x > goal%range%min(1) .and. part%x <= goal%range%max(1) &
-                .and. part%y > goal%range%min(2) .and. part%y <= goal%range%max(2) &
-                .and. part%z > goal%range%min(3) .and. part%z <= goal%range%max(3)) then
+            if (part%x >= goal%range%min(1) .and. part%x < goal%range%max(1) &
+                .and. part%y >= goal%range%min(2) .and. part%y < goal%range%max(2) &
+                .and. part%z >= goal%range%min(3) .and. part%z < goal%range%max(3)) then
                 belongs = .true.
             else
                 belongs = .false.
@@ -268,7 +268,7 @@ module calculations
                 rji = tree%c_o_m - particles(goal)%p
                 r2 = normsquare(rji)
                 D = sqrt(r2)
-                if (1/D < theta) then
+                if (l/D < theta) then
                     r3 = r2 * D
                     particles(goal)%a = particles(goal)%a + tree%mass * rji / r3
                 else
