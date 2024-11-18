@@ -4,6 +4,7 @@ program tree
     use geometry
     use calculations
     use utils
+    use barnes_hut
 
     implicit none
 
@@ -14,7 +15,7 @@ program tree
     character(len=100) :: sim_name, file_out
     !Input file of initial conditions
     character(len=100) :: file_in
-    type(cell), pointer:: head, temp_cell
+    type(cell), pointer:: head
 
     !Check if an input file was provided or use terminal input
     if (command_argument_count() == 1) then
@@ -63,16 +64,8 @@ program tree
 
     allocate(head)
 
-    call calculate_ranges(particles, head)
-    head%type = 0
-    call nullify_pointers(head)
+    call barnes_hut_tree(particles, head, n)
 
-    do i = 1, n
-        call find_cell(head, temp_cell, particles(i)%p)
-        call place_cell(temp_cell, particles(i)%p, i)
-    end do
-    
-    call borrar_empty_leaves(head)
     call calculate_masses(particles, head)
     call reset_a(particles)
     call calculate_forces(particles, head)
@@ -83,19 +76,10 @@ program tree
         do while (t < t_end)
             call update_vel(particles, dt)
             call update_pos(particles, dt)
-
+            
             call borrar_tree(head)
-
-            call calculate_ranges(particles, head)
-            head%type = 0
-            call nullify_pointers(head)
-
-            do i = 1, n
-                call find_cell(head, temp_cell, particles(i)%p)
-                call place_cell(temp_cell, particles(i)%p, i)
-            end do
-
-            call borrar_empty_leaves(head)
+            call barnes_hut_tree(particles, head, n)
+            
             call calculate_masses(particles, head)
             call reset_a(particles)
             call calculate_forces(particles, head)

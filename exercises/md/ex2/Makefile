@@ -1,7 +1,7 @@
 FC = gfortran
 PYTHON = python
 FCFLAGS = -c
-OBJECTS = ex2.o calculations.o utils.o geometry.o particle.o 
+OBJECTS = ex2.o barnes_hut.o calculations.o utils.o geometry.o particle.o
 TESTS = tests/test_2part_stable_orbit_file.py
 PLOT_IMAGES_SCRIPT = visual/plot_images.py
 IMAGE_TO_VIDEO_SCRIPT = visual/image_to_video.py
@@ -35,6 +35,9 @@ particle.o: particle.f90
 
 calculations.o: calculations.f90
 	$(FC) $(FCFLAGS) calculations.f90
+
+barnes_hut.o: barnes_hut.f90
+	$(FC) $(FCFLAGS) barnes_hut.f90
 
 utils.o: utils.f90
 	$(FC) $(FCFLAGS) utils.f90
