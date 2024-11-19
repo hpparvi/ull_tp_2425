@@ -2,12 +2,12 @@ import os
 import numpy as np
 
 ex_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ics_dir = ics_dir = ex_dir + "/data/ics/"
+ics_dir = ex_dir + "/ics/"
 ics_filename = "uniform_sphere.dat"
 
 
 N = 1e3  #Number of particles (approximate)
-MASS_TOTAL = 1e5
+MASS_TOTAL = 100
 R = 1  #Radius sphere
 
 Q = 6/np.pi  # ratio between volume of a cube and sphere
@@ -42,8 +42,20 @@ def generate_ics():
             f.write("\n")
 
 
+def print_freefall_time(G):
+
+    V_SPH = 4/3 * np.pi * R**3
+    density = MASS_TOTAL / (V_SPH)
+
+    t_ff = np.sqrt((3*np.pi) / (32 * G * density))
+
+    print(f'Free-fall time: {t_ff:0.3e}')
+
+
+
 if __name__ == "__main__":
     generate_ics()
+    print_freefall_time(G=1.)
 
 
 
