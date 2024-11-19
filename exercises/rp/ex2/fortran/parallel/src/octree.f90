@@ -365,6 +365,7 @@ contains
    end subroutine delete_tree
 
 
+
    ! Assign the attrbiutes
    ! %mass and %com (center of mass) to the octants
    recursive subroutine compute_masses(base_octant)

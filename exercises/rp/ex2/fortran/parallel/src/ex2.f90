@@ -92,42 +92,56 @@ program tree
    call save_data(0, savefolder, bodies, N)
 
 
-   call cpu_time(start_time)
+   start_time = omp_get_wtime()
 
    j = 1
    k = 1
    do i = 1, N_time_steps
 
       ! First part of leapfrog step
+
+      !$omp parallel do default(shared) private(ii)
       do ii=1, N
          bodies(ii)%v = bodies(ii)%v + (a(ii) * dt) * 0.5
          bodies(ii)%p = bodies(ii)%p + bodies(ii)%v * dt
       end do
+      !$omp end parallel do
 
       ! RECOMPUTE ALL ACCELERATIONS
       call delete_tree(root_octant)
       call give_root_octant_a_range(root_octant, N, bodies)
       root_octant%category = 0
       call nullify_suboctant_pointers(root_octant)
+
       do ii = 1,N
          call find_octant(root_octant,temp_octant,bodies(ii))
          call place_particle_in_octant(temp_octant, bodies(ii),ii)
       end do
+
       call delete_empty_leaves(root_octant)
       call compute_masses(root_octant)
+
+      !$omp parallel do default(shared) private(ii)
       do ii = 1, N
          a(ii)%x = 0.0
          a(ii)%y = 0.0
          a(ii)%z = 0.0
       end do
+      !$omp end parallel do
+
+      !$omp parallel do default(shared) private(ii)
       do ii = 1, N
          call compute_forces(ii, root_octant)
       end do
+      !$omp end parallel do
 
       ! Second part of leapfrog step
+
+      !$omp parallel do default(shared) private(ii)
       do ii=1, N
          bodies(ii)%v = bodies(ii)%v + (a(ii) * dt) * 0.5
       end do
+      !$omp end parallel do
 
       ! Save data
       if (MOD(i-1, snap_step) == 0) then
@@ -143,7 +157,7 @@ program tree
 
    end do
 
-   call cpu_time(end_time)
+   end_time = omp_get_wtime()
 
    elapsed_time = end_time - start_time
    print *, "Done! Elapsed CPU time:", elapsed_time, "s"
