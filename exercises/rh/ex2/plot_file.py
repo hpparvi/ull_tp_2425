@@ -2,10 +2,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-x1,y1,z1,x2,y2,z2,x3,y3,z3 = np.loadtxt('results.dat', unpack = True)
+data = np.loadtxt('output.dat', unpack = True)
+
+
 
 ax = plt.figure().add_subplot(projection='3d')
-ax.plot(x1,y1,z1,'r')
-ax.plot(x2,y2,z2,'b')
-ax.plot(x3,y3,z3,'g')
+
+
+n = int((np.shape(data)[0]-1)/3)
+print(n)
+t = data[0,:]
+for i in range(n):
+	xx = data[3*i+1,:]
+	yy = data[3*i+2,:]
+	zz = data[3*i+3,:]
+	ax.plot(xx,yy,zz,alpha = 0.5)
+
 plt.show()
+

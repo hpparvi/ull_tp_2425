@@ -1,4 +1,5 @@
-program e2  
+program e2 
+  !$ Use omp_lib 
   use, intrinsic ::  iso_fortran_env
   use geometry
   use particle
@@ -10,7 +11,7 @@ program e2
   REAL(real64), PARAMETER :: theta = 1
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles !p,v,m position, velocity and mass of each particles
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
-  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'results.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   !! Lectura de datos
@@ -54,19 +55,19 @@ program e2
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     acc = vector3d(0.0,0.0,0.0)
     CALL Calculate_forces(head,particles,acc)
-    print *, acc
     
   ! open the output file 
   OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
     IF (rc/=0) WRITE (*,*) 'Cannot open file ' , outname
   
   ! the first record of the output file is the initial positions of the particles
-  WRITE(4, *) particles%p
+  WRITE(4, *) t, particles%p
   
   !! Bucle principal
   !!!!!!!!!!!!!!!!!!
     t_out = 0.0
     DO  WHILE (t <= t_end)
+    
       particles%v = particles%v + acc * (dt/2.)
       particles%p = particles%p + particles%v * dt
 
@@ -87,17 +88,13 @@ program e2
 
       acc = vector3d(0.0,0.0,0.0)
       CALL Calculate_forces(head,particles,acc)
-      print *, acc
-      particles%v = particles%v + acc * (dt/2.)
       
+      !$OMP WORKSHARE
+      particles%v = particles%v + acc * (dt/2.)
+      !$OMP END WORKSHARE []
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
-        WRITE(4, *) particles%p ! positions in one row (one particle position after another)
-          DO i = 1,n
-          PRINT*, particles(i)%p
-         END DO
-        PRINT*, "-----------------------------------"
-        PRINT*, ""
+        WRITE(4, *) t, particles%p ! positions in one row (one particle position after another)
         t_out = 0.0
       END IF
       t = t + dt

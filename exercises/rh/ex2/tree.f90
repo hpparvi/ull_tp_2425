@@ -1,11 +1,12 @@
 module tree_algorithm
+  !$ use omp_lib
   use iso_fortran_env
   use geometry
   use particle
   implicit none
   
   TYPE RANGE
-  REAL, DIMENSION(3) :: min_val,max_val ! it should be a vector, shouldn't be?
+  REAL(real64), DIMENSION(3) :: min_val,max_val ! it should be a vector, shouldn't be?
   END TYPE RANGE
   
   ! new type cell as a pointer
@@ -53,8 +54,6 @@ module tree_algorithm
     medios = (maxs + mins)/2. 
     goal%range%min_val = medios - span/2.  
     goal%range%max_val = medios + span/2.
-    print *, goal%range%max_val
-    print *, goal%range%min_val 
     
   END SUBROUTINE Calculate_Ranges
 
@@ -100,7 +99,6 @@ module tree_algorithm
       CASE DEFAULT
         goal => root
     END SELECT
-    print *, goal%type
   END SUBROUTINE Find_Cell
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -231,10 +229,8 @@ module tree_algorithm
       (part%p%z >= goal%range%min_val(3)) .AND. &
       (part%p%z < goal%range%max_val(3))) THEN
         Belongs = .TRUE.
-        print *, 'found it'
     
     ELSE
-      print *, 'not here bro'
       Belongs = .FALSE.
     END IF
   END FUNCTION Belongs
@@ -379,14 +375,22 @@ module tree_algorithm
     TYPE(CELL), POINTER, INTENT(in) :: head
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
-    INTEGER :: i,n !j,k,start,end
-    
+    INTEGER :: i, n, nt = 1, tid = 0 
     n = SIZE(particles)
-    
+   
+    print *, "Before parallel"
+    !$omp parallel private(nt, tid, i) shared(head,particles,acc)
+    !$ nt = omp_get_num_threads()
+    !$ tid = omp_get_thread_num()
+    !$omp do
     DO i = 1,n
       CALL Calculate_forces_aux(i,head,particles,acc)
+      print '(xA,i3,xA,i2,xA,i3)', "Do loop, i =", i, &
+          & "thread ", tid, " of ", nt
     END DO
-  
+    !$omp end do
+    !$omp end parallel
+    print *, "After parallel"
   END SUBROUTINE Calculate_forces
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! Calculate_forces_aux
