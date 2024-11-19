@@ -1,11 +1,8 @@
 
 FC = gfortran
 FCFLAGS = -c
-OBJECTS = geometry.o particle.o e1.o
+OBJECTS = geometry.o particle.o tree.o e2.o
 
-# do make 
-# then make test (in order to test the executable)
-# and make clean (remove module files and the executable)
 
 all: e2
 

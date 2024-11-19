@@ -11,7 +11,7 @@ program e2
   REAL(real64), PARAMETER :: theta = 1
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles !p,v,m position, velocity and mass of each particles
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
-  CHARACTER(len=*), PARAMETER :: filename = 'initial_conditions.dat', outname = 'output.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'init_files/example.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   !! Lectura de datos
