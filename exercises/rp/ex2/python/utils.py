@@ -12,7 +12,7 @@ import h5py
 
 def plot_projections(pos, idx=0, lim=(-1, 1), alpha=0.5):
 
-    fs, ratio = 5, 3
+    fs, ratio = 4, 3
     fig, axs = plt.subplots(1, 3, figsize=(ratio*fs, fs))
 
     dims = [(0,1),(0,2),(1,2)]
@@ -48,7 +48,7 @@ def save_projections(pos, savefold, lim=(-1, 1), alpha=0.5):
 
     N = pos.shape[1]
 
-    fs, ratio = 7, 3
+    fs, ratio = 4, 3
     fig, axs = plt.subplots(1, 3, figsize=(ratio*fs, fs))
     for ax in axs:
         ax.set_aspect('equal')
@@ -58,7 +58,7 @@ def save_projections(pos, savefold, lim=(-1, 1), alpha=0.5):
     axs[0].set_title('XY')
     axs[1].set_title('XZ')
     axs[2].set_title('YZ')
-    
+
     dims = [(0,1),(0,2),(1,2)]
     idxs = list(range(pos.shape[0]))
 
