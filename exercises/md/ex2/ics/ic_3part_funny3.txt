@@ -16,6 +16,9 @@
 ! Theta:
 0.01
 
+! Epsilon (softening length):
+0.0
+
 ! Positions (x,y,z) (each line, a particle):
 0.2355245585, 0, 0
 0.9712004534, 0, 0

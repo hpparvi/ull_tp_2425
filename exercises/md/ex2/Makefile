@@ -59,7 +59,7 @@ all_videos:
 	@echo "All videos generated"
 
 all_ics: 
-	for file in ics/*; do \
+	for file in ics/*.txt; do \
 		./ex2 $$file; \
 	done
 

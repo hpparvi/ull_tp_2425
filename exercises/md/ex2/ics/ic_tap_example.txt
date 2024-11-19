@@ -16,6 +16,9 @@ tap_example
 ! Theta:
 1.0
 
+! Epsilon (softening length):
+0.0
+
 ! Positions (x,y,z) (each line, a particle):
 0.9700436, -0.24308753, 0.0
 -0.9700436, 0.24308753, 0.0

@@ -236,23 +236,24 @@ module calculations
             end select
         end subroutine calculate_masses
 
-        subroutine calculate_forces(particles, head, theta)
+        subroutine calculate_forces(particles, head, epsilon, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: head
             integer :: i, n
-            real(real64) :: theta
+            real(real64), intent(in) :: epsilon, theta
             
             n = size(particles)
             do i = 1, n
-                call calculate_forces_aux(particles, i, head, theta)
+                call calculate_forces_aux(particles, i, head, epsilon, theta)
             end do
         end subroutine calculate_forces
 
-        recursive subroutine calculate_forces_aux(particles, goal, tree, theta)
+        recursive subroutine calculate_forces_aux(particles, goal, tree, epsilon, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: tree
             integer :: i, j, k, goal
-            real(real64) :: l, D, r2, r3, theta
+            real(real64) :: l, D, r2, r3
+            real(real64), intent(in) :: epsilon, theta
             type(vector3d) :: rji
 
             select case (tree%type)
@@ -260,7 +261,7 @@ module calculations
                 if (goal .ne. tree%pos) then
                     rji = tree%c_o_m - particles(goal)%p
                     r2 = normsquare(rji)
-                    r3 = r2*sqrt(r2)
+                    r3 = r2*sqrt(r2) + epsilon
                     particles(goal)%a = particles(goal)%a + particles(tree%pos)%m * rji / r3
                 end if
             case(2)
@@ -269,14 +270,14 @@ module calculations
                 r2 = normsquare(rji)
                 D = sqrt(r2)
                 if (l/D < theta) then
-                    r3 = r2 * D
+                    r3 = r2 * D + epsilon
                     particles(goal)%a = particles(goal)%a + tree%mass * rji / r3
                 else
                     do i = 1,2
                         do j = 1,2
                             do k = 1,2
                                 if (associated(tree%subcell(i,j,k)%ptr)) then
-                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr, theta)
+                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr, epsilon, theta)
                                 end if
                             end do
                         end do

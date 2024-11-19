@@ -4,10 +4,10 @@ module utils
     implicit none
     
     contains
-        subroutine read_data(file_in, particles, sim_name, dt, dt_out, t_end, n, in, theta_local)
+        subroutine read_data(file_in, particles, sim_name, dt, dt_out, t_end, n, in, epsilon, theta_local)
             character(len=100), intent(in) :: file_in
             character(len=100), intent(inout) :: sim_name
-            real(real64), intent(out) :: dt, t_end, dt_out, theta_local
+            real(real64), intent(out) :: dt, t_end, dt_out, theta_local, epsilon
             integer, intent(inout) :: n
             integer, intent(in) :: in
             integer :: i
@@ -32,6 +32,9 @@ module utils
                 read(in, *)
                 read(in, *) 
                 read(in, *) theta_local
+                read(in, *)
+                read(in, *)
+                read(in, *) epsilon
                 read(in, *)
 
                 !Now I know the number of particles, so I can allocate the array
@@ -59,9 +62,9 @@ module utils
             close(in)
         end subroutine read_data
 
-        subroutine read_data_terminal(particles, sim_name, dt, dt_out, t_end, n)
+        subroutine read_data_terminal(particles, sim_name, dt, dt_out, t_end, n, epsilon, theta_local)
             character(len=100), intent(inout) :: sim_name
-            real(real64), intent(inout) :: dt, t_end, dt_out
+            real(real64), intent(inout) :: dt, t_end, dt_out, theta_local, epsilon
             integer, intent(inout) :: n
             type(particle3d), allocatable, intent(inout) :: particles(:)
             
@@ -75,6 +78,10 @@ module utils
             read*, t_end
             print*, "Enter the number of particles:"
             read*, n
+            print*, "Enter theta:"
+            read*, theta_local
+            print*, "Enter epsilon:"
+            read*, epsilon
 
             allocate(particles(n))
         end subroutine read_data_terminal

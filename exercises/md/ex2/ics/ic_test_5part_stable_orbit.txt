@@ -16,6 +16,9 @@ test_5part_stable_orbit
 ! Theta:
 1.0
 
+! Epsilon (softening length):
+0.0
+
 ! Positions (x,y,z) (each line, a particle):
 0, 0, 0
 0.7, 0, 0
