@@ -7,14 +7,14 @@ PROGRAM ex2
   IMPLICIT NONE
 
   INTEGER(INT64) :: n !Number of bodies
-  REAL(REAL64) :: dt, t_end, t, dt_out, t_out !Time step, final time, current time, output time step and output time
+  REAL(REAL64) :: dt, t_end, t, dt_out, t_out, theta !Time step, final time, current time, output time step, output time and parameter that determines the accuracy of the simulation
   TYPE(vector3d) :: rji !Vector from one particle to another
   TYPE(particle3d), allocatable :: p(:) !Particles
   REAL(REAL64) :: dummy !Temporary variable for reading input data
   TYPE(CELL), POINTER :: head, temp_cell !Pointers for the root cell and temporary cells in the tree structure
   
-  CHARACTER(len = 50) :: input  !Input file name for initial data
-  CHARACTER(len = 50) :: output !Output file name for final results
+  CHARACTER(len = 100) :: input, output, identifier !Input file name for initial data, output file name for final results and identifier of the input file
+  INTEGER(INT64) :: input_pos, dot_pos !Variables for 'input_' and '.' positions
   CHARACTER(len = 10) :: temp_str !Temporary character variable for the header of the output file
   INTEGER :: io_status !Variable to check the status of I/O operations
 
@@ -22,13 +22,16 @@ PROGRAM ex2
   PRINT*, "Insert the input file name: "
   READ*, input
 
-  !Assigning output file name
-  IF (input == 'input_angels.dat') THEN
-     output = 'output_angels.dat'
+  !Checking if input file name contains 'input_'
+  input_pos = INDEX(input, 'input_')
+  dot_pos = INDEX(input, '.')
+
+  IF (input_pos /= 0 .AND. dot_pos .GT. input_pos) THEN
+     identifier = input(input_pos + 6 : dot_pos - 1) !Extracting the identifier after 'input_' and before '.'
+     output = 'output_' // TRIM(identifier) // '.dat' !Output file name with the identifier
      
   ELSE
-     output = 'output.dat'
-     
+     output = 'output.dat' !Output file name in other case
   END IF
 
   !Open the input file and check for errors
@@ -45,9 +48,9 @@ PROGRAM ex2
       STOP
   END IF
   
-  READ(12, *, iostat = io_status) dt, dt_out, t_end, n !Read time step, output time step, final time and number of bodies from the input file
+  READ(12, *, iostat = io_status) dt, dt_out, t_end, n, theta !Read time step, output time step, final time and number of bodies from the input file
   IF (io_status /= 0) THEN
-      PRINT*, "Error reading parameters (dt, dt_out, t_end, n) from file" !Print error message if reading fails
+      PRINT*, "Error reading parameters (dt, dt_out, t_end, n, theta) from file" !Print error message if reading fails
       STOP
   END IF
 
@@ -55,6 +58,7 @@ PROGRAM ex2
   PRINT*, "Output time step: ", dt_out !Output the output time step
   PRINT*, "Final time: ", t_end   !Output the final time
   PRINT*, "Number of bodies: ", n !Output the number of bodies
+  PRINT*, "Theta: ", theta !Output the parameter that determines the accuracy of the simulation
   PRINT *, "" !Blank line
 
   !Allocate memory for particles array
@@ -107,7 +111,7 @@ PROGRAM ex2
   CALL Calculate_masses(head, p) !Calculate the masses and centers of mass for the cells
 
   CALL set_acceleration(n, p) !Reset accelerations of particles to zero
-  CALL Calculate_forces(head, n, p, rji) !Calculate forces between particles based on the tree
+  CALL Calculate_forces(head, n, p, rji, theta) !Calculate forces between particles based on the tree
 
   t = 0.0 !Initialize time
   t_out = 0.0 !Initialize output time
@@ -154,7 +158,7 @@ PROGRAM ex2
      CALL Calculate_masses(head, p) !Recalculate masses and centers of mass for the cells
      
      CALL set_acceleration(n, p) !Reset accelerations of particles to zero
-     CALL Calculate_forces(head, n, p, rji) !Recalculate forces between particles
+     CALL Calculate_forces(head, n, p, rji, theta) !Recalculate forces between particles
 
      CALL velocity(n, dt, p) !Update the velocities of particles
      t_out = t_out + dt      !Update output time

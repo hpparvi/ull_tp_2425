@@ -10,8 +10,6 @@ MODULE barnes
   !Define real variables for squared and cubed distances
   REAL(REAL64) :: r2, r3
 
-  REAL(REAL64), PARAMETER :: theta = 1
-
   !Define a RANGE type to hold the minimum and maximum range in 3D space
   TYPE RANGE
      REAL(REAL64), DIMENSION(3) :: min, max
@@ -26,8 +24,7 @@ MODULE barnes
   TYPE CELL
      TYPE(RANGE) :: range
      TYPE(particle3d) :: part !Particle information for the cell
-     INTEGER(INT64) :: pos
-     INTEGER(INT64) :: type !0 = no particle; 1 = particle; 2 = conglomerate (group of particles)
+     INTEGER(INT64) :: pos, type !In type: 0 = no particle; 1 = particle; 2 = conglomerate (group of particles)
      TYPE(vector3d) :: c_o_m !Center of mass of the particles in the cell
      REAL(REAL64) :: mass !Mass of the particles in the cell
      TYPE(CPtr), DIMENSION(2, 2, 2) :: subcell !Subcells of the current cell
@@ -261,7 +258,7 @@ CONTAINS
     TYPE(CELL), POINTER :: goal !Target cell
     TYPE(vector3d) :: c_o_m !Center of mass for the cell
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
-    REAL(REAL64) :: mass  !Temporary mass variable 
+    REAL(REAL64) :: mass !Temporary mass variable 
     INTEGER(INT64) :: i, j, k !Loop indexing variables
 
     !Initialize mass and center of mass
@@ -295,27 +292,27 @@ CONTAINS
   END SUBROUTINE Calculate_masses
 
   !Subroutine to calculate forces between particles based on their positions and masses
-  SUBROUTINE Calculate_forces(head, n, p, rji)
+  SUBROUTINE Calculate_forces(head, n, p, rji, theta)
     TYPE(CELL), POINTER :: head !Head of the tree or root cell
-    INTEGER(INT64) :: n !Number of bodies
+    INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    INTEGER(INT64) :: i !Loop indexing varibale
+    REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
     DO i = 1, n
-       CALL Calculate_forces_aux(i, head, p, rji) !Auxiliary subroutine for force calculation
+       CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation
     END DO
     
   END SUBROUTINE Calculate_forces
 
   !Recursive subroutine to calculate forces between a specific particle and the tree structure
-  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji)
+  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji, theta)
     INTEGER(INT64) :: goal, i, j, k !Index of the current particle and loop indexing variables
     TYPE(CELL), POINTER :: tree !Current cell or subcell being processed
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    REAL(REAL64) :: l, D !Length of the side of the cell and distance between the particle and the center of mass of the cell
+    REAL(REAL64) :: l, D, theta  !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
 
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
@@ -340,7 +337,7 @@ CONTAINS
              DO j = 1, 2
                 DO k = 1, 2
                    IF (ASSOCIATED(tree%subcell(i, j, k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji) !Recursive call into the subcells to calculate forces on individual particles
+                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji, theta) !Recursive call into the subcells to calculate forces on individual particles
                    END IF
                 END DO
              END DO

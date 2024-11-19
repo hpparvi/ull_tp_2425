@@ -1,4 +1,4 @@
-PROGRAM input_data
+PROGRAM random_input
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module 
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
@@ -8,7 +8,8 @@ PROGRAM input_data
   INTEGER(INT32) :: values(1:8), k !Variables for storing data and time info and holding the size of the random seed
   INTEGER(INT32), allocatable :: seed(:) !Random seed
   TYPE(particle3d), allocatable :: p(:) !Particles
-  REAL(REAL64) :: rx, ry, rz, dt, t_end, dt_out !Random coordinates for the position of particles (x, y, z), time step, final time and output time step
+  REAL(REAL64) :: rx, ry, rz, dt, t_end, dt_out, theta !Random coordinates for the position of particles (x, y, z), time step, final time, output time step and parameter that
+                                                       !determines the accuracy of the simulation
 
   CHARACTER(len = 50) :: input  !Input file name for initial data
   INTEGER :: io_status !Variable to check the status of I/O operations
@@ -39,6 +40,10 @@ PROGRAM input_data
   !Read the final time from the user
   PRINT*, "Insert the final time: "
   READ*, t_end
+
+  !Read theta from the user
+  PRINT*, "Insert theta: "
+  READ*, theta
   
   !Allocate memory for particles array
   ALLOCATE(p(n))
@@ -53,8 +58,8 @@ PROGRAM input_data
       STOP
    END IF
 
-  WRITE(12, "(A9, 6X, 2A16, 5X, A18)") "Time step", "Output time step", "Final time", "Number of bodies" !Write header to the input file
-  WRITE(12, "(ES12.6, ES15.6, 7X, ES15.6, I14)") dt, dt_out, t_end, n !Write the time step, output time step, final time and number of bodies to the input file
+  WRITE(12, "(A9, 6X, 2A16, 5X, A18, 5X, A12)") "Time step", "Output time step", "Final time", "Number of bodies", "Theta" !Write header to the input file
+  WRITE(12, "(ES12.6, ES15.6, 7X, ES15.6, I14, 15X, ES12.6)") dt, dt_out, t_end, n, theta !Write the time step, output time step, final time, number of bodies and theta to the input file
 
   WRITE(12, *) !Write a blank line
   
@@ -87,4 +92,4 @@ PROGRAM input_data
 
   PRINT*, "Initial data stored in file: ", input !End of program message
   
-END PROGRAM input_data
+END PROGRAM random_input

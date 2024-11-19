@@ -1,5 +1,5 @@
-Time step      Output time step      Final time       Number of bodies
-0.0001		     0.1		100		       3
+Time step      Output time step      Final time       Number of bodies		Theta
+0.0001		     0.1		100		       3		  1
 
  Body        Mass           x           y           z          vx          vy           vz
   1         1.0  	0.9700436   -0.24308753    0.0 	 0.466203685 	0.43236573 	0.0
