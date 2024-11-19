@@ -29,6 +29,10 @@ def plot_projections(pos, idx=0, lim=(-1, 1), alpha=0.5):
         ax.set_xlim(lim[0], lim[1])
         ax.set_ylim(lim[0], lim[1])
 
+    axs[0].set_title('XY')
+    axs[1].set_title('XZ')
+    axs[2].set_title('YZ')
+
     plt.show()
 
     return 
@@ -51,6 +55,10 @@ def save_projections(pos, savefold, lim=(-1, 1), alpha=0.5):
         ax.set_xlim(lim[0], lim[1])
         ax.set_ylim(lim[0], lim[1])
 
+    axs[0].set_title('XY')
+    axs[1].set_title('XZ')
+    axs[2].set_title('YZ')
+    
     dims = [(0,1),(0,2),(1,2)]
     idxs = list(range(pos.shape[0]))
 

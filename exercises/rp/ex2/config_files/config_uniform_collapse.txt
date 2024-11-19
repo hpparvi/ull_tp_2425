@@ -2,14 +2,14 @@ G = 1
 
 T = 0.5
 
-DT = 0.002
+DT = 0.001
 
 EPSILON = 0.0001  
 
-THETA = 0.05
+THETA = 0.01
 
-N_SNAPSHOTS = 50
+N_SNAPSHOTS = 200
 
 ICS_FILE = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/ics/uniform_sphere.dat
 
-SAVE_FOLDER = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/fortran/not_parallel/results/uniform_collapse/
+SAVE_FOLDER = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/results/uniform_collapse/

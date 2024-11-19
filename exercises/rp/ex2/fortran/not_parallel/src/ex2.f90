@@ -26,6 +26,13 @@ program tree
 
    integer :: i, j, k, ii  ! dummy loop varables
 
+   ! to get the time
+   real :: start_time, end_time, elapsed_time
+
+   ! progress marker stuff
+   integer :: progress_marker, progress_marker_aux
+   progress_marker = 1  ! every 1%
+   progress_marker_aux = progress_marker
 
 
    call read_config(ics_file, savefolder, N_snapshots, G, T, dt, e, theta)
@@ -76,12 +83,14 @@ program tree
    ! save ICS
    call save_data(0, savefolder, bodies, N)
 
-   j = 1
 
+   call cpu_time(start_time)
+
+   j = 1
    k = 1
    do i = 1, N_time_steps
 
-      ! First part of leapfrog step 
+      ! First part of leapfrog step
       do ii=1, N
          bodies(ii)%v = bodies(ii)%v + (a(ii) * dt) * 0.5
          bodies(ii)%p = bodies(ii)%p + bodies(ii)%v * dt
@@ -116,33 +125,40 @@ program tree
       if (MOD(i-1, snap_step) == 0) then
          call save_data(j, savefolder, bodies, N)
          j=j+1
+      end if
 
-         ! Print progress
-         print*, real(i)/N_time_steps * 100 ,'%' 
-
+      if (int(real(i) / N_time_steps * 100) >= progress_marker) then
+         write(*, '(I3, A)', ADVANCE="NO") progress_marker, '%'  ! Print progress without advancing
+         write(*, '(A)', ADVANCE="NO") CHAR(13)                 ! Carriage return to overwrite
+         progress_marker = progress_marker + progress_marker_aux
       end if
 
    end do
 
+   call cpu_time(end_time)
+
+   elapsed_time = end_time - start_time
+   print *, "Done! Elapsed CPU time:", elapsed_time, 's'
+
 
 contains
-recursive subroutine compute_forces(idx, base_octant)
+   recursive subroutine compute_forces(idx, base_octant)
 
-   ! idx of particle
-   integer, intent(in) :: idx
+      ! idx of particle
+      integer, intent(in) :: idx
 
-   type(octant), pointer, intent(in) :: base_octant
+      type(octant), pointer, intent(in) :: base_octant
 
-   type(vector3d) :: d_vec ! Relatve position between particles
-   real :: d, denominator ! Relatve distance between particles
-   real :: octant_span
+      type(vector3d) :: d_vec ! Relatve position between particles
+      real :: d, denominator ! Relatve distance between particles
+      real :: octant_span
 
-   integer :: iii, jjj, kkk
+      integer :: iii, jjj, kkk
 
-   select case (base_octant%category)
+      select case (base_octant%category)
 
-      ! Only one particle in octant
-      case (1)
+         ! Only one particle in octant
+       case (1)
          ! Avoid self-interaction
          if (idx .ne. base_octant%idx) then
             d_vec = bodies(idx)%p - bodies(base_octant%idx)%p
@@ -151,8 +167,8 @@ recursive subroutine compute_forces(idx, base_octant)
             a(idx) = a(idx) - G * bodies(base_octant%idx)%m * d_vec / denominator
          end if
 
-      ! More than one particle in octant
-      case (2)
+         ! More than one particle in octant
+       case (2)
          ! Span is the same in all three dimensions
          octant_span = base_octant%range%r_max(1) - base_octant%range%r_min(1)
 
@@ -176,7 +192,7 @@ recursive subroutine compute_forces(idx, base_octant)
                end do
             end do
          end if
-   end select
-end subroutine compute_forces
+      end select
+   end subroutine compute_forces
 
 end program tree

@@ -12,4 +12,4 @@ N_SNAPSHOTS = 500
 
 ICS_FILE = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/ics/ics_broucke_a2.dat
 
-SAVE_FOLDER = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/fortran/not_parallel/results/broucke_a2/
+SAVE_FOLDER = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex2/results/broucke_a2/

@@ -1,3 +1,7 @@
 backup/
 trash/
 figures/uniform_collapse/
+
+results/
+
+python/__pycache__
