@@ -23,11 +23,11 @@ module geometry        !This module defines 3D vector and point operations for v
   end interface operator (-)
 
   interface operator (*)
-     module procedure mulrv, mulvr
+     module procedure mulrv, mulvr, mulrp, mulpr
   end interface operator (*)
 
   interface operator (/)
-     module procedure divvr
+     module procedure divvr, divpr
   end interface operator (/)
   
   
@@ -95,6 +95,19 @@ contains
     mulvr = vector3d(v%x*r, v%y*r, v%z*r)
   end function mulvr
 
+  !Definition of multiplication between reals and points.
+   pure type(point3d) function mulrp(r, p)
+    real(real64), intent(in) :: r
+    type(point3d), intent(in) :: p
+    mulrp = point3d(r*p%x, r*p%y, r*p%z)
+  end function mulrp
+
+  pure type(point3d) function mulpr(p, r)
+    type(point3d), intent(in) :: p
+    real(real64), intent(in) :: r
+    mulpr = point3d(p%x*r, p%y*r, p%z*r)
+  end function mulpr
+
 
   !Definition of division between reals and vectors.
   pure type(vector3d) function divvr(v, r)
@@ -106,6 +119,33 @@ contains
        divvr = vector3d(v%x/r, v%y/r, v%z/r)
     end if
   end function divvr
+
+  pure type(point3d) function divpr(p, r)
+    type(point3d), intent(in) :: p
+    real(real64), intent(in) :: r
+    if (r == 0) then
+       divpr = point3d(0.0, 0.0, 0.0)
+    else
+       divpr = point3d(p%x/r, p%y/r, p%z/r)
+    end if
+  end function divpr
+
+  !ULTIMATE DEBUGGER PRO 9000 (+18 only)
+  function DEBUGGERPRO9000A(p) result(v)
+    type(point3d), intent(in) :: p
+    type(vector3d) :: v
+    v%x = p%x
+    v%y = p%y
+    v%z = p%z
+  end function DEBUGGERPRO9000A
+
+  function DEBUGGERPRO9000B(v) result(p)
+    type(vector3d), intent(in) :: v
+    type(point3d) :: p
+    p%x = v%x
+    p%y = v%y
+    p%z = v%z
+  end function DEBUGGERPRO9000B
 
 
   !Definition of functions.

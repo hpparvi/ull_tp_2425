@@ -5,12 +5,12 @@ module barneshut
   implicit none
 
   INTEGER(int64) :: i,j,k,n
-  REAL(real64) :: dt, t_end, t, dt_out, t_out, rs, r2, r3
-  REAL(real64), PARAMETER :: theta = 1
-  REAL(real64), DIMENSION(:), ALLOCATABLE :: m
-  REAL(real64), DIMENSION(:,:), ALLOCATABLE :: r,v,a
-  REAL(real64), DIMENSION(3) :: rji
-  type(particle3d), allocatable :: p(:)               !Particles of the problem.
+  REAL(real64) :: dt, t_end, t, dt_out, t_out, rs
+  REAL(real64), PARAMETER :: theta = 1.0
+  !REAL(real64), DIMENSION(:), ALLOCATABLE :: m
+  !REAL(real64), DIMENSION(:,:), ALLOCATABLE :: r,v
+  !type(vector3d), allocatable :: a(:)
+  !type(particle3d), allocatable :: p(:)               !Particles of the problem.
   
   CONTAINS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -22,12 +22,21 @@ module barneshut
   !! variable apuntada por goal
   !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE Calculate_Ranges(goal)
+  SUBROUTINE Calculate_Ranges(goal, p)
     TYPE(CELL),POINTER :: goal
     REAL(real64), DIMENSION(3) :: mins,maxs,medios
     REAL(real64) :: span
-    mins = MINVAL(r,DIM=1)
-    maxs = MAXVAL(r,DIM=1)
+    type(particle3d), allocatable :: p(:)
+    
+    REAL(real64), ALLOCATABLE, DIMENSION(:,:) :: positions
+    ALLOCATE(positions(SIZE(p), 3))
+    
+    do i = 1, size(p)
+       positions(i, :) = [p(i)%p%x, p(i)%p%y, p(i)%p%z]
+    end do
+    
+    mins = MINVAL(positions,DIM=1)
+    maxs = MAXVAL(positions,DIM=1)
     ! Al calcular span le sumo un 10% para que las
     ! particulas no caigan justo en el borde
     span = MAXVAL(maxs - mins) * 1.1
@@ -53,8 +62,8 @@ module barneshut
   !! las 8. Las celdas vac´ıas se borran al final del todo, cuando
   !! todo el ´arbol ha sido ya creado.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  RECURSIVE SUBROUTINE Find_Cell(root,goal,part)
-    REAL(real64), DIMENSION(3) :: part
+  RECURSIVE SUBROUTINE Find_Cell(root,goal,p)
+    type(particle3d), intent(in) :: p
     TYPE(CELL),POINTER :: root,goal,temp
     INTEGER(int64) :: i,j,k
     SELECT CASE (root%type)
@@ -62,8 +71,8 @@ module barneshut
        out: DO i = 1,2
           DO j = 1,2
              DO k = 1,2
-                IF (Belongs(part,root%subcell(i,j,k)%ptr)) THEN
-                   CALL Find_Cell(root%subcell(i,j,k)%ptr,temp,part)
+                IF (Belongs(p,root%subcell(i,j,k)%ptr)) THEN
+                   CALL Find_Cell(root%subcell(i,j,k)%ptr,temp,p)
                    goal => temp
                    EXIT out
                 END IF
@@ -86,19 +95,20 @@ module barneshut
   !! su lugar las dos particulas (la que originalmente
   !! estaba, y la nueva).
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  RECURSIVE SUBROUTINE Place_Cell(goal,part,n)
+  RECURSIVE SUBROUTINE Place_Cell(goal,p,n)
     TYPE(CELL),POINTER :: goal,temp
-    REAL(real64), DIMENSION(3) :: part
+    !REAL(real64), DIMENSION(3) :: part
+    type(particle3d), intent(in) :: p
     INTEGER(int64) :: n
     SELECT CASE (goal%type)
     CASE (0)
        goal%type = 1
-       goal%part = part
+       goal%p = p
        goal%pos = n
     CASE (1)
        CALL Crear_Subcells(goal)
-       CALL Find_Cell(goal,temp,part)
-       CALL Place_Cell(temp,part,n)
+       CALL Find_Cell(goal,temp,p)
+       CALL Place_Cell(temp,p,n)
     CASE DEFAULT
        print*,"SHOULD NOT BE HERE. ERROR!"
     END SELECT
@@ -120,10 +130,10 @@ module barneshut
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   SUBROUTINE Crear_Subcells(goal)
     TYPE(CELL), POINTER :: goal
-    REAL(real64),DIMENSION(3) :: part
+    type(particle3d) :: p
     INTEGER(int64) :: i,j,k,n
     INTEGER(int64), DIMENSION(3) :: octant
-    part = goal%part
+    p = goal%p
     goal%type=2
     DO i = 1,2
        DO j = 1,2
@@ -132,8 +142,8 @@ module barneshut
              ALLOCATE(goal%subcell(i,j,k)%ptr)
              goal%subcell(i,j,k)%ptr%range%min = Calcular_Range (int(0, int64),goal,octant)
              goal%subcell(i,j,k)%ptr%range%max = Calcular_Range (int(1, int64),goal,octant)
-             IF (Belongs(part,goal%subcell(i,j,k)%ptr)) THEN
-                goal%subcell(i,j,k)%ptr%part = part
+             IF (Belongs(p,goal%subcell(i,j,k)%ptr)) THEN
+                goal%subcell(i,j,k)%ptr%p = p
                 goal%subcell(i,j,k)%ptr%type = 1
                 goal%subcell(i,j,k)%ptr%pos = goal%pos
              ELSE
@@ -174,16 +184,16 @@ module barneshut
   !!
   !! Utilizada por FIND_CELL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION Belongs (part,goal)
-    REAL(real64), DIMENSION(3) :: part
+  FUNCTION Belongs (p,goal)
+    type(particle3d) :: p
     TYPE(CELL), POINTER :: goal
     LOGICAL :: Belongs
-    IF (part(1) >= goal%range%min(1) .AND. &
-         part(1) <= goal%range%max(1) .AND. &
-         part(2) >= goal%range%min(2) .AND. &
-         part(2) <= goal%range%max(2) .AND. &
-         part(3) >= goal%range%min(3) .AND. &
-         part(3) <= goal%range%max(3)) THEN
+    IF (p%p%x >= goal%range%min(1) .AND. &
+         p%p%x < goal%range%max(1) .AND. &
+         p%p%y >= goal%range%min(2) .AND. &
+         p%p%y < goal%range%max(2) .AND. &
+         p%p%z >= goal%range%min(3) .AND. &
+         p%p%z < goal%range%max(3)) THEN
        Belongs = .TRUE.
     ELSE
        Belongs = .FALSE.
@@ -274,27 +284,32 @@ module barneshut
   !! Nos calcula para todas las celdas que cuelgan
   !! de "goal" su masa y su center-of-mass.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  RECURSIVE SUBROUTINE Calculate_masses(goal)
+  RECURSIVE SUBROUTINE Calculate_masses(goal, p)
     TYPE(CELL),POINTER :: goal
     INTEGER(int64) :: i,j,k
     REAL(real64) :: mass
-    REAL(real64), DIMENSION(3) :: c_o_m
+    type(point3d), allocatable :: c_o_m
+    type(particle3d), intent(inout) :: p(:)
     goal%mass = 0
-    goal%c_o_m = 0
+    goal%c_o_m%x = 0
+    goal%c_o_m%y = 0
+    goal%c_o_m%z = 0
     SELECT CASE (goal%type)
     CASE (1)
-       goal%mass = m(goal%pos)
-       goal%c_o_m = r(goal%pos,:)
+       goal%mass = goal%p%m
+       goal%c_o_m%x = goal%p%p%x
+       goal%c_o_m%y = goal%p%p%y
+       goal%c_o_m%z = goal%p%p%z
     CASE (2)
        DO i = 1,2
           DO j = 1,2
              DO k = 1,2
                 IF (ASSOCIATED(goal%subcell(i,j,k)%ptr)) THEN
-                   CALL Calculate_masses(goal%subcell(i,j,k)%ptr)
+                   CALL Calculate_masses(goal%subcell(i,j,k)%ptr, p)
                    mass = goal%mass
                    goal%mass = goal%mass + goal%subcell(i,j,k)%ptr%mass
-                   goal%c_o_m = (mass * goal%c_o_m + &
-                        goal%subcell(i,j,k)%ptr%mass * goal%subcell(i,j,k)%ptr%c_o_m) / goal%mass
+                   goal%c_o_m = DEBUGGERPRO9000B((mass * goal%c_o_m + &
+                        goal%subcell(i,j,k)%ptr%mass * goal%subcell(i,j,k)%ptr%c_o_m) / goal%mass)
                 END IF
              END DO
           END DO
@@ -309,11 +324,15 @@ module barneshut
   !! Se sirve de la funcion Calculate_forces_aux que es la
   !! que en realidad hace los calculos para cada particula
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE Calculate_forces(head)
+  SUBROUTINE Calculate_forces(head, n, p, rji, a)
     TYPE(CELL),POINTER :: head
+    integer(int64), intent(in) :: n
     INTEGER(int64) :: i,j,k,start,end
+    type(particle3d), intent(inout) :: p(:)
+    type(vector3d), intent(inout) :: rji
+    type(vector3d), intent(inout) :: a(:)
     DO i = 1,n
-       CALL Calculate_forces_aux(i,head)
+       CALL Calculate_forces_aux(i,head, p, rji, a)
     END DO
   END SUBROUTINE Calculate_forces
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -335,17 +354,23 @@ module barneshut
   !! de tree y para cada una de ellas llamar recursivamente
   !! a Calculate_forces_aux
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  RECURSIVE SUBROUTINE Calculate_forces_aux(goal,tree)
+  RECURSIVE SUBROUTINE Calculate_forces_aux(goal,tree, p, rji, a)
     TYPE(CELL),POINTER :: tree
     INTEGER(int64) :: i,j,k,goal
     REAL(real64) :: l,D
+    type(vector3d), intent(inout) :: rji
+    real(real64) :: r2, r3
+    type(particle3d), intent(inout) :: p(:)
+    type(vector3d), intent(inout) :: a(:)
+
+    
     SELECT CASE (tree%type)
     CASE (1)
        IF (goal .NE. tree%pos) THEN
-          rji = tree%c_o_m - r(goal,:)
-          r2 = SUM(rji**2)
+          rji = tree%c_o_m - p(goal)%p
+          r2 = rji%x**2 + rji%y**2 + rji%z**2
           r3 = r2 * SQRT(r2)
-          a(goal,:) = a(goal,:) + m(tree%pos) * rji / r3
+          a(goal) = a(goal) + (p(tree%pos)%m * rji / r3)
        END IF
     CASE (2)
        !! El rango tiene el mismo span en las 3 dimensiones
@@ -353,19 +378,19 @@ module barneshut
        !! para calcular el lado de la celda (en este caso la
        !! dimension 1)
        l = tree%range%max(1) - tree%range%min(1)
-       rji = tree%c_o_m - r(goal,:)
-       r2 = SUM(rji**2)
+       rji = tree%c_o_m - p(goal)%p
+       r2 = rji%x**2 + rji%y**2 + rji%z**2
        D = SQRT(r2)
        IF (l/D < theta) THEN
           !! Si conglomerado, tenemos que ver si se cumple l/D < @
           r3 = r2 * D
-          a(goal,:) = a(goal,:) + tree%mass * rji / r3
+          a(goal) = a(goal) + (tree%mass * rji / r3)
        ELSE
           DO i = 1,2
              DO j = 1,2
                 DO k = 1,2
                    IF (ASSOCIATED(tree%subcell(i,j,k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal,tree%subcell(i,j,k)%ptr)
+                      CALL Calculate_forces_aux(goal,tree%subcell(i,j,k)%ptr, p, rji, a)
                    END IF
                 END DO
              END DO
