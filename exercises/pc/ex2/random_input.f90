@@ -14,7 +14,9 @@ PROGRAM random_input
   CHARACTER(len = 50) :: input  !Input file name for initial data
   INTEGER :: io_status !Variable to check the status of I/O operations
 
-  input = 'input.dat' !Assigning input file name
+  !Read the input file name from the user
+  PRINT*, "Insert the input file name: "
+  READ*, input
   
   CALL date_and_time(values = values) !Get the current date and time
   CALL random_seed(size = k) !Get the size of the random seed
