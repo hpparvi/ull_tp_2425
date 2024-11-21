@@ -20,8 +20,8 @@ directory = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex2'
 
 os.chdir(directory)
 
-N_ic = 5
-create_ic = True
+N_ic = 10
+create_ic = False
 update_pars = True
 make = False
 execute = True
@@ -31,8 +31,7 @@ fnum = 1
 
 
 dt, dt_out, t_end = 0.01, 10, 10
-epsilon = 0.1
-theta = 1
+epsilon = 0.001
 
 # input_file = "data/stars.txt" 
 input_file = "data/random_bodies.txt"
@@ -44,8 +43,7 @@ lines_custom = ["# Simulation parameters",
                 "dt = %.2f       # Time step"%dt,
                 "dt_out = %.2f    # Printing time step"%dt_out,
                 "t_end = %.2f     # Final execution time"%t_end, 
-                "epsilon = %.5f   # Softening scale"%epsilon,
-                "theta = %.1f    # l/D ratio compared to theta"%theta,
+                "epsilon = %.2f   # Softening scale"%epsilon,
                 "",
                 "# File names",
                 "input_file = \"%s\""%input_file,

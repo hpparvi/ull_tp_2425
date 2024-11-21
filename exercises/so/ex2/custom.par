@@ -2,10 +2,11 @@
 dt = 0.01       # Time step
 dt_out = 10.00    # Printing time step
 t_end = 10.00     # Final execution time
-epsilon = 0.10   # Softening scale
+epsilon = 0.10000   # Softening scale
+theta = 1.0    # l/D ratio compared to theta
 
 # File names
 input_file = "data/random_bodies.txt"
-create_bodies = .False. 
-N_bodies = 10 
+create_bodies = .True. 
+N_bodies = 5 
 output_file = "output/output.txt"
