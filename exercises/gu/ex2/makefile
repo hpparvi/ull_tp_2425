@@ -7,9 +7,6 @@ all: ex2
 ex2 : $(OBJECTS) ex2.o
 	$(FC) -o $@ $(OBJECTS) ex2.o
 
-try : $(OBJECTS) try.o
-	$(FC) -o $@ $(OBJECTS) try.o
-
 particulas : $(OBJECTS) particulas.o
 	$(FC) -o $@ $(OBJECTS) particulas.o
 	./particulas

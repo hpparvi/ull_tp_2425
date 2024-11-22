@@ -1,6 +1,6 @@
 PROGRAM ex2
   USE, INTRINSIC :: iso_fortran_env
-  !$ use omp_lib
+  use omp_lib
   USE geometry
   USE particle
   USE tree
@@ -43,8 +43,6 @@ PROGRAM ex2
   END DO
   CLOSE(3)
 
-  !$omp parallel private(i) shared(parts)
-
   !! Initializing the head node
   ALLOCATE(head)
   CALL calculate_ranges(parts, head)
@@ -74,12 +72,12 @@ PROGRAM ex2
 
   DO WHILE (t .LE. t_end)
 
-     !$ omp do
-     do i = 1, n
-        parts(i)%v = parts(i)%v + aa(i) * (dt/2.)
-        parts(i)%p = parts(i)%p + parts(i)%v * dt
-     end do
-     !$ omp end do
+     !$omp parallel shared(parts, aa, dt)
+     !$omp workshare
+     parts%v = parts%v + aa * (dt/2.)
+     parts%p = parts%p + parts%v * dt
+     !$omp end workshare
+     !$omp end parallel
 
      !! Redo the tree
      call delete_tree(head)
@@ -100,12 +98,11 @@ PROGRAM ex2
      aa = vector3d(0.,0.,0.)
      call calculate_forces(head, aa, parts, theta)
 
-     !$ omp do
-     do i = 1, n
-        parts(i)%v = parts(i)%v + aa(i) * (dt/2.)
-     end do
-     !$ omp end do
-     !$ omp end parallel
+     !$omp parallel shared(parts, aa, dt)
+     !$omp workshare
+     parts%v = parts%v + aa * (dt/2.)
+     !$omp end workshare
+     !$omp end parallel
      t_out = t_out + dt
      IF (t_out .GE. dt_out) THEN
         WRITE(4, fmt='(F11.3)', advance='no') t

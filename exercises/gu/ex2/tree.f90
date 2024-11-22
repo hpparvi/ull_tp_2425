@@ -1,5 +1,6 @@
 MODULE tree
   USE iso_fortran_env
+  use omp_lib
   USE geometry
   USE particle
   IMPLICIT NONE
@@ -325,7 +326,7 @@ logical FUNCTION Belongs (part, goal)
                         goal%subcell(i,j,k)%ptr%mass * (goal%subcell(i,j,k)%ptr%center_of_mass - zero)) &
                         &/ goal%mass
 
-                   goal%center_of_mass = point3d(c_o_m%xx, c_o_m%yy, c_o_m%zz) ! this is what we spanish call a ñapa
+                   goal%center_of_mass = point3d(c_o_m%xx, c_o_m%yy, c_o_m%zz) ! this is what we spanish call a chapuza
                 END IF
              END DO
           END DO
@@ -413,9 +414,11 @@ logical FUNCTION Belongs (part, goal)
     real(real64), intent(in) :: theta
     INTEGER :: i, n
     n = size(aa)
+    !$omp do
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, parts, aa, theta)
     END DO
+    !$omp end do
   END SUBROUTINE Calculate_forces
 
 
