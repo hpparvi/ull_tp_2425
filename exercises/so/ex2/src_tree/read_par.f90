@@ -1,7 +1,7 @@
 module parameter_reader
     implicit none
     ! Declare parameter variables
-    real :: dt, dt_out, t_end, epsilon, theta
+    real :: dt, dt_out, t_end, epsilon, theta, radius
     character(len=100) :: input_file, output_file
     logical :: create_bodies
     integer :: N_bodies
@@ -50,6 +50,8 @@ contains
                     read(line, *) dummy_one, dummy_two, create_bodies
                 case ("N_bodies")
                    read(line, *) dummy_one, dummy_two, N_bodies
+                case ("radius")
+                   read(line, *) dummy_one, dummy_two, radius
                 case ("epsilon")
                    read(line, *) dummy_one, dummy_two, epsilon
                 case ("theta")

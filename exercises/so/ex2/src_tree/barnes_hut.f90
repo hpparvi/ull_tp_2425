@@ -39,8 +39,6 @@ CONTAINS
 
     mins = [MINVAL([p_arr(:)%p%x]), MINVAL([p_arr(:)%p%y]), MINVAL([p_arr(:)%p%z])]
     maxs = [MAXVAL([p_arr(:)%p%x]), MAXVAL([p_arr(:)%p%y]), MAXVAL([p_arr(:)%p%z])]
-    !mins = MINVAL(p_arr(:)%p,DIM=1)
-    !maxs = MAXVAL(p_arr(:)%p,DIM=1)
     ! Adding a 10% to the span to avoid particles on borders
     span = MAXVAL(maxs - mins) * 1.1
     medios = (maxs + mins) / 2.0
@@ -270,14 +268,14 @@ CONTAINS
   ! the cell head. Real calculations are performed by
   ! the recursive subroutine Calculate_forces_aux()
 
-  SUBROUTINE Calculate_forces(head, p_arr, n, theta)
+  SUBROUTINE Calculate_forces(head, p_arr, n, theta, epsilon)
     TYPE(CELL),POINTER :: head
     type(particle), dimension(:) :: p_arr
     INTEGER :: i, n
-    real :: theta
+    real, intent(in) :: theta, epsilon
     
     DO i = 1, n
-       CALL Calculate_forces_aux(i,head, p_arr, theta)
+       CALL Calculate_forces_aux(i,head, p_arr, theta, epsilon)
     END DO
   END SUBROUTINE Calculate_forces
 
@@ -294,20 +292,26 @@ CONTAINS
   ! - if the cell is close to the goal particle (l/D>theta), all subcells
   !   under the cell have to be considered, calling the function recursively.
 
-  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p_arr, theta)
+  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p_arr, theta, epsilon)
     TYPE(CELL), POINTER :: tree
     INTEGER :: i, j, k, goal
     type(particle), dimension(:) :: p_arr
-    REAL :: l, D, r3
-    real, intent(in) :: theta
+    REAL :: l, D, r
+    real, intent(in) :: theta, epsilon
     type(vector3d) :: rji_v
     
     SELECT CASE (tree%type)
     CASE (1)
        IF (goal .NE. tree%pos) THEN ! not considering the goal particle for calculations!
           rji_v = vecpp(p_arr(goal)%p, tree%c_o_m)
-          r3 = norm(rji_v)**3
-          p_arr(goal)%a = p_arr(goal)%a + p_arr(tree%pos)%m * rji_v / r3
+          r = norm(rji_v)
+          p_arr(goal)%a = p_arr(goal)%a + p_arr(tree%pos)%m * rji_v /((r**2 + epsilon**2) * r)
+          !
+!
+! CHECK ALL THIS NO GRAVITATIONAL SOFTENING HERE!!!
+!
+
+          !
        END IF
     CASE (2)
        ! The span of the range is the same in every dimension, so dim1 is chosen for example
@@ -316,8 +320,8 @@ CONTAINS
        D = norm(rji_v)
        ! if far enough to approximate by center of mass
        IF (l/D < theta) THEN
-          r3 = D**3
-          p_arr(goal)%a = p_arr(goal)%a + tree%mass * rji_v / r3
+          !r3 = D**3
+          p_arr(goal)%a = p_arr(goal)%a + tree%mass * rji_v / ((D**2 + epsilon**2) * D)
        ! if not, go through all subcells recursively
        ELSE
           DO i = 1,2
@@ -325,7 +329,7 @@ CONTAINS
                 DO k = 1,2
                    ! empty cells have been deleted so we can avoid them
                    IF (ASSOCIATED(tree%subcell(i,j,k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal,tree%subcell(i,j,k)%ptr, p_arr, theta)
+                      CALL Calculate_forces_aux(goal,tree%subcell(i,j,k)%ptr, p_arr, theta, epsilon)
                    END IF
                 END DO
              END DO
@@ -357,11 +361,11 @@ CONTAINS
 !-------------------------------------------------------------  
   ! Make_Tree calls all previous functions to make the tree from scratch
   
-  SUBROUTINE Make_Tree(root, p_arr, n, theta)
+  SUBROUTINE Make_Tree(root, p_arr, n, theta, epsilon)
     type(CELL), pointer :: root, temp_cell
     type(particle), dimension(:) :: p_arr
     INTEGER :: n, i
-    real, intent(in) :: theta
+    real, intent(in) :: theta, epsilon
     
     ! calculates its min and max values
     CALL Calculate_Ranges(root, p_arr)
@@ -381,7 +385,7 @@ CONTAINS
     do i = 1,n
      p_arr(i)%a = vector3d(0,0,0)
     end do
-    CALL Calculate_forces(root, p_arr, n, theta)
+    CALL Calculate_forces(root, p_arr, n, theta, epsilon)
   END SUBROUTINE Make_Tree
 
 End MODULE barnes_hut

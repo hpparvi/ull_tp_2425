@@ -20,17 +20,19 @@ directory = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex2'
 
 os.chdir(directory)
 
+tree = True
+
 N_ic = 5
-create_ic = True
+create_ic = False
 update_pars = True
 make = False
 execute = True
 ploteo = True
+d3 = True
 fnum = 1
 
 
-
-dt, dt_out, t_end = 0.01, 10, 10
+dt, dt_out, t_end = 0.01, 10, 100
 epsilon = 0.1
 theta = 1
 
@@ -38,6 +40,7 @@ theta = 1
 input_file = "data/random_bodies.txt"
 create_bodies = create_ic
 N_bodies = N_ic
+radius = 10
 output_file = "output/output.txt"
 
 lines_custom = ["# Simulation parameters", 
@@ -51,6 +54,7 @@ lines_custom = ["# Simulation parameters",
                 "input_file = \"%s\""%input_file,
                 "create_bodies = .%s. "%create_bodies,
                 "N_bodies = %i "%N_bodies,
+                "radius = %.f"%radius,
                 "output_file = \"%s\""%output_file]
 
 if update_pars:
@@ -65,23 +69,59 @@ if execute:
     os.system("./ex2 custom.par")
 
 # Data reading and plotting
+
+
+
 if ploteo:
     data  = np.loadtxt(output_file)
     plt.close(fnum)
     
-    fig, ax = plt.subplots(num = fnum, figsize = (6,6))
+    if d3 == False:
+        fig, ax = plt.subplots(2,2, num = fnum, figsize = (15,15))
+    if d3:
+        fig, ax = plt.subplots(num = fnum, figsize = (10,12), subplot_kw= {'projection': '3d'})
+        
     for i in range(N_bodies):
-        ax.plot(data[:,1+3*i],  data[:,2+3*i], color = plt.colormaps['tab10'](i), marker = '+', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+        if N_bodies <=10:
+            color = plt.colormaps['tab10'](i)
+        else:
+            color = 'black'
+        
+        if d3 == False:
+            ax[0,0].plot(data[:,1+3*i],  data[:,2+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+            ax[0,1].plot(data[:,2+3*i],  data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+            ax[1,0].plot(data[:,1+3*i],  data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+        if d3:
+            ax.plot(data[:,1+3*i],  data[:,2+3*i], data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+
+    for i in range(2):
+        for j in range(2):
+            if d3 == False:
+                ax[i,j].minorticks_on()
+                ax[i,j].grid()
+                ax[i,j].set_xlim(-radius,radius)
+                ax[i,j].set_ylim(-radius,radius)
+
+    fig.suptitle('N-body sim with $\\epsilon$=%.1e\nTotal time: %.2f\nTotal number of iterations: %i\nBarnes-Hut: %s     $\\theta$=%.2f'%(epsilon,t_end, t_end/dt, tree, theta))
+    if d3 == False:
+        ax[0,0].set_xlabel('x')
+        ax[0,1].set_xlabel('y')
+        ax[1,0].set_xlabel('x')
+        ax[0,0].set_ylabel('y')
+        ax[0,1].set_ylabel('z')
+        ax[1,0].set_ylabel('z')
+    if d3:
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        ax.set_xlim(-radius, radius)
+        ax.set_ylim(-radius, radius)
+        ax.set_zlim(-radius, radius)
+        ax.minorticks_on()
+        ax.grid()
     
-    ax.minorticks_on()
-    ax.grid()
-
-ax.set_title('N-body sim with $\\epsilon$=%.1e\nTotal time: %.2f\nTotal number of iterations: %i'%(epsilon,t_end, t_end/dt))
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-
-ax.set_xlim(-1,1)
-ax.set_ylim(-1,1)
-
-ax.legend()
-plt.tight_layout()
+    if N_bodies <=10:
+        if d3 == False:
+            ax[1,0].legend()
+        
+    plt.tight_layout()
