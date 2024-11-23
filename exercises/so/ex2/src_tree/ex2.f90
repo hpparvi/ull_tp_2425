@@ -59,7 +59,8 @@ PROGRAM main
     print*, "  -  input_file = ", input_file
     print*, "  -  create_bodies = ", create_bodies
     if (create_bodies .eqv. .true.) then
-    print*, "  -  N_bodies = ", N_bodies
+       print*, "  -  N_bodies = ", N_bodies
+       print*, "  -  radius = ", radius
  end if
     print*, "  -  output_file = ", output_file
 
@@ -68,7 +69,7 @@ PROGRAM main
     ! if a new file with the positions of N_bodies is desired,
     ! the create_init_conds routine creates it with the desired name
     if (create_bodies .eqv. .true.) then
-       call create_init_conds(input_file, N_bodies)
+       call create_init_conds(input_file, N_bodies, radius)
     end if
     
     ! Open the file with initial data
@@ -132,14 +133,14 @@ print*, "-------------------------------------------------------------"
 
   ! ------------------------------------------------------------
   ! ------------------------------------------------------------
-  ! Block 2: CALCULATIONS. First step creation of tree
+  ! Block 2: CALCULATIONS. First step, creation of tree
   ! ------------------------------------------------------------
   ! ------------------------------------------------------------
 
 ! Initialize head node
   ALLOCATE(head)
   ! Creation of tree
-  CALL Make_Tree(head, partics, n, theta)
+  CALL Make_Tree(head, partics, n, theta, epsilon)
   
 !---------------------------------------
 ! Main loop
@@ -154,7 +155,7 @@ print*, "-------------------------------------------------------------"
      partics(:)%p = partics(:)%p + (partics(:)%v * dt)
      ! positions have changed so the tree has to be rebuilt
      CALL Delete_Tree(head)
-     CALL Make_Tree(head, partics, n, theta)
+     CALL Make_Tree(head, partics, n, theta, epsilon)
      
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
      t_out = t_out + dt
