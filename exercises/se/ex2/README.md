@@ -18,18 +18,23 @@ animation.
 =========== TO COMPILE AND RUN ===========
 
 First, ALWAYS do:
->> make clean
+
+> make clean
+
 to remove previous compilations. 
 
 
 For non-parallel version, use the regular makefile, by writing in
 your terminal either:
->> make 
+
+> make
+
 or: 
->> make -f makefile
+
+> make -f makefile
 
 For parallelized version, use the corresponding makefile by writing:
->> make -f makefile_parallel
+> make -f makefile_parallel
 
 Both should run just fine, as the parallel sections are written
 with magic commands that will be interpreted as comments if the flag
@@ -37,14 +42,17 @@ with magic commands that will be interpreted as comments if the flag
 makefiles account for. 
 
 To run the exercise, use:
->> ./ex2 
-or 
->> make test
+> ./ex2
+
+or
+
+> make test
+
 as usual. 
 
 To compile the copy of exercise 1 for the elapsed time tests, do make 
 clean and then:
->> make -f makefile_ex1
+> make -f makefile_ex1
 
 
 =========== Discussion of parallelization ===========
@@ -91,46 +99,25 @@ writing to file block. I then wrote down the results manually.
 
 These are the results on a table:
 
-|     Case 1: no strategy     |       |       |       |       |       |                      
-|
+|     Case 1: no strategy     |       |       |       |       |       |                      |
 |:---------------------------:|:-----:|:-----:|:-----:|:-----:|:-----:|:--------------------:|
-| N = 3                       | 0.049 | 0.056 | 0.057 | 0.053 | 0.057 | 
-0.054 &plusmn; 0.003 |
-| N = 20                      | 0.147 | 0.153 | 0.153 | 0.153 | 0.153 | 
-0.152 &plusmn; 0.002 |
-| N = 50                      | 0.762 | 0.766 | 0.767 | 0.768 | 0.762 | 
-0.765 &plusmn; 0.003 |
-| N = 80                      | 1.899 | 1.893 | 1.908 | 1.903 | 1.913 | 
-1.903 &plusmn; 0.007 |
-| N = 150                     | 6.587 | 6.584 | 6.587 | 6.581 | 6.568 | 
-6.581 &plusmn; 0.007 |
-| N = 400                     | 46.37 | 46.39 | 46.34 | 46.38 | 46.51 |  
-46.40 &plusmn; 0.06 |
-|      Case 2: Barnes-Hut     |       |       |       |       |       |                      
-|
-| N = 3                       | 0.172 | 0.172 | 0.171 | 0.170 | 0.167 | 
-0.170 &plusmn; 0.002 |
-| N = 20                      | 0.263 | 0.260 | 0.261 | 0.261 | 0.260 | 
-0.261 &plusmn; 0.001 |
-| N = 50                      | 0.970 | 0.972 | 0.966 | 0.979 | 0.969 | 
-0.971 &plusmn; 0.004 |
-| N = 80                      | 1.825 | 1.831 | 1.837 | 1.838 | 1.838 | 
-1.834 &plusmn; 0.005 |
-| N = 150                     | 4.790 | 4.838 | 4.788 | 4.819 | 4.825 |  
-4.81 &plusmn; 0.02  |
-| N = 400                     | 23.32 | 23.45 | 23.40 | 23.37 | 23.41 |  
-23.39 &plusmn; 0.04 |
-| Case 3: parallel Barnes-Hut |       |       |       |       |       |                      
-|
-| N = 3                       | 5.119 | 5.080 | 5.071 | 5.070 | 5.075 |  
-5.08 &plusmn; 0.02  |
-| N = 20                      | 0.705 | 0.711 | 0.709 | 0.705 | 0.708 | 
-0.708 &plusmn; 0.002 |
-| N = 50                      | 1.164 | 1.153 | 1.146 | 1.143 | 1.147 | 
-1.151 &plusmn; 0.007 |
-| N = 80                      | 1.590 | 1.581 | 1.575 | 1.603 | 1.596 |  
-1.59 &plusmn; 0.01  |
-| N = 150                     | 2.973 | 2.978 | 2.968 | 2.960 | 2.977 | 
-2.971 &plusmn; 0.007 |
-| N = 400                     | 9.421 | 9.386 | 9.411 | 9.420 | 9.432 |  
-9.41 &plusmn; 0.02  |
+| N = 3                       | 0.049 | 0.056 | 0.057 | 0.053 | 0.057 | 0.054 &plusmn; 0.003 |
+| N = 20                      | 0.147 | 0.153 | 0.153 | 0.153 | 0.153 | 0.152 &plusmn; 0.002 |
+| N = 50                      | 0.762 | 0.766 | 0.767 | 0.768 | 0.762 | 0.765 &plusmn; 0.003 |
+| N = 80                      | 1.899 | 1.893 | 1.908 | 1.903 | 1.913 | 1.903 &plusmn; 0.007 |
+| N = 150                     | 6.587 | 6.584 | 6.587 | 6.581 | 6.568 | 6.581 &plusmn; 0.007 |
+| N = 400                     | 46.37 | 46.39 | 46.34 | 46.38 | 46.51 |  46.40 &plusmn; 0.06 |
+|      Case 2: Barnes-Hut     |       |       |       |       |       |                      |
+| N = 3                       | 0.172 | 0.172 | 0.171 | 0.170 | 0.167 | 0.170 &plusmn; 0.002 |
+| N = 20                      | 0.263 | 0.260 | 0.261 | 0.261 | 0.260 | 0.261 &plusmn; 0.001 |
+| N = 50                      | 0.970 | 0.972 | 0.966 | 0.979 | 0.969 | 0.971 &plusmn; 0.004 |
+| N = 80                      | 1.825 | 1.831 | 1.837 | 1.838 | 1.838 | 1.834 &plusmn; 0.005 |
+| N = 150                     | 4.790 | 4.838 | 4.788 | 4.819 | 4.825 |  4.81 &plusmn; 0.02  |
+| N = 400                     | 23.32 | 23.45 | 23.40 | 23.37 | 23.41 |  23.39 &plusmn; 0.04 |
+| Case 3: parallel Barnes-Hut |       |       |       |       |       |                      |
+| N = 3                       | 5.119 | 5.080 | 5.071 | 5.070 | 5.075 |  5.08 &plusmn; 0.02  |
+| N = 20                      | 0.705 | 0.711 | 0.709 | 0.705 | 0.708 | 0.708 &plusmn; 0.002 |
+| N = 50                      | 1.164 | 1.153 | 1.146 | 1.143 | 1.147 | 1.151 &plusmn; 0.007 |
+| N = 80                      | 1.590 | 1.581 | 1.575 | 1.603 | 1.596 |  1.59 &plusmn; 0.01  |
+| N = 150                     | 2.973 | 2.978 | 2.968 | 2.960 | 2.977 | 2.971 &plusmn; 0.007 |
+| N = 400                     | 9.421 | 9.386 | 9.411 | 9.420 | 9.432 |  9.41 &plusmn; 0.02  |
