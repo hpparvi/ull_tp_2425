@@ -27,7 +27,7 @@ MODULE barnes_hut
      INTEGER          :: type  ! 0 = no particle; 1 = particle; 2 = aggl.
      TYPE(point3d)    :: c_o_m ! center of mass; used when type=2.
      
-     TYPE (CPtr), DIMENSION(2,2,2) :: subcell ! Pointers to each of the 8 subcells
+     TYPE (CPtr), DIMENSION(2,2,2) :: subcell ! Pointers to each of 8 subcells
      
   END TYPE cell
 
@@ -185,8 +185,6 @@ CONTAINS
     goal%type=2  ! Contains more than 1 particle
     
     ! Go through all octants in the cell
-    ! dont parallelize unless already in a parallel section, because
-    ! opening the threads is expensive for the amount of calculations
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
@@ -257,6 +255,7 @@ CONTAINS
     TYPE(CELL), POINTER :: goal
     LOGICAL :: Belongs
 
+    ! If contained within the edges of the cell
     IF ((part%p%x >= goal%range%min_val(1)) .AND. &
          (part%p%x < goal%range%max_val(1)) .AND. &
          (part%p%y >= goal%range%min_val(2)) .AND. &
@@ -290,12 +289,16 @@ CONTAINS
     REAL(real64), DIMENSION(3) :: Calculate_Range, valor_medio
     valor_medio = (goal%range%min_val + goal%range%max_val) / 2.0
     SELECT CASE (what)
+       
+    ! Nothing inside   
     CASE (0)
        WHERE (octant == 1)
           Calculate_Range = goal%range%min_val
        ELSEWHERE
           Calculate_Range = valor_medio
        ENDWHERE
+       
+    ! Particle inside   
     CASE (1)
        WHERE (octant == 1)
           Calculate_Range = valor_medio
@@ -462,21 +465,21 @@ CONTAINS
     INTEGER :: tid, nt
 
     n = SIZE(particles)
+    
+    ! (Parallel block opened in the program)
 
-
-    !(dollarsign)omp parallel private(i, tid, nt) shared(head, particles, a)
     !$ nt = omp_get_num_threads()
     !$ tid = omp_get_thread_num()
 
-    PRINT*, "Thread", tid, "of", nt
-    PRINT*, ""
+    !$ PRINT*, "Thread", tid, "of", nt
+    !$ PRINT*, ""
     
     !$omp do
     DO i = 1,n
        CALL Calculate_forces_aux(i, head, particles, a)
     END DO
     !$omp end do
-    !(dollarsign)omp end parallel
+    
     ! remove the parallel section initialization here if I put it
     ! in the program (try without adding anything to see if it works)
 
