@@ -17,17 +17,11 @@ PROGRAM ex2
   REAL(real64) :: dt, t_end, t, dt_out, t_out
   INTEGER :: time_counter, total_timesteps
   
-  ! Vector quantities (magnitude cubed)
-  REAL(real64) :: r3
-
   ! Particles
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles
 
   ! Accelerations
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: a
-
-  ! Difference vector
-  TYPE(vector3d) :: rji
 
   ! To read the necessary inputs from a file
   INTEGER :: openstatus_input, openstatus_output, readstatus
