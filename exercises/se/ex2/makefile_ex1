@@ -1,0 +1,17 @@
+FC = gfortran
+FCFLAGS = -c
+OBJECTS = geometry.o particle.o ex1_copy.o
+
+all: ex1_copy
+
+ex1_copy : $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
+
+%.o : %.f90
+	$(FC) $(FCFLAGS) $<
+
+clean :
+	rm -f *.o *.mod
+
+test : ex1_copy
+	./ex1_copy

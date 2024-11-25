@@ -27,7 +27,7 @@ MODULE barnes_hut
      INTEGER          :: type  ! 0 = no particle; 1 = particle; 2 = aggl.
      TYPE(point3d)    :: c_o_m ! center of mass; used when type=2.
      
-     TYPE (CPtr), DIMENSION(2,2,2) :: subcell ! Pointers to each of the 8 subcells
+     TYPE (CPtr), DIMENSION(2,2,2) :: subcell ! Pointers to each of 8 subcells
      
   END TYPE cell
 
@@ -182,27 +182,34 @@ CONTAINS
     INTEGER, DIMENSION(3) :: octant
 
     part = goal%part
-    goal%type=2
+    goal%type=2  ! Contains more than 1 particle
+    
+    ! Go through all octants in the cell
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
              octant = (/i,j,k/)
-
+             ! Allocates a pointer: essentially creates the subcell.
              ALLOCATE(goal%subcell(i,j,k)%ptr)
 
+             ! Calculates the ranges of the octant
              goal%subcell(i,j,k)%ptr%range%min_val = Calculate_Range (0,goal,octant)
              goal%subcell(i,j,k)%ptr%range%max_val = Calculate_Range (1,goal,octant)
 
+             ! Check if the particle is inside this octant
              IF (Belongs(part,goal%subcell(i,j,k)%ptr)) THEN
+                ! Update everything to have the cell contain the particle
                 goal%subcell(i,j,k)%ptr%part = part
                 goal%subcell(i,j,k)%ptr%type = 1
                 goal%subcell(i,j,k)%ptr%pos = goal%pos
 
-             ELSE
+             ! No particle in the octant   
+             ELSE 
                 goal%subcell(i,j,k)%ptr%type = 0
 
              END IF
-
+             
+             ! Nullifies the pointers of the subcell 
              CALL Nullify_Pointers(goal%subcell(i,j,k)%ptr)
           END DO
        END DO
@@ -248,6 +255,7 @@ CONTAINS
     TYPE(CELL), POINTER :: goal
     LOGICAL :: Belongs
 
+    ! If contained within the edges of the cell
     IF ((part%p%x >= goal%range%min_val(1)) .AND. &
          (part%p%x < goal%range%max_val(1)) .AND. &
          (part%p%y >= goal%range%min_val(2)) .AND. &
@@ -281,12 +289,16 @@ CONTAINS
     REAL(real64), DIMENSION(3) :: Calculate_Range, valor_medio
     valor_medio = (goal%range%min_val + goal%range%max_val) / 2.0
     SELECT CASE (what)
+       
+    ! Nothing inside   
     CASE (0)
        WHERE (octant == 1)
           Calculate_Range = goal%range%min_val
        ELSEWHERE
           Calculate_Range = valor_medio
        ENDWHERE
+       
+    ! Particle inside   
     CASE (1)
        WHERE (octant == 1)
           Calculate_Range = valor_medio
@@ -450,24 +462,26 @@ CONTAINS
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
     ! OpenMP-related variables
-    INTEGER :: tid=1, nt=0
+    INTEGER :: tid, nt
 
     n = SIZE(particles)
+    
+    ! (Parallel block opened in the program)
 
-
-    !$omp parallel private(i, tid, nt) shared(head, particles, a)
     !$ nt = omp_get_num_threads()
     !$ tid = omp_get_thread_num()
 
-    PRINT*, "Thread", tid, "of", nt
-    PRINT*, ""
+    !$ PRINT*, "Thread", tid, "of", nt
+    !$ PRINT*, ""
     
     !$omp do
     DO i = 1,n
        CALL Calculate_forces_aux(i, head, particles, a)
     END DO
     !$omp end do
-    !$omp end parallel
+    
+    ! remove the parallel section initialization here if I put it
+    ! in the program (try without adding anything to see if it works)
 
   END SUBROUTINE Calculate_forces
 
