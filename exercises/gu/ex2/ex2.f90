@@ -102,9 +102,11 @@ PROGRAM ex2
      CALL calculate_masses(head)
 
      aa = vector3d(0.,0.,0.)
+     !$omp end single
+     
      call calculate_forces(head, aa, parts, theta)
 
-     !$omp end single
+     
      !$omp workshare
      parts%v = parts%v + aa * (dt/2.)
      !$omp end workshare

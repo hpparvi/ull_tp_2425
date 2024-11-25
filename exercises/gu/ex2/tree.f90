@@ -414,13 +414,13 @@ logical FUNCTION Belongs (part, goal)
     real(real64), intent(in) :: theta
     INTEGER :: i, n
     n = size(aa)
-    !$omp parallel private(i) shared(head, parts, aa)
+    !!$omp parallel private(i) shared(head, parts, aa)
     !$omp do
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, parts, aa, theta)
     END DO
     !$omp end do
-    !$omp end parallel
+    !!$omp end parallel
   END SUBROUTINE Calculate_forces
 
 
