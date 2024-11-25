@@ -11,10 +11,16 @@ PROGRAM ex2
   INTEGER :: n=0
   INTEGER :: i, j, stat
   REAL(real64) :: dt, dt_out, t_end, theta = 1., t_out=0., t=0.
+  INTEGER :: start_time, end_time, rate
+  REAL :: elapsed_time
   TYPE(vector3d), ALLOCATABLE :: aa(:)
 
   TYPE(cell), POINTER :: head, temp_cell
 
+  
+  !Start timer
+  call system_clock(count_rate = rate)
+  call system_clock(count = start_time)
 
   OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = stat) !opens input file
   IF (stat/=0) WRITE (*,*) 'Cannot open file ' , filename
@@ -77,7 +83,7 @@ PROGRAM ex2
      parts%v = parts%v + aa * (dt/2.)
      parts%p = parts%p + parts%v * dt
      !$omp end workshare
-     !$omp end parallel
+     !$omp single
 
      !! Redo the tree
      call delete_tree(head)
@@ -98,7 +104,7 @@ PROGRAM ex2
      aa = vector3d(0.,0.,0.)
      call calculate_forces(head, aa, parts, theta)
 
-     !$omp parallel shared(parts, aa, dt)
+     !$omp end single
      !$omp workshare
      parts%v = parts%v + aa * (dt/2.)
      !$omp end workshare
@@ -118,5 +124,10 @@ PROGRAM ex2
 
   CLOSE(4)
 
+  call system_clock(count = end_time)
+
+  elapsed_time = real(end_time-start_time)/real(rate)
+
+  print *, 'Elapsed time: ', elapsed_time, ' seconds'
 
 END PROGRAM ex2
