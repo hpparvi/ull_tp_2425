@@ -36,24 +36,5 @@ contains
     end do
   end subroutine set_acceleration
 
-  !Subroutine to calculate gravitational acceleration on each particle due to others
-  subroutine acceleration(n, dt, p, rji)
-    integer(int64), intent(in) :: n !Number of particles
-    real(real64), intent(in) :: dt  !Time step
-    type(particle3d), intent(inout) :: p(:) !Particles
-    type(vector3d), intent(inout) :: rji !Vector from one particle to another
-
-    !Calculate acceleration between particles
-    do i = 1, n
-       do j = i + 1, n
-          rji = p(j)%p - p(i)%p !Determine vector between particle j and particle i
-          r2 = (norm(rji))**2 !Square of the vector
-          r3 = r2 * sqrt(r2)  !Cube of the vector
-          p(i)%a = p(i)%a + p(j)%m * rji / r3 !Update acceleration on particle i
-          p(j)%a = p(j)%a - p(i)%m * rji / r3 !Update acceleration on particle j
-       end do
-    end do
-  end subroutine acceleration
-
 end module calcs
 

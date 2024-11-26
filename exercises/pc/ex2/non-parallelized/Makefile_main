@@ -1,6 +1,6 @@
 FC = gfortran
 FCFLAGS = -c
-OBJECTS = geometry.o particle.o barnes.o calcs.o ex2.o
+OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex2.o
 
 all: ex2
 
