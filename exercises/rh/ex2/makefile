@@ -1,5 +1,5 @@
 
-FC = gfortran
+FC = gfortran -fopenmp
 FCFLAGS = -c
 OBJECTS = geometry.o particle.o tree.o e2.o
 

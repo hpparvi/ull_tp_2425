@@ -9,12 +9,13 @@ program e2
 
   INTEGER :: i,j,k,n,rc
   REAL (real64) :: dt, t_end, t, dt_out, t_out
-  REAL(real64) :: start_time, end_time, elapsed_time
+  INTEGER :: start_time, end_time, count_rate
+  REAL :: elapsed_time
   REAL(real64), PARAMETER :: theta = 1
   
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
-  CHARACTER(len=*), PARAMETER :: filename = 'init_files/data_input.dat', outname = 'output.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'particle_position.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   ! open the input file
@@ -40,7 +41,7 @@ program e2
   CALL Nullify_Pointers(head) ! null all the pointers first just in case
   
   ! Start the timer
-  call cpu_time(start_time)
+  call system_clock(start_time, count_rate)
 
   ! Create initial tree
   DO i = 1,n
@@ -67,11 +68,16 @@ program e2
   !!!!!!!!!!!!!!!!!!
     t_out = 0.0
     DO  WHILE (t <= t_end)
-    ! update velocities and positions of the particles
+    
+      !$omp parallel
+      ! update velocities and positions of the particles
+      !$OMP WORKSHARE
       particles%v = particles%v + acc * (dt/2.)
       particles%p = particles%p + particles%v * dt
-
-    ! The positions have changed, so we have to remove and initialise the tree again
+      !$OMP END WORKSHARE
+      
+      !The positions have changed, so we have to remove and initialise the tree again
+      !$OMP SINGLE
       CALL Borrar_tree(head) ! remove previous tree
       CALL Calculate_ranges(head, particles) ! calculate head range again
       head%type = 0 
@@ -84,12 +90,15 @@ program e2
       
       CALL Borrar_empty_leaves(head)
       CALL Calculate_masses(head, particles)
+      
       acc = vector3d(0.0,0.0,0.0)
+      !$OMP END SINGLE 
       CALL Calculate_forces(head,particles,acc)
       
       !$OMP WORKSHARE
       particles%v = particles%v + acc * (dt/2.)
-      !$OMP END WORKSHARE []
+      !$OMP END WORKSHARE
+      !$omp end parallel
       
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
@@ -102,12 +111,13 @@ program e2
   CLOSE(UNIT=4)
   
     ! End the timer
-  call cpu_time(end_time)
+  call system_clock(end_time)
 
   ! Calculate elapsed time
-  elapsed_time = end_time - start_time
-
+  elapsed_time = REAL(end_time-start_time) / REAL(count_rate)
+  
   ! Output the elapsed time
-  print *, "Elapsed time: ", elapsed_time, " seconds"
+  PRINT *, "The elapsed time is ", &
+       elapsed_time, " seconds"
 
 end program e2

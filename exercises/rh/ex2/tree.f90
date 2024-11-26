@@ -430,11 +430,12 @@ module tree_algorithm
     TYPE(CELL), POINTER, INTENT(in) :: head
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
-    INTEGER :: i, n, nt = 3, tid = 2 
+    INTEGER :: i, n, nt, tid 
     n = SIZE(particles) ! number of particles
    
     !print *, "Before parallel"
-    !$omp parallel private(nt, tid, i) shared(head,particles,acc)
+    !!$omp parallel private(nt, tid, i) shared(head,particles,acc)
+    
     !$ nt = omp_get_num_threads()
     !$ tid = omp_get_thread_num()
     !$omp do
@@ -444,7 +445,7 @@ module tree_algorithm
        !   & "thread ", tid, " of ", nt
     END DO
     !$omp end do
-    !$omp end parallel
+    !!$omp end parallel
     !print *, "After parallel"
   END SUBROUTINE Calculate_forces
 
