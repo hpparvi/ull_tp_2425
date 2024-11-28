@@ -8,8 +8,9 @@ PROGRAM random_input
   INTEGER(INT32) :: values(1:8), k !Variables for storing data and time info and holding the size of the random seed
   INTEGER(INT32), allocatable :: seed(:) !Random seed
   TYPE(particle3d), allocatable :: p(:) !Particles
-  REAL(REAL64) :: rx, ry, rz, dt, t_end, dt_out, theta !Random coordinates for the position of particles (x, y, z), time step, final time, output time step and parameter that
-                                                       !determines the accuracy of the simulation
+  REAL(REAL64) :: rx, ry, rz, vx, vy, vz !Random coordinates for the position (x, y, z) and velocity (vx, vy, vz) of the particles
+  REAL(REAL64) :: mass, M !Random mass of a particle and total mass of the particles
+  REAL(REAL64) :: dt, t_end, dt_out, theta !Time step, final time, output time step and parameter that determines the accuracy of the simulation
 
   CHARACTER(len = 50) :: input  !Input file name for initial data
   INTEGER :: io_status !Variable to check the status of I/O operations
@@ -50,8 +51,18 @@ PROGRAM random_input
   !Allocate memory for particles array
   ALLOCATE(p(n))
 
-  !Initialize the mass of each particle
-  p%m = 1.0/n
+  !Initialize the total mass of the particles
+  M = 0.0
+
+  !Generate random masses and calculate the total mass of the particles
+  DO i = 1, n
+     CALL random_number(mass) !Generate a random number for the mass
+     p(i)%m = mass !Assign the random mass to each particle
+     M = M + mass  !Sum the contribution of the random mass to the total mass 
+  END DO
+
+  !Normalize the mass of the particles
+  p%m = p%m/M
 
   !Open the input file and check for errors
   OPEN(12, file = input, status = 'replace', action = 'write', iostat = io_status)
@@ -67,27 +78,30 @@ PROGRAM random_input
   
   !Write header for particles properties to the input file
   WRITE(12, "(A5, 7A12)") "Body", "Mass", "x", "y", "z", "vx", "vy", "vz"
-  
+
+  !Generate random positions and velocities for the particles
   DO i = 1, n
-     CALL random_number(rx) !Generate a random number for the x-coordinate
-     p(i)%p%x = rx
-     
      DO
+        CALL random_number(rx) !Generate a random number for the x-coordinate
         CALL random_number(ry) !Generate a random number for the y-coordinate
-        p(i)%p%y = ry
 
         IF ((NORM(vector3d(rx, ry, 0))**2) .LE. 1) EXIT !Ensure the generated coordinates are within a circle in the xy-plane
      END DO
      
      DO
         CALL random_number(rz) !Generate a random number for the z-coordinate
-        p(i)%p%z = rz
+ 
+        CALL random_number(vx) !Generate a random number for the vx-coordinate
+        CALL random_number(vy) !Generate a random number for the vy-coordinate
+        CALL random_number(vz) !Generate a random number for the vz-coordinate
 
+        p(i)%p = REAL(2.0, REAL64) * vector3d(rx, ry, rz) - point3d(1.0, 1.0, 1.0)  !Transform the range of values from (0, 1) to (-1, 1) for having also position negative values
+        p(i)%v = REAL(2.0, REAL64) * vector3d(vx, vy, vz) - vector3d(1.0, 1.0, 1.0) !Transform the range of values from (0, 1) to (-1, 1) for having also velocity negative values
+       
         IF ((NORM(vector3d(rx, ry, rz)))**2 .LE. 1) EXIT !Ensure the generated coordinates are within a sphere
      END DO
-     
 
-     WRITE(12, "(I3, 7X, 7ES12.4)") i, p(i)%m, rx, ry, rz, 0.0, 0.0, 0.0 !Write the index, mass, position and velocity of each particle to the input file
+     WRITE(12, "(I3, 7X, 7ES12.4)") i, p(i)%m, p(i)%p, p(i)%v !Write the index, mass, position and velocity of each particle to the input file
   END DO
 
   CLOSE(12) !Close the input file

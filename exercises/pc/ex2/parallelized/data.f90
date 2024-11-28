@@ -4,7 +4,6 @@ MODULE data
   USE barnes   !Importing the barnes module, where the Barnes-Hut algorithm is defined
   USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
-  !$USE omp_lib !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
   CHARACTER(len = 100) :: input, identifier !Input file name for initial data and identifier of the input file
@@ -135,7 +134,6 @@ CONTAINS
     REAL(REAL64), INTENT(INOUT) :: t   !Current time
     TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
 
-    !$OMP CRITICAL
     WRITE(13, "(F12.2)", ADVANCE = 'no') t !Write the current time to the output file
 
     DO i = 1, n
@@ -143,7 +141,6 @@ CONTAINS
     END DO
 
     WRITE(13, *) !New line for the next set of results
-    !$OMP END CRITICAL
 
   END SUBROUTINE save_data
     

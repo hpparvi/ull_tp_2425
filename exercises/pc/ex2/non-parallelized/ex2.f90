@@ -87,7 +87,14 @@ PROGRAM ex2
 
   CALL system_clock(count = finish)    !Get the current clock counter value and stored it in the finish variable
   elapsed_time = (finish - start)/rate !Calculates the elapsed time in seconds
-  PRINT*, "Time spent on performing the simulation: ", elapsed_time, " s" !Output the elapsed time
+  
+  IF (elapsed_time .GT. 60) THEN
+     PRINT *, "Time spent on performing the simulation: ", floor(elapsed_time/60), "min", &
+         floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+         "s" !Output the elapsed time
+  ELSE
+     PRINT *, "Time spent on performing the simulation: ", elapsed_time, "s"
+  END IF
 
   PRINT*, "Data calculated stored in file: ", output !End of program message
   

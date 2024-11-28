@@ -1,11 +1,11 @@
 FC = gfortran
-FCFLAGS = -c
+FCFLAGS = -c -fopenmp
 OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex2.o
 
 all: ex2
 
 ex2: $(OBJECTS)
-	$(FC) -o $@ $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS) -fopenmp
 
 %.o: %.f90
 	$(FC) $(FCFLAGS) $<

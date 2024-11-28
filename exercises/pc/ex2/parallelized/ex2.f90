@@ -5,7 +5,7 @@ PROGRAM ex2
   USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
   USE data     !Importing the data module, where subroutines to read and save data are defined
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
-  !$USE omp_lib !Importing the omp library to use OpenMP
+  !$ USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
   INTEGER(INT64) :: n !Number of bodies
@@ -47,7 +47,7 @@ PROGRAM ex2
 
   !Open the output file
   CALL open_output(n)
-
+ 
   !Main loop to update properties of particles until final time is reached
   DO WHILE (t .LE. t_end)
      CALL velocity(n, dt, p) !Update the velocities of particles
@@ -77,6 +77,7 @@ PROGRAM ex2
      IF (t_out .GE. dt_out) THEN
         CALL save_data(n, p, t) !Write current time and position of each particle to the output file
         t_out = 0.0 !Reset output time
+        
      END IF
 
      t = t + dt !Increment the current time by the time step
@@ -87,7 +88,14 @@ PROGRAM ex2
 
   CALL system_clock(count = finish)    !Get the current clock counter value and stored it in the finish variable
   elapsed_time = (finish - start)/rate !Calculates the elapsed time in seconds
-  PRINT*, "Time spent on performing the simulation: ", elapsed_time, " s" !Output the elapsed time
+  
+  IF (elapsed_time .GT. 60) THEN
+     PRINT *, "Time spent on performing the simulation: ", floor(elapsed_time/60), "min", &
+         floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+         "s" !Output the elapsed time
+  ELSE
+     PRINT *, "Time spent on performing the simulation: ", elapsed_time, "s"
+  END IF
 
   PRINT*, "Data calculated stored in file: ", output !End of program message
   
