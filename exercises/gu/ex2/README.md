@@ -15,5 +15,6 @@ For 1000 particles, 0.5 seconds:
 - without parallelization: 7.6 seconds
 - with parallelization: 2.2 seconds
 
-For 1000 particles, 10k steps:
-- parallel: 
+For 1000 particles, 1k steps:
+- parallelized: 3.8 seconds
+- not parallelized: 14.3 seconds
