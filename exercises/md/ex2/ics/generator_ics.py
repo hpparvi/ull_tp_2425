@@ -1,5 +1,6 @@
 import numpy as np
 
+
 G = 4.302e-6  # kpc km^2/s^2
 G = 1
 
@@ -7,8 +8,7 @@ G = 1
 class ic:
     def __init__(
         self,
-        file_name,
-        sim_name="test",
+        sim_name,
         dt=0.01,
         dt_out=0.1,
         t_end=15,
@@ -16,7 +16,7 @@ class ic:
         theta=1,
     ):
 
-        self.file_name = file_name
+        self.file_name = 'ics/ic_' + sim_name + '.txt'
         self.sim_name = sim_name
         self.dt = dt
         self.dt_out = dt_out
@@ -28,78 +28,16 @@ class ic:
 
         self.components = True
 
-    def hernquist_sphere(self, N, M_total, a, R_max):
-        """
-        Genera partículas distribuidas siguiendo un perfil de Hernquist.
-
-        Parámetros:
-            N (int): Número de partículas.
-            M_total (float): Masa total del sistema (M_sun).
-            a (float): Parámetro de escala del perfil de Hernquist (kpc).
-            R_max (float): Radio máximo de las posiciones (kpc).
-
-        Retorna:
-            None. Agrega las partículas al atributo `self.X`.
-        """
-
-        def inverse_cdf(fraction, a):
-            """
-            Inversa de la CDF del perfil de Hernquist.
-            """
-            return a * fraction / (1 - fraction)
-
-        # Generar fracciones de masa acumulada uniformemente distribuidas
-        mass_fractions = np.random.uniform(0, 1, N)
-
-        # Calcular radios usando la inversa de la CDF
-        radii = inverse_cdf(mass_fractions, a)
-
-        # Filtrar partículas fuera de R_max
-        radii = radii[radii <= R_max]
-
-        # Generar más partículas si el filtro elimina demasiadas
-        while len(radii) < N:
-            extra_fractions = np.random.uniform(0, 1, N - len(radii))
-            extra_radii = inverse_cdf(extra_fractions, a)
-            radii = np.concatenate((radii, extra_radii[extra_radii <= R_max]))
-        radii = radii[:N]
-
-        # Generar direcciones aleatorias en 3D
-        theta = np.random.uniform(0, np.pi, N)
-        phi = np.random.uniform(0, 2 * np.pi, N)
-
-        x = radii * np.sin(theta) * np.cos(phi)
-        y = radii * np.sin(theta) * np.sin(phi)
-        z = radii * np.cos(theta)
-
-        # Asignar masas iguales a todas las partículas
-        m = np.ones_like(radii) * M_total / N
-
-        # Asignar velocidades iniciales (inicialmente cero)
-        v_x = np.zeros(N)
-        v_y = np.zeros(N)
-        v_z = np.zeros(N)
-
-        # Combinar en un array
-        X = np.column_stack([m, x, y, z, v_x, v_y, v_z])
-
-        # Agregar al atributo de posiciones
-        self.X = np.vstack([self.X, X])
-        self.L = 2 * R_max  # Escala característica del sistema
-
-    def uni_sphere(self, N, R, M_total, V_max):
+    def uni_sphere(self, N, R, M_total, V_max, xyz_0):
         r = np.random.uniform(0, R, size=N)
         theta = np.random.uniform(0, np.pi, size=N)
         phi = np.random.uniform(0, 2 * np.pi, size=N)
 
-        x = r * np.sin(theta) * np.cos(phi)
-        y = r * np.sin(theta) * np.sin(phi)
-        z = r * np.cos(theta)
+        x = r * np.sin(theta) * np.cos(phi) + xyz_0[0]
+        y = r * np.sin(theta) * np.sin(phi) + xyz_0[1]
+        z = r * np.cos(theta) + xyz_0[2]
 
         m = np.ones_like(r) * M_total / len(r)
-        M = np.empty_like(r)
-        for i in range(len(r)):
-            M[i] = np.sum(m[r <= r[i]])
 
         v_x = -V_max * np.sin(theta) * np.cos(phi)
         v_y = -V_max * np.sin(theta) * np.sin(phi)
@@ -108,7 +46,7 @@ class ic:
         X = np.column_stack([m, x, y, z, v_x, v_y, v_z])
 
         self.X = np.vstack([self.X, X])
-        self.L = 2 * R  # Characteristic length scale
+        self.L = 2 * R
 
     def exp_disk(self, N, R_d, z_scale, M_disk):
         r = np.random.exponential(scale=R_d, size=N)
@@ -180,10 +118,31 @@ class ic:
 
 
 if __name__ == "__main__":
-    ic1 = ic("ics/ic_test.txt", theta=1, dt=1e-2, dt_out=1, t_end=100)
-    ic1.uni_sphere(1000, 10, 1000, 0)
-    # ic1.hernquist_sphere(N=1000, M_total=1e12, a=10, R_max=100)
-    # ic1.exp_disk(2000, 20.0, 0.3, 5e10)
-    # ic1.uni_sphere(100, 1e9, 20.0, 1e11, N=100)
-    # ic1.NFW(5932371.0, 20.0, 5e10, 0.3, 10, N=100)
-    ic1.save_file()
+
+    file_name = input("Enter the file name: ")
+    theta = float(input("Enter theta: "))
+    dt = float(input("Enter dt: "))
+    dt_out = float(input("Enter dt_out: "))
+    t_end = float(input("Enter t_end: "))
+
+    ics = ic(file_name, theta=theta, dt=dt, dt_out=dt_out, t_end=t_end)
+
+    num_unispheres = int(input("Enter the number of uniform spheres: "))
+    for i in range(num_unispheres):
+        print(f"Enter parameters for unisphere {i+1}:")
+        N = int(input("  Enter N (particle numbers): "))
+        R = float(input("  Enter R (maximum radius of the unisphere): "))
+        M_total = float(input("  Enter M_total (total mass of the sphere): "))
+        V_max = float(
+            input(
+                "  Enter V_max (maximum velocity in magnitude of a particle in the sphere): "
+            )
+        )
+        xyz_0 = (
+            float(input("  Enter x0: ")),
+            float(input("  Enter y0: ")),
+            float(input("  Enter z0: ")),
+        )
+        ics.uni_sphere(N, R, M_total, V_max, xyz_0)
+
+    ics.save_file()

@@ -4,6 +4,9 @@ from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import numpy as np
+import matplotlib
+
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import utils
@@ -68,10 +71,11 @@ if len(ids) < 15:
     colors = utils.generate_colors(len(ids), cmap='gnuplot_r')
 
 
-# Function to save one image at an specific time of the simulation
+# Function to save one image at a specific time of the simulation
 def save_figure(t):
+    output_dir = './output/images_' + sim_info['simulation_name']
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-    fig.suptitle(f'$t={t* dt_out:.3f}$', fontsize=20)
+    fig.suptitle(f'$t={t * dt_out:.3f}$', fontsize=20)
     # Loop over all the particles types
     for i, particle in enumerate(ids):
         # Distance between the initial and final position of the particle
@@ -111,27 +115,27 @@ def save_figure(t):
     ax[2].set_xlim(y_min, y_max)
     ax[2].set_ylim(z_min, z_max)
     fig.subplots_adjust(top=0.9, bottom=0.15, left=0.07, right=0.99, wspace=0.25)
-    output_dir = './output/images_' + sim_info['simulation_name']
-    os.makedirs(output_dir, exist_ok=True)
+
     fig.savefig(os.path.join(output_dir, f'im_{t:01d}.png'))
     plt.close(fig)
+    del fig, ax
 
 
 def save_figure_nolines(t):
+    output_dir = './output/images_' + sim_info['simulation_name']
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
     fig.suptitle(f'$t={t* dt_out:.3f}$', fontsize=20)
 
     # Loop over all the particles types
-    for i, particle in enumerate(ids):
-        for j in range(3):
-            ax[j].plot(
-                pos[particle, xyz[j][0]][t],
-                pos[particle, xyz[j][1]][t],
-                marker='.',
-                color='red',
-                alpha=0.6,
-            )
-
+    for j in range(3):
+        ax[j].plot(
+            pos[t * len(ids) : t * len(ids) + len(ids), xyz[j][0]],
+            pos[t * len(ids) : t * len(ids) + len(ids), xyz[j][1]],
+            marker='.',
+            color='red',
+            alpha=0.6,
+            ls='',
+        )
     fig, ax = utils.labels_plots(fig, ax)
 
     ax[0].set_xlim(x_min, x_max)
@@ -142,19 +146,18 @@ def save_figure_nolines(t):
     ax[2].set_ylim(z_min, z_max)
     fig.subplots_adjust(top=0.9, bottom=0.15, left=0.07, right=0.99, wspace=0.25)
 
-    output_dir = './output/images_' + sim_info['simulation_name']
-    os.makedirs(output_dir, exist_ok=True)
     fig.savefig(os.path.join(output_dir, f'im_{t:01d}.png'))
 
     plt.close(fig)
+    del fig, ax
 
 
 if __name__ == '__main__':
     time_indexs = range(int(sim_info['final_time'] // dt_out))
+    output_dir = './output/images_' + sim_info['simulation_name']
+    os.makedirs(output_dir, exist_ok=True)
     if len(ids) > 15:
         save_figure = save_figure_nolines
     # Parallelization: each image is generated in a different thread
     with ProcessPoolExecutor(max_workers=num_cores) as executor:
-        futures = [executor.submit(save_figure, t) for t in time_indexs]
-        for _ in tqdm(as_completed(futures), total=len(time_indexs)):
-            pass
+        list(tqdm(executor.map(save_figure, time_indexs), total=len(time_indexs)))

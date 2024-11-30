@@ -1,8 +1,8 @@
 FC = gfortran
 PYTHON = python
 MAKE = make
-FCFLAGS = -c
-PARFLAGS = -fopenmp
+FCFLAGS = -c -g -fcheck=bounds
+PARFLAGS = -fopenmp -g -fcheck=bounds
 OBJECTS = ex2.o barnes_hut.o calculations.o utils.o geometry.o particle.o
 OBJECTS_PARALLEL = ex2_par.o barnes_hut_par.o calculations_par.o utils.o geometry.o particle_par.o
 TESTS = tests/test_stable_orbit_file.py

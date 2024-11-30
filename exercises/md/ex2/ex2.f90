@@ -79,6 +79,7 @@ program tree
     !$omp end parallel
 
     t_out = 0.0
+    write(*,'(A)', advance='no') char(13) // "["
     open(unit=out, file=file_out, action='write')
         write(out, "(A6, 1X, A12, 1X, A12, 1X, A12, 1X, A12, 1X, A12, 1X)") &
             "#Index", "X", "Y", "Z", "Mass", "Time"
@@ -105,12 +106,15 @@ program tree
             end if
 
             t = t + dt
+
+            call show_progress(t, t_end)
         end do
-    
+
         call cpu_time(end_time)
         write(out, "(A, F12.6)") "#Simulation execution time: ", end_time - start_time
     close(out)
     
+    print*, " "
     print*, "Done!"
     print "(A, F6.3, A)", "Simulation execution time: ", end_time - start_time, " seconds"
     print*, "____________________________________"

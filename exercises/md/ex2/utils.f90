@@ -95,4 +95,27 @@ module utils
                 write(out, "(I6, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5, 1X, ES12.5)") i, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z, particles(i)%m, t
             end do
         end subroutine write_data
+
+        subroutine show_progress(current_time, total_time)
+            implicit none
+            real(real64), intent(in) :: current_time, total_time
+            integer :: bar_width, position, i
+            real(real64) :: progress
+
+            bar_width = 50
+            progress = current_time / total_time
+            position = int(bar_width * progress)
+
+
+            write(*,'(A)', advance='no') char(13) // "["
+            do i = 1, bar_width
+                if (i <= position) then
+                    write(*,'(A)', advance='no') "#"
+                else
+                    write(*,'(A)', advance='no') " "
+                end if
+            end do
+            write(*,'(A, F5.1, A, A, F6.1, A)', advance='no') "] ", progress*100.0, "% "
+    
+        end subroutine show_progress
 end module utils
