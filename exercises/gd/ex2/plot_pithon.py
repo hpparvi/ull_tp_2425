@@ -1,60 +1,64 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
 
 # Crear una figura y un eje 3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 # Lee el archivo de texto
-
-DATAPATH = '/home/methos/Documentos/Programacion2004/ull_tp_2425/exercises/gd/ex2/orbit.dat'
+DATAPATH = '/home/methos/Documentos/Programacion2004/ull_tp_2425/exercises/gd/ex2/output.dat'
 df = pd.read_csv(DATAPATH, delim_whitespace=True, header=None)
 
+# Número de partículas
+N = int((df.shape[1]-1)/3)  # Número de partículas
+frames = len(df)  # Número de cuadros basado en las filas del archivo
 
-# Imprime el contenido del DataFrame
-#print(df)
+# Configuración inicial
+particles, = ax.plot([], [], [], 'bo', markersize=2, label="Partículas")  # Puntos para las partículas
+trails = []  # Para las trayectorias
+for _ in range(N):
+    trail, = ax.plot([], [], [], alpha=1)  # Una línea para cada órbita
+    trails.append(trail)
 
-# Selecciona solo los elementos en posiciones impares
-p1 = np.array(df[[1,2,3]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p2 = np.array(df[[4,5,6]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p3 = np.array(df[[7,8,9]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p4 = np.array(df[[10,11,12]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p5 = np.array(df[[13,14,15]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p6 = np.array(df[[16,17,18]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p7 = np.array(df[[19,20,21]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p8 = np.array(df[[22,23,24]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p9 = np.array(df[[25,26,27]])  # Comienza desde el índice 1 y toma cada segundo elemento
-p10 = np.array(df[[28,29,30]])  # Comienza desde el índice 1 y toma cada segundo elemento
-
-
-ax.plot(p1.T[0], p1.T[1], p1.T[2], alpha = 0.2, c='r', label='Partícula 1')
-# Diagrama de dispersión para la segunda partícula
-ax.plot(p2.T[0], p2.T[1], p2.T[2], alpha = 0.2, c='b', label='Partícula 2')
-ax.plot(p3.T[0], p3.T[1], p3.T[2], alpha = 0.2, c='black', label='Partícula 3')
-ax.plot(p4.T[0], p4.T[1], p4.T[2], alpha = 0.2, c='black', label='Partícula 4')
-ax.plot(p5.T[0], p5.T[1], p5.T[2], alpha = 0.2, c='black', label='Partícula 5')
-ax.plot(p6.T[0], p6.T[1], p6.T[2], alpha = 0.2, c='black', label='Partícula 6')
-ax.plot(p7.T[0], p7.T[1], p7.T[2], alpha = 0.2, c='black', label='Partícula 7')
-ax.plot(p8.T[0], p8.T[1], p8.T[2], alpha = 0.2, c='black', label='Partícula 8')
-ax.plot(p9.T[0], p9.T[1], p9.T[2], alpha = 0.2, c='black', label='Partícula 9')
-ax.plot(p10.T[0], p10.T[1], p10.T[2], alpha = 0.2, c='black', label='Partícula 10')
-
-# Limitar los ejes
-#ax.set_xlim(-3, -2)
-#ax.set_ylim(-1, 1)
-#ax.set_zlim(-1, 1)
+# Límites del gráfico
+ax.set_xlim(-2, 2)
+ax.set_ylim(-2, 2)
+ax.set_zlim(-2, 2)
 
 # Etiquetas de los ejes
 ax.set_xlabel('Eje X')
 ax.set_ylabel('Eje Y')
 ax.set_zlabel('Eje Z')
 
-ax.set_xlim(-2, 2)
-ax.set_ylim(-2, 2)
-ax.set_zlim(-2, 2)
+# Función para inicializar la animación
+def init():
+    particles.set_data([], [])
+    particles.set_3d_properties([])
+    for trail in trails:
+        trail.set_data([], [])
+        trail.set_3d_properties([])
+    return [particles] + trails
 
+N_TRAIL = 25  # Número máximo de puntos en la trayectoria
 
-# Mostrar el gráfico
+def update(frame):
+    positions = np.array([df.iloc[frame, 1 + 3 * i:4 + 3 * i].values for i in range(N)])  # Extraer posiciones
+    particles.set_data(positions[:, 0], positions[:, 1])
+    particles.set_3d_properties(positions[:, 2])
+    
+    # Actualizar trayectorias con rastro limitado
+    for i, trail in enumerate(trails):
+        start = max(0, frame - N_TRAIL)  # Empieza desde el cuadro más reciente limitado a N_TRAIL
+        trail_data = df.iloc[start:frame, 1 + 3 * i:4 + 3 * i].values.T
+        trail.set_data(trail_data[0], trail_data[1])
+        trail.set_3d_properties(trail_data[2])
+    return [particles] + trails
+
+# Crear la animación
+ani = FuncAnimation(fig, update, frames=frames, init_func=init, blit=True, interval=50)
+ani.save('animacion_inf.mp4', writer='ffmpeg', fps=20)
+# Mostrar la animación
 plt.show()

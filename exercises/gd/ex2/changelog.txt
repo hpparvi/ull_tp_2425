@@ -13,3 +13,10 @@
 	* Organice main program ex2
 	* Change output.dat format
 	* Change Makefile to create Clean_all that delete files.
+	
+[v0.9]
+	* Fix error in the force calculation.
+	* Create parallelisation 
+	* Change Makefile to create ex2_pall and test_pall method
+	* Change python rutine. Now create animation
+	* Changes particulas module: now create a sphere of rotating particles.

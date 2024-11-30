@@ -3,7 +3,7 @@ MODULE barnes_hut
   USE geometry
   USE ex2_deriv_types
   USE ISO_FORTRAN_ENV
-  
+  !$ use omp_lib
   IMPLICIT NONE
   INTEGER :: i,j,k,n
   REAL(REAL64), PARAMETER :: theta = 1
@@ -383,9 +383,13 @@ CONTAINS
     TYPE(CELL),POINTER :: head
     INTEGER :: i,j,k,start,end
     
+    !$omp parallel private(i) shared(head,temp_cell,pt)
+    !$omp do
     DO i = 1,n
       CALL Calculate_forces_aux(i,head)
     END DO
+    !$omp end do
+    !$omp end parallel
     
   END SUBROUTINE Calculate_forces
 
@@ -414,22 +418,23 @@ CONTAINS
     INTEGER :: i,j,k,goal
     REAL(REAL64) :: l,D
     !para las fuerzas, convertinos el centro de masa en un punto
+    TYPE(vector3d) :: r
     TYPE(point3d) :: c_o_m
     TYPE(point3d) :: V3d_0 = point3d(0,0,0)
     SELECT CASE (tree%type)
     CASE (1)
       IF (goal .NE. tree%pos) THEN
-        c_o_m = tree%c_o_m - V3d_0
+        c_o_m =  V3d_0 + tree%c_o_m 
         r = pt(goal)%p - c_o_m 
         a(goal) = a(goal) + (pt(tree%pos)%m *r)/ distance(pt(goal)%p,c_o_m)**3 !accel of particle i due to j
       END IF
     CASE (2)
-      c_o_m = tree%c_o_m - V3d_0
+      c_o_m = V3d_0 + tree%c_o_m 
       l = tree%range%max%x - tree%range%min%x
       D = distance(pt(goal)%p,c_o_m)
       IF (l/D < theta) THEN
         r = pt(goal)%p - c_o_m 
-        a(goal) = a(goal) + (pt(tree%pos)%m *r)/ distance(pt(goal)%p,c_o_m)**3 !accel of particle i due to j
+        a(goal) = a(goal) + (tree%pt%m *r)/ distance(pt(goal)%p,c_o_m)**3 !accel of particle i due to j
       ELSE
         DO i = 1,2
           DO j = 1,2

@@ -4,7 +4,7 @@ PROGRAM ex2
   USE ex2_deriv_types
   USE barnes_hut
   USE ISO_FORTRAN_ENV
-  
+  !$ use omp_lib
   IMPLICIT NONE      
   
   REAL(REAL64) :: dt, t_end, t, dt_out, t_out    
@@ -84,9 +84,9 @@ PROGRAM ex2
       write (3, '(3F12.4)', advance='no') t
       DO i = 1,n
         IF(i<n) THEN
-          write (3, '(3F12.6)', advance='no') pt(i)%p
+          write (3, '(6F16.6)', advance='no') pt(i)%p
         ELSE
-          write (3, '(3F12.6)') pt(i)%p
+          write (3, '(6F16.6)') pt(i)%p
         END IF
       END DO
       t_out = 0.0 ! reset of output parameter 
