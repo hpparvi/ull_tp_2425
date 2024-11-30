@@ -1,4 +1,5 @@
 module particle
+    !$use omp_lib
     use iso_fortran_env
     use geometry
 
@@ -18,9 +19,11 @@ module particle
         subroutine reset_a(particles)
             type(particle3d), intent(inout) :: particles(:)
             integer :: i
+            !$omp do
             do i = 1, size(particles)
                 particles(i)%a = vector3d(0.0, 0.0, 0.0)
             end do
+            !$omp end do
         end subroutine reset_a
 
         !Update the position of the particles
@@ -28,9 +31,11 @@ module particle
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
             integer :: i
+            !$omp do
             do i = 1, size(particles)
                 particles(i)%p = particles(i)%p + particles(i)%v * dt
             end do
+            !$omp end do
         end subroutine update_pos
 
         !Update the velocity of the particles in a middle step
@@ -38,9 +43,11 @@ module particle
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
             integer :: i
+            !$omp do
             do i = 1, size(particles)
                 particles(i)%v = particles(i)%v + particles(i)%a * dt * real(0.5, kind=real64)
             end do
+            !$omp end do
         end subroutine update_vel
 
         !Update the acceleration of the particles

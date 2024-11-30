@@ -1,4 +1,5 @@
 program tree
+    !$use omp_lib  
     use iso_fortran_env
     use particle
     use geometry
@@ -12,6 +13,7 @@ program tree
     integer, parameter :: in = 1, out = 2
     real(real64) :: dt, t_end, t, dt_out, t_out
     real(real64) :: epsilon, theta_local
+    real(real64) :: start_time, end_time
     type(particle3d), allocatable :: particles(:)
     character(len=100) :: sim_name, file_out
     !Input file of initial conditions
@@ -63,31 +65,38 @@ program tree
     print*, "Theta: ", theta_local
     print*, "____________________________________"
     print*, "Starting simulation..."
+    call cpu_time(start_time)
 
     
 
     allocate(head)
-
     call barnes_hut_tree(particles, head, n)
 
     call calculate_masses(particles, head)
+    !$omp parallel shared(particles, head, epsilon, theta_local, n, dt)
     call reset_a(particles)
     call calculate_forces(particles, head, epsilon, theta_local)
+    !$omp end parallel
 
     t_out = 0.0
     open(unit=out, file=file_out, action='write')
-        write(out, "(A6, 1X, A12, 1X, A12, 1X, A12, 1X, A12, 1X, A12)") "#Index", "X", "Y", "Z", "Mass", "Time"
+        write(out, "(A6, 1X, A12, 1X, A12, 1X, A12, 1X, A12, 1X, A12, 1X)") &
+            "#Index", "X", "Y", "Z", "Mass", "Time"
         do while (t < t_end)
+            !$omp parallel shared(particles, head, epsilon, theta_local, n, dt)
             call update_vel(particles, dt)
             call update_pos(particles, dt)
-            
+
+            !$omp single
             call borrar_tree(head)
             call barnes_hut_tree(particles, head, n)
-            
             call calculate_masses(particles, head)
+            !$omp end single
+            
             call reset_a(particles)
             call calculate_forces(particles, head, epsilon, theta_local)
             call update_vel(particles, dt)
+            !$omp end parallel
 
             t_out = t_out + dt
             if (t_out >= dt_out) then
@@ -97,7 +106,12 @@ program tree
 
             t = t + dt
         end do
-
+    
+        call cpu_time(end_time)
+        write(out, "(A, F12.6)") "#Simulation execution time: ", end_time - start_time
+    close(out)
+    
     print*, "Done!"
+    print "(A, F6.3, A)", "Simulation execution time: ", end_time - start_time, " seconds"
     print*, "____________________________________"
 end program tree

@@ -1,4 +1,5 @@
 module calculations
+    !$use omp_lib
     use iso_fortran_env
     use geometry
     use particle
@@ -243,9 +244,11 @@ module calculations
             real(real64), intent(in) :: epsilon, theta
             
             n = size(particles)
+            !$omp do
             do i = 1, n
                 call calculate_forces_aux(particles, i, head, epsilon, theta)
             end do
+            !$omp end do
         end subroutine calculate_forces
 
         recursive subroutine calculate_forces_aux(particles, goal, tree, epsilon, theta)

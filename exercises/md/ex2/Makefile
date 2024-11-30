@@ -2,7 +2,9 @@ FC = gfortran
 PYTHON = python
 MAKE = make
 FCFLAGS = -c
+PARFLAGS = -fopenmp
 OBJECTS = ex2.o barnes_hut.o calculations.o utils.o geometry.o particle.o
+OBJECTS_PARALLEL = ex2_par.o barnes_hut_par.o calculations_par.o utils.o geometry.o particle_par.o
 TESTS = tests/test_stable_orbit_file.py
 PLOT_IMAGES_SCRIPT = visual/plot_images.py
 IMAGE_TO_VIDEO_SCRIPT = visual/image_to_video.py
@@ -22,11 +24,17 @@ DELETE ?= TRUE
 
 all: ex2
 
+parallel: $(OBJECTS_PARALLEL)
+	$(FC) $(PARFLAGS) -o ex2 $(OBJECTS_PARALLEL)
+
 ex2: $(OBJECTS)
 	$(FC) -o $@ $(OBJECTS)
 
 ex2.o: ex2.f90
 	$(FC) $(FCFLAGS) ex2.f90
+
+ex2_par.o: ex2.f90
+	$(FC) $(PARFLAGS) $(FCFLAGS) -o $@ ex2.f90
 
 geometry.o: geometry.f90
 	$(FC) $(FCFLAGS) geometry.f90
@@ -34,11 +42,20 @@ geometry.o: geometry.f90
 particle.o: particle.f90
 	$(FC) $(FCFLAGS) particle.f90
 
+particle_par.o: particle.f90
+	$(FC) $(PARFLAGS) $(FCFLAGS) -o $@ particle.f90
+
 calculations.o: calculations.f90
 	$(FC) $(FCFLAGS) calculations.f90
 
+calculations_par.o: calculations.f90
+	$(FC) $(PARFLAGS) $(FCFLAGS) -o $@ calculations.f90
+
 barnes_hut.o: barnes_hut.f90
 	$(FC) $(FCFLAGS) barnes_hut.f90
+
+barnes_hut_par.o: barnes_hut.f90
+	$(FC) $(PARFLAGS) $(FCFLAGS) -o $@ barnes_hut.f90
 
 utils.o: utils.f90
 	$(FC) $(FCFLAGS) utils.f90
@@ -67,4 +84,4 @@ test:
 	$(PYTHON) $(TESTS)
 
 clean:
-	rm -f $(OBJECTS) ex2
+	rm -f $(OBJECTS) $(OBJECTS_PARALLEL) ex2

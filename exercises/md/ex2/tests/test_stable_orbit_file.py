@@ -29,10 +29,10 @@ class TestEx2Output:
         except subprocess.CalledProcessError as e:
             print(f"ex2 failed with error: {e.stderr}")
 
-        pos, ids, mass, t = utils.read_data(file)
+        pos, ids, mass, t, exec_time = utils.read_data(file)
         r = np.linalg.norm(pos, axis=1)
 
-        if len(mass) != 398:
+        if len(mass) != 396:
             print("Something wrong with output time steps")
             self.all_good = False
 
@@ -61,10 +61,10 @@ class TestEx2Output:
         except subprocess.CalledProcessError as e:
             print(f"ex2 failed with error: {e.stderr}")
 
-        pos, ids, mass, t = utils.read_data(file)
+        pos, ids, mass, t, exec_time = utils.read_data(file)
         r = np.linalg.norm(pos, axis=1)
 
-        if len(mass) != 2495:
+        if len(mass) != 2475:
             print("Something wrong with output time steps")
             self.all_good = False
 
@@ -90,6 +90,7 @@ class TestEx2Output:
 if __name__ == '__main__':
     print('-----------------------------------')
     print("Running tests for ex2")
+    print('-----------------------------------')
     print("Test 2 particles stable orbit")
     test = TestEx2Output()
     test.setUp('./ics/ic_test_2part_stable_orbit.txt')

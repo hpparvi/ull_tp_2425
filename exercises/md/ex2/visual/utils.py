@@ -41,12 +41,14 @@ def read_data(file):
     if 'output' not in file:
         file = '../output/' + file
     data = np.loadtxt(file)
+    with open(file, 'r') as f:
+        exec_time = f.readlines()[-1].split()[-1]
     unique_ids = np.unique(data[:, 0])
     ids = [data[:, 0] == u_id for u_id in unique_ids]
     pos = data[:, 1:4]
     mass = data[:, 4]
     t = data[:, 5]
-    return pos, ids, mass, t
+    return pos, ids, mass, t, exec_time
 
 
 # To read the input file

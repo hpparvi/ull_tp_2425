@@ -1,4 +1,5 @@
 module barnes_hut
+    !$use omp_lib
     use iso_fortran_env
     use particle
     use geometry
@@ -17,7 +18,6 @@ module barnes_hut
         call calculate_ranges(particles, head)
         head%type = 0
         call nullify_pointers(head)
-
         do i = 1, n
             call find_cell(head, temp_cell, particles(i)%p)
             call place_cell(temp_cell, particles(i)%p, i)
