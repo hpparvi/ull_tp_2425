@@ -1,5 +1,4 @@
 module barnes_hut
-    !$use omp_lib
     use iso_fortran_env
     use particle
     use geometry

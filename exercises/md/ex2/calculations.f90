@@ -244,7 +244,7 @@ module calculations
             real(real64), intent(in) :: epsilon, theta
             
             n = size(particles)
-            !$omp do
+            !$omp do private(i)
             do i = 1, n
                 call calculate_forces_aux(particles, i, head, epsilon, theta)
             end do

@@ -19,7 +19,7 @@ module particle
         subroutine reset_a(particles)
             type(particle3d), intent(inout) :: particles(:)
             integer :: i
-            !$omp do
+            !$omp do private(i)
             do i = 1, size(particles)
                 particles(i)%a = vector3d(0.0, 0.0, 0.0)
             end do
@@ -31,7 +31,7 @@ module particle
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
             integer :: i
-            !$omp do
+            !$omp do private(i)
             do i = 1, size(particles)
                 particles(i)%p = particles(i)%p + particles(i)%v * dt
             end do
@@ -43,7 +43,7 @@ module particle
             type(particle3d), intent(inout) :: particles(:)
             real(real64), intent(in) :: dt
             integer :: i
-            !$omp do
+            !$omp do private(i)
             do i = 1, size(particles)
                 particles(i)%v = particles(i)%v + particles(i)%a * dt * real(0.5, kind=real64)
             end do
