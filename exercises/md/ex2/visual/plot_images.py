@@ -167,5 +167,5 @@ if __name__ == '__main__':
         save_figure = save_figure_nolines
         gc.collect()
     # Parallelization: each image is generated in a different thread
-    with ProcessPoolExecutor(max_workers=3) as executor:
+    with ProcessPoolExecutor(max_workers=num_cores) as executor:
         list(tqdm(executor.map(save_figure, time_indexs), total=len(time_indexs)))
