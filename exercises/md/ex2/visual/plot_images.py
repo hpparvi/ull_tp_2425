@@ -1,7 +1,8 @@
 import os
 import sys
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
+import gc
 
 import numpy as np
 import matplotlib
@@ -45,6 +46,7 @@ else:
 
 # Positions, identification of the particles and mass
 pos, ids, mass, time, exec_time = utils.read_data(output_file)
+
 # Simulation information
 sim_info = utils.read_input_file(input_file)
 dt = sim_info['time_step']
@@ -67,12 +69,16 @@ else:
     ) + 0.2 * np.abs(np.max(pos[:, 2]))
 
 xyz = [(0, 1), (0, 2), (1, 2)]
+ids_len = len(ids)
 if len(ids) < 15:
     colors = utils.generate_colors(len(ids), cmap='gnuplot_r')
+else:
+    del ids
 
 
 # Function to save one image at a specific time of the simulation
 def save_figure(t):
+
     output_dir = './output/images_' + sim_info['simulation_name']
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
     fig.suptitle(f'$t={t * dt_out:.3f}$', fontsize=20)
@@ -129,8 +135,8 @@ def save_figure_nolines(t):
     # Loop over all the particles types
     for j in range(3):
         ax[j].plot(
-            pos[t * len(ids) : t * len(ids) + len(ids), xyz[j][0]],
-            pos[t * len(ids) : t * len(ids) + len(ids), xyz[j][1]],
+            pos[t * ids_len : t * ids_len + ids_len, xyz[j][0]],
+            pos[t * ids_len : t * ids_len + ids_len, xyz[j][1]],
             marker='.',
             color='red',
             alpha=0.6,
@@ -156,8 +162,10 @@ if __name__ == '__main__':
     time_indexs = range(int(sim_info['final_time'] // dt_out))
     output_dir = './output/images_' + sim_info['simulation_name']
     os.makedirs(output_dir, exist_ok=True)
-    if len(ids) > 15:
+
+    if ids_len > 15:
         save_figure = save_figure_nolines
+        gc.collect()
     # Parallelization: each image is generated in a different thread
-    with ProcessPoolExecutor(max_workers=num_cores) as executor:
+    with ProcessPoolExecutor(max_workers=3) as executor:
         list(tqdm(executor.map(save_figure, time_indexs), total=len(time_indexs)))

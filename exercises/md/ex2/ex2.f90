@@ -111,11 +111,15 @@ program tree
         end do
 
         call cpu_time(end_time)
-        write(out, "(A, F12.6)") "#Simulation execution time: ", end_time - start_time
+        write(out, "(A, F12.3)") "#Simulation execution time: ", end_time - start_time
     close(out)
     
     print*, " "
     print*, "Done!"
-    print "(A, F6.3, A)", "Simulation execution time: ", end_time - start_time, " seconds"
+    if (end_time - start_time > 60.0) then
+        print "(A, F6.3, A)", "Simulation execution time: ", (end_time - start_time) / 60.0, " minutes"
+    else
+        print "(A, F6.3, A)", "Simulation execution time: ", end_time - start_time, " seconds"
+    end if
     print*, "____________________________________"
 end program tree
