@@ -432,7 +432,15 @@ module tree_algorithm
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
     INTEGER :: i, n, nt, tid 
     n = SIZE(particles) ! number of particles
-   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+!!!!!! Parallel programming with OpenMP !!!!      
+!!!!! This subroutine parallelise do loop and
+!!!!! that calculate (for each particle) the 
+!!!!! interaction between particles. 
+!!!!! WARNING: omp parallel must be opened in the main code
+!!!!! in order this works (it could be a better optimization
+!!!!! of the code if a conditional open the  omp parallel if
+!!!!! it's not previously opened(?).)      
     !print *, "Before parallel"
     !!$omp parallel private(nt, tid, i) shared(head,particles,acc)
     
@@ -447,6 +455,7 @@ module tree_algorithm
     !$omp end do
     !!$omp end parallel
     !print *, "After parallel"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
   END SUBROUTINE Calculate_forces
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -470,6 +479,11 @@ module tree_algorithm
 !! then we have to consider all the subcells of the 
 !! tree and for each of them call Calculate_forces_aux in a
 !! recursive way.
+!! Note: The original condition we set (theta = 1.) is that  
+!! the distance between particles must be greater than the 
+!! range of the cell, which in some cases may be insufficient 
+!! accuracy, as was noted by some classmates, and it is necessary 
+!! for the calculation to reduce the value of theta.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   RECURSIVE SUBROUTINE Calculate_forces_aux(goal,tree,particles,acc)
     TYPE(CELL),POINTER, INTENT(in) :: tree
@@ -510,6 +524,8 @@ module tree_algorithm
           END DO
         END IF
     END SELECT
+    ! note: this code could have issues in the integration if the particles are close enough (r aprox 0),
+    ! so it could be necessary to add a softening length in some cases (as in ex1)
   END SUBROUTINE Calculate_forces_aux
 
 end module tree_algorithm

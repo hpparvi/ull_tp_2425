@@ -21,12 +21,12 @@ for i in range(num_particles):
 # Create the figure and 3D axes
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.set_xlim(-1, 1)
-ax.set_ylim(-1, 1)
-ax.set_zlim(-1, 1)
+ax.set_xlim(-1, 2)
+ax.set_ylim(-1, 2)
+ax.set_zlim(-1, 2)
 
 # Initialize particle markers and trajectory lines
-particles, = ax.plot([], [], [], 'ro', markersize=5)  # Particle markers
+particles, = ax.plot([], [], [], 'co', markersize=5)  # Particle markers
 traces = [ax.plot([], [], [], '-', alpha=0.5)[0] for _ in range(num_particles)]  # Trajectories
 
 def init():

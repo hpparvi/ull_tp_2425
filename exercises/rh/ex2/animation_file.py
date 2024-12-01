@@ -20,8 +20,8 @@ for i in range(num_particles):
 
 # Create the figure
 fig, ax = plt.subplots()
-ax.set_xlim(-1,1)
-ax.set_ylim(-1,1)
+ax.set_xlim(-1,2)
+ax.set_ylim(-1,2)
 particles, = ax.plot([], [], 'bo', markersize=5)  # Particle markers
 traces = [ax.plot([], [], '-', alpha=0.5)[0] for _ in range(num_particles)]  # Trajectories
 
@@ -42,7 +42,7 @@ def update(frame):
     return [particles, *traces]
 
 # Create the animation
-anim = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=True, interval=50)
+anim = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=True, interval=2)
 
 # Show animation
 plt.show()

@@ -1,6 +1,7 @@
 program e2
   ! import required libraries/modules 
-  !$ Use omp_lib 
+  ! included OpenMP library to parallel programming
+  !$ Use omp_lib  
   use, intrinsic ::  iso_fortran_env
   use geometry
   use particle
@@ -68,15 +69,21 @@ program e2
   !!!!!!!!!!!!!!!!!!
     t_out = 0.0
     DO  WHILE (t <= t_end)
-    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+!!!!!! Parallel programming with OpenMP !!!! 
       !$omp parallel
       ! update velocities and positions of the particles
+!!!!!!! open mp has workshare construct that allows to
+      ! parallelise large arrays.
       !$OMP WORKSHARE
       particles%v = particles%v + acc * (dt/2.)
       particles%p = particles%p + particles%v * dt
       !$OMP END WORKSHARE
       
-      !The positions have changed, so we have to remove and initialise the tree again
+      ! The positions have changed, so we have to remove and initialise the tree again
+!!!!!!! in these lines of code tree functions are called, and it's necessary to 
+!!!!!!! calculate without parallelise it (because in the recursive process, it needs to
+!!!!!!! to know whether a cell are placed in a cell already or not.)      
       !$OMP SINGLE
       CALL Borrar_tree(head) ! remove previous tree
       CALL Calculate_ranges(head, particles) ! calculate head range again
@@ -99,7 +106,9 @@ program e2
       particles%v = particles%v + acc * (dt/2.)
       !$OMP END WORKSHARE
       !$omp end parallel
-      
+!!!!!!! Note: code works even if openMP is not activated,
+!!!!!!! but slower (as it's expected :) 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
         WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
