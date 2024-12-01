@@ -5,7 +5,7 @@
 0.001
 
 ! Output time step:
-0.1
+0.5
 
 ! Final time:
 100.0
