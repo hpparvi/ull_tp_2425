@@ -21,7 +21,10 @@ PROGRAM ex2
 
   !Read the input file
   CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
-  
+
+  !Output message to notify the user that the simulation is being performed
+  PRINT*, "Performing the simulation..."
+ 
   !Initializing head node for the hierarchical tree
   ALLOCATE(head)
   

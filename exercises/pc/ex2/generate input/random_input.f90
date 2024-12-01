@@ -77,7 +77,7 @@ PROGRAM random_input
   WRITE(12, *) !Write a blank line
   
   !Write header for particles properties to the input file
-  WRITE(12, "(A5, 7A12)") "Body", "Mass", "x", "y", "z", "vx", "vy", "vz"
+  WRITE(12, "(A6, 1X, 7A12)") "Body", "Mass", "x", "y", "z", "vx", "vy", "vz"
 
   !Generate random positions and velocities for the particles
   DO i = 1, n
@@ -101,7 +101,7 @@ PROGRAM random_input
         IF ((NORM(vector3d(rx, ry, rz)))**2 .LE. 1) EXIT !Ensure the generated coordinates are within a sphere
      END DO
 
-     WRITE(12, "(I3, 7X, 7ES12.4)") i, p(i)%m, p(i)%p, p(i)%v !Write the index, mass, position and velocity of each particle to the input file
+     WRITE(12, "(I6, 7X, 7ES12.4)") i, p(i)%m, p(i)%p, p(i)%v !Write the index, mass, position and velocity of each particle to the input file
   END DO
 
   CLOSE(12) !Close the input file

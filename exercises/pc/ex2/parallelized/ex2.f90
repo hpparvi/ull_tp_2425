@@ -5,7 +5,7 @@ PROGRAM ex2
   USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
   USE data     !Importing the data module, where subroutines to read and save data are defined
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
-  !$ USE omp_lib  !Importing the omp library to use OpenMP
+  !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
   INTEGER(INT64) :: n !Number of bodies
@@ -22,6 +22,9 @@ PROGRAM ex2
 
   !Read the input file
   CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
+
+  !Output message to notify the user that the simulation is being performed
+  PRINT*, "Performing the simulation..."
   
   !Initializing head node for the hierarchical tree
   ALLOCATE(head)
@@ -39,8 +42,10 @@ PROGRAM ex2
   CALL Borrar_empty_leaves(head) !Delete subcells with no particles
   CALL Calculate_masses(head, p) !Calculate the masses and centers of mass for the cells
 
+  !$OMP PARALLEL PRIVATE(i) SHARED(n, p, head,  rji, theta)
   CALL set_acceleration(n, p) !Reset accelerations of particles to zero
   CALL Calculate_forces(head, n, p, rji, theta) !Calculate forces between particles based on the tree
+  !$OMP END PARALLEL
 
   t = 0.0 !Initialize time
   t_out = 0.0 !Initialize output time
@@ -50,10 +55,12 @@ PROGRAM ex2
  
   !Main loop to update properties of particles until final time is reached
   DO WHILE (t .LE. t_end)
+     !$OMP PARALLEL PRIVATE(i) SHARED(n, dt, p, head, rji, theta)
      CALL velocity(n, dt, p) !Update the velocities of particles
      CALL position(n, dt, p) !Update the positions of particles
-     
+
      !Delete and reinitialize the tree due to updated positions
+     !$OMP SINGLE
      CALL Borrar_tree(head) !Delete the old tree structure
      CALL Calculate_ranges(head, p) !Recalculate the ranges of the particles
      head%type = 0  !Set the type of the head cell to 0 (no particles)
@@ -67,11 +74,14 @@ PROGRAM ex2
      
      CALL Borrar_empty_leaves(head) !Delete subcells with no particles
      CALL Calculate_masses(head, p) !Recalculate masses and centers of mass for the cells
+     !$OMP END SINGLE
      
      CALL set_acceleration(n, p) !Reset accelerations of particles to zero
      CALL Calculate_forces(head, n, p, rji, theta) !Recalculate forces between particles
-
+     
      CALL velocity(n, dt, p) !Update the velocities of particles
+     !$OMP END PARALLEL
+     
      t_out = t_out + dt      !Update output time
 
      IF (t_out .GE. dt_out) THEN
@@ -88,7 +98,7 @@ PROGRAM ex2
 
   CALL system_clock(count = finish)    !Get the current clock counter value and stored it in the finish variable
   elapsed_time = (finish - start)/rate !Calculates the elapsed time in seconds
-  
+
   !Output the elapsed time
   IF (elapsed_time .GT. 60) THEN
      PRINT *, "Time spent on performing the simulation: ", floor(elapsed_time/60), "min", &

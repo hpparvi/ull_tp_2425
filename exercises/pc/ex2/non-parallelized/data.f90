@@ -19,19 +19,19 @@ CONTAINS
     TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
 
     REAL(REAL64) :: dummy !Temporary variable for reading input data
-    INTEGER(INT64) :: input_pos, dot_pos !Variables for 'input_' and '.' positions
+    INTEGER(INT64) :: input_pos, dot_pos !Variables for 'input' and '.' positions
 
     !Read the input file name from the user
     PRINT*, "Insert the input file name: "
     READ*, input
 
     !Checking if input file name contains 'input_'
-    input_pos = INDEX(input, 'input_')
+    input_pos = INDEX(input, 'input')
     dot_pos = INDEX(input, '.')
 
     IF (input_pos /= 0 .AND. dot_pos .GT. input_pos) THEN
-       identifier = input(input_pos + 6 : dot_pos - 1) !Extracting the identifier after 'input_' and before '.'
-       output = 'output_' // TRIM(identifier) // '.dat' !Output file name with the identifier
+       identifier = input(input_pos + 5 : dot_pos - 1) !Extracting the identifier after 'input' and before '.'
+       output = 'output' // TRIM(identifier) // '.dat' !Output file name with the identifier
 
     ELSE
        output = 'output.dat' !Output file name in other case
@@ -51,7 +51,7 @@ CONTAINS
        STOP
     END IF
 
-    READ(12, *, iostat = io_status) dt, dt_out, t_end, n, theta !Read time step, output time step, final time and number of bodies from the input file
+    READ(12, *, iostat = io_status) dt, dt_out, t_end, n, theta !Read time step, output time step, final time, number of bodies and theta from the input file
     IF (io_status /= 0) THEN
        PRINT*, "Error reading parameters (dt, dt_out, t_end, n, theta) from file" !Print error message if reading fails
        STOP

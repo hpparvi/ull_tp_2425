@@ -1,0 +1,6 @@
+#Time is represented under each set of particles in units of seconds. 
+
+			3	5	10	25	50	100	250	500	1000		
+ex1			3	4	6	11	22	87	541	962	3788	
+Barnes-hut		2	3	5	14	31	53	180	487	1056	
+Parallelized		96	98	96	90			

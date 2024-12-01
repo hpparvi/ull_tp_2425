@@ -2,7 +2,7 @@ MODULE barnes
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits for variables
-  !$ USE omp_lib  !Importing the omp library to use OpenMP
+  !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
   !Define integer variables for loop indexing
@@ -297,13 +297,11 @@ CONTAINS
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
-    !$OMP PARALLEL PRIVATE(i) SHARED(head)
     !$OMP DO
     DO i = 1, n
-       CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation
+       CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
     END DO
     !$OMP END DO
-    !$OMP END PARALLEL
     
   END SUBROUTINE Calculate_forces
 
