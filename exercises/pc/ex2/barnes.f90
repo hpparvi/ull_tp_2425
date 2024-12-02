@@ -297,11 +297,11 @@ CONTAINS
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
-    !$OMP DO
+    !$OMP SINGLE
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
     END DO
-    !$OMP END DO
+    !$OMP END SINGLE
     
   END SUBROUTINE Calculate_forces
 
