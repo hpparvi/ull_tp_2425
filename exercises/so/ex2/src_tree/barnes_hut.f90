@@ -1,6 +1,8 @@
 MODULE barnes_hut
   use geometry
   use particles
+
+  !$use_omp_lib
   
   IMPLICIT NONE
 
@@ -54,6 +56,8 @@ CONTAINS
   SUBROUTINE Nullify_Pointers(goal)
     TYPE(CELL), POINTER :: goal
     INTEGER :: i,j,k
+    !$omp parallel private(i,j,k) shared(goal)
+    !$omp do 
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
@@ -61,6 +65,8 @@ CONTAINS
           END DO
        END DO
     END DO
+    !$omp end do
+    !$omp end parallel
   END SUBROUTINE Nullify_Pointers
 
 !------------------------------------------------------------- 
@@ -124,7 +130,7 @@ CONTAINS
 
 !-------------------------------------------------------------  
   ! Place_Cell is run after Find_cell, to store a particle in
-  ! a the given cell (always empty or one particle, type=0,1).
+  ! a given cell (always empty or one particle, type=0,1).
   ! If type=1, it divides the cell and places each particle in
   ! the corresponding subcell.
 
@@ -217,6 +223,8 @@ CONTAINS
     TYPE(CELL),POINTER :: goal
     INTEGER :: i, j, k
     IF (ASSOCIATED(goal%subcell(1,1,1)%ptr)) THEN
+       !$omp parallel private(i,j,k) shared(goal)
+       !$omp do
        DO i = 1,2
           DO j = 1,2
              DO k = 1,2
@@ -227,6 +235,8 @@ CONTAINS
              END DO
           END DO
        END DO
+       !$omp end do
+       !$omp end parallel
     END IF
   END SUBROUTINE Delete_empty_leaves
 
@@ -247,6 +257,8 @@ CONTAINS
        goal%mass = p_arr(goal%pos)%m
        goal%c_o_m = p_arr(goal%pos)%p
     CASE (2)
+       !$omp parallel private(i,j,k) shared(goal, p_arr)
+       !$omp do
        DO i = 1,2
           DO j = 1,2
              DO k = 1,2
@@ -260,6 +272,8 @@ CONTAINS
              END DO
           END DO
        END DO
+       !$omp end do
+       !$omp end parallel
     END SELECT
   END SUBROUTINE Calculate_masses
 
@@ -273,10 +287,13 @@ CONTAINS
     type(particle), dimension(:) :: p_arr
     INTEGER :: i, n
     real, intent(in) :: theta, epsilon
-    
+    !$omp parallel private(i) shared(head, p_arr, theta, epsilon)
+    !$omp do
     DO i = 1, n
        CALL Calculate_forces_aux(i,head, p_arr, theta, epsilon)
     END DO
+    !$omp end do
+    !$omp end parallel
   END SUBROUTINE Calculate_forces
 
 !-------------------------------------------------------------  
@@ -306,12 +323,6 @@ CONTAINS
           rji_v = vecpp(p_arr(goal)%p, tree%c_o_m)
           r = norm(rji_v)
           p_arr(goal)%a = p_arr(goal)%a + p_arr(tree%pos)%m * rji_v /((r**2 + epsilon**2) * r)
-          !
-!
-! CHECK ALL THIS NO GRAVITATIONAL SOFTENING HERE!!!
-!
-
-          !
        END IF
     CASE (2)
        ! The span of the range is the same in every dimension, so dim1 is chosen for example
@@ -346,6 +357,8 @@ CONTAINS
   RECURSIVE SUBROUTINE Delete_Tree(goal)
     TYPE(CELL),POINTER :: goal
     INTEGER :: i,j,k
+    !$omp parallel private(i,j,k) shared(goal)
+    !$omp do
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
@@ -356,6 +369,8 @@ CONTAINS
           END DO
        END DO
     END DO
+    !$omp end do
+    !$omp end parallel
   END SUBROUTINE Delete_Tree
 
 !-------------------------------------------------------------  

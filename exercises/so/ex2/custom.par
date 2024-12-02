@@ -7,7 +7,10 @@ theta = 1.0    # l/D ratio compared to theta
 
 # File names
 input_file = "data/random_bodies.txt"
-create_bodies = .False. 
-N_bodies = 5 
+create_bodies = .True. 
+N_bodies = 10
 radius = 10
 output_file = "output/output.txt"
+
+# Parallel calculations
+N_threads = 12

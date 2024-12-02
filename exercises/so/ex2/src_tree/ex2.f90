@@ -7,6 +7,8 @@ PROGRAM main
   use parameter_reader
   use barnes_hut
 
+  !$ use omp_lib
+
   IMPLICIT NONE
 
   INTEGER :: i, k, i_t, ios
@@ -14,7 +16,10 @@ PROGRAM main
   INTEGER :: num_args       ! to count the number of given arguments
   character(len=100) :: par_filename, dummy_line     ! to import the stars data and parameters data
   real :: t, t_out !dt, t_end, dt_out
+  real :: t_ini, t_fin, t2, t3_i, t3_f, t_dummy
+  integer :: it_percent=0, it_percent_previous=0
   character(len=100) :: fmt
+  logical :: parallelized = .false.
   
   type(particle), dimension(:), allocatable :: partics
 
@@ -31,6 +36,10 @@ PROGRAM main
   ! Block 1: loading all data from the parameters file specified
   ! ------------------------------------------------------------
   ! ------------------------------------------------------------
+
+  call cpu_time(t_ini)
+
+  !$ parallelized = .true. 
   
   ! Get the number of command-line arguments
     num_args = command_argument_count()
@@ -48,22 +57,26 @@ PROGRAM main
 
   ! Print info of the parameters specified
     call read_parameters(par_filename)
-    print*, "Reading parameters from ", par_filename
+    print*, "Reading parameters from: ", trim(par_filename)
     print*, "..."
     print*, "Parameters loaded:"
-    print*, "  -  dt = ", dt
-    print*, "  -  dt_out = ", dt_out
-    print*, "  -  t_end = ", t_end
-    print*, "  -  epsilon = ", epsilon
-    print*, "  -  theta = ", theta    
+    print '(A10, A10, A10, A10, A10, A16, A10, A10)', "dt", "dt_out","t_end","epsilon", "theta", "create_bodies", "N_bodies", "radius"
+    print '(F10.2,F10.2,F10.2,F10.2,F10.2,L16,I10, F10.2)', dt, dt_out, t_end, epsilon, theta, create_bodies, N_bodies, radius
+    print*, ""
     print*, "  -  input_file = ", input_file
-    print*, "  -  create_bodies = ", create_bodies
-    if (create_bodies .eqv. .true.) then
-       print*, "  -  N_bodies = ", N_bodies
-       print*, "  -  radius = ", radius
- end if
-    print*, "  -  output_file = ", output_file
+    print*, "  -  output_file = ", trim(output_file)
+    print*, ""
+    print'(A,L1)', " - Parallelization: ", parallelized
+    if (parallelized .eqv. .true.) then
+       print*, "     -  N_threads = ", N_threads
+    end if
+    
+    print*, ""
 
+    ! Set number of threads for parallel mode
+    !$ call omp_set_num_threads(N_threads)
+    ! Used when going through the tree for calculations for each particle
+    
     input_file = trim(input_file)
  
     ! if a new file with the positions of N_bodies is desired,
@@ -94,7 +107,7 @@ PROGRAM main
        n = n + 1
      end do
     rewind(10) !so that pointer is at the beginnin for reading and importing data later
-    print*, " Number of bodies = ", n
+    print '(A, I0)', " Number of bodies read: ", n
 
   ! Allocate arrays based on the number of stars
     allocate(partics(n))
@@ -124,12 +137,13 @@ PROGRAM main
         print *, "Error: Could not open file ", output_file
         stop
      end if
+     
+call cpu_time(t2)     
 
 print*, ""
 print*, "-------------------------------------------------------------"
 print*, "Beginning of calculations"
 print*, "-------------------------------------------------------------"
-
 
   ! ------------------------------------------------------------
   ! ------------------------------------------------------------
@@ -150,6 +164,13 @@ print*, "-------------------------------------------------------------"
   print*,""
   t_out = 0.0
   DO i_t = 0, n_t
+     it_percent = i_t*100/n_t
+     if (it_percent .ne. it_percent_previous) then
+       write(*, '(A, I3, A)', advance="no") " Progress: ", it_percent, "%"
+       write(*, '(A)', ADVANCE="NO") CHAR(13)
+       it_percent_previous = it_percent
+     end if
+  
      t = i_t*dt
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
      partics(:)%p = partics(:)%p + (partics(:)%v * dt)
@@ -164,21 +185,22 @@ print*, "-------------------------------------------------------------"
      ! t p1x, p1y, ... pNz
      write(fmt, "(A,I0,A,I0,A)") "(F10.2, ", 3*N, "F12.5)"
      write(20, fmt) t, (partics(k)%p, k=1,N)
-     
-     !IF (t_out >= dt_out) THEN
-     !   print*, "Time = ", t, "", "Iteration = ", i_t
-     !   DO i = 1,n
-           !print*, "Particle ", i
-           !print*, partics(i)%p
-     !   END DO
-     !   t_out = 0.0
-     !END IF
-     
+          
   END DO
 
   close(20)
 
-  print*, "Calculations finished."
-  print*, trim(output_file), " created."
+  print*, ""
+print*, "-------------------------------------------------------------"
+print*, "Calculations finished. ", n_t, " iterations completed." 
+print*, "-------------------------------------------------------------"
+
+print*, trim(output_file), " created."
+
+call cpu_time(t_fin)
+
+print '("Total time = ",f0.3," seconds.")',t_fin-t_ini
+print '("  - Time spent in input setup = ",f0.3," seconds.")',t2-t_ini
+print '("  - Time spent in main loop = ",f0.3," seconds.")',t_fin-t2
   
 END PROGRAM main

@@ -4,7 +4,7 @@ module parameter_reader
     real :: dt, dt_out, t_end, epsilon, theta, radius
     character(len=100) :: input_file, output_file
     logical :: create_bodies
-    integer :: N_bodies
+    integer :: N_bodies, N_threads = 1
 
 contains
 
@@ -45,7 +45,6 @@ contains
                    read(line, *) dummy_one, dummy_two, input_file
                 case ("output_file")
                    read(line, *) dummy_one, dummy_two, output_file
-                   print*, output_file
                 case ("create_bodies")
                     read(line, *) dummy_one, dummy_two, create_bodies
                 case ("N_bodies")
@@ -56,6 +55,8 @@ contains
                    read(line, *) dummy_one, dummy_two, epsilon
                 case ("theta")
                    read(line, *) dummy_one, dummy_two, theta
+                case ("N_threads")
+                   read(line, *) dummy_one, dummy_two, N_threads
                 case default
                     print *, "Warning: Unrecognized parameter:", key
                  end select

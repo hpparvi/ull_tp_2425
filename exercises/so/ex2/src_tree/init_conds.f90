@@ -22,7 +22,7 @@ CONTAINS
   SEED(:) = values(8)
   CALL random_seed(put=seed)
 
-  print *, "Creating random initial conditions with ", N, "bodies."
+  print '(A, I0, A)', "Creating random initial conditions with ", N, " bodies."
   
   mass = 1.0 / N
 
@@ -53,6 +53,6 @@ CONTAINS
      WRITE(20,'(F6.3, 3F20.15, 3I2)') mass, rx,ry,rz, 0,0,0
   END DO
   close(20)
-  PRINT*, "Initial conditions created."
+  !PRINT*, "Initial conditions created."
 END SUBROUTINE CREATE_INIT_CONDS
 END MODULE init_conds_mod
