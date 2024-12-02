@@ -5,7 +5,7 @@ The Barnes–Hut simulation is an approximation algorithm for performing an N-bo
 In this program, Barnes-Hut algorithm have been used in a three-dimensional space with n particle. The implementation is done in the module  named **tree** that contains the subroutines required to use the algorithm.
 
 
-The code has been parallelized using OpenMP, which reduces the computational time for a large number of particles. Tests have been done under the same time conditions ($dt = 0.01, t_{end} = 0.5$). Few time steps are used since time cannot be parallelized in the simulation so it is not so important to demonstrate the difference in computation for each time step. 
+The code has been parallelised using OpenMP, which reduces the computational time for a large number of particles. Tests have been done under the same time conditions ($dt = 0.01, t_{end} = 0.1$). Few time steps are used, because time cannot be parallelised in the simulation, so it is not so important to demonstrate the difference in computation for each time step. First test (10 particles) shows that the parallelised program works slower than without parallelise, because in this case takes more time to call OpenMP and start to parallelise than calculate directly the interactions. 
      
 | N | Time without OpenMp (s) | Time with OpenMP (s) |
 |--|--|--|
