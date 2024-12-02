@@ -7,8 +7,9 @@ In this program, Barnes-Hut algorithm have been used in a three-dimensional spac
 
 The code has been parallelized using OpenMP, which reduces the computational time for a large number of particles. Tests have been done under the same time conditions ($dt = 0.01, t_{end} = 0.5$). Few time steps are used since time cannot be parallelized in the simulation so it is not so important to demonstrate the difference in computation for each time step. 
      
-| N | Time (without OpenMp) | Time (with OpenMP) |
+| N | Time without OpenMp (s) | Time with OpenMP (s) |
 |--|--|--|
-| 100 |  |  |
-| 1000 |  |  |
-| 10000 | sc |  |
+| 10 | 8e-3 | 3e-3 |
+| 100 | 9.9e-3 | 2.7e-2 |
+| 1000 | 0.416 | 1.54 |
+| 10000 | 39.79 | 158.47 |
