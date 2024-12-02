@@ -1,5 +1,19 @@
 FC = gfortran
-FCFLAGS = -Wall -Wextra -c -Jbin
+BASE_FCFLAGS = -Wall -Wextra -c -Jbin
+BASE_LDFLAGS =
+OPENMP = yes
+OPENMP_FLAGS = -fopenmp
+
+# Conditional Flags
+ifeq ($(OPENMP), yes)
+    FCFLAGS = $(BASE_FCFLAGS) $(OPENMP_FLAGS)
+    LDFLAGS = $(OPENMP_FLAGS)
+else
+    FCFLAGS = $(BASE_FCFLAGS)
+    LDFLAGS =
+endif
+
+
 SRC_DIR = src_tree
 SRC = $(SRC_DIR)/geometry.f90 $(SRC_DIR)/particles.f90 $(SRC_DIR)/init_conds.f90 $(SRC_DIR)/read_par.f90 $(SRC_DIR)/barnes_hut.f90 $(SRC_DIR)/ex2.f90
 OBJ_DIR = bin_tree
@@ -15,7 +29,7 @@ test: $(PROG)
 	./$(PROG)
 
 $(PROG): $(OBJECTS)
-	$(FC) $(DOUBLE_PRECISION_FLAG) -o $@ $(OBJECTS)
+	$(FC) $(LDFLAGS) $(DOUBLE_PRECISION_FLAG) -o $@ $(OBJECTS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90 | $(OBJ_DIR)
 	$(FC) $(FCFLAGS) $(DOUBLE_PRECISION_FLAG) -o $@ $<

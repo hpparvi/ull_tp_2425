@@ -70,30 +70,82 @@ if execute:
 
 # Data reading and plotting
 
-
-
-if ploteo:
+def ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta,
+                trail = True, movie = False,
+                d3 = False, fnum=1):
     data  = np.loadtxt(output_file)
+    n_it = data.shape[0]
     plt.close(fnum)
     
     if d3 == False:
         fig, ax = plt.subplots(2,2, num = fnum, figsize = (15,15))
     if d3:
         fig, ax = plt.subplots(num = fnum, figsize = (10,12), subplot_kw= {'projection': '3d'})
+    
+    if movie:
+        n_frames = data.shape[0]
+    else:
+        n_frames = 1
         
-    for i in range(N_bodies):
-        if N_bodies <=10:
-            color = plt.colormaps['tab10'](i)
+    
+    
+    # if trail == True:
+    #     trail_n = None
+    # if trail == False:
+    #     trail_n = -1
+    # else:
+    #     trail_n = trail
+    
+    if trail == True:
+        init_frame = None
+    if trail == False:
+        init_frame = -1
+    
+    for i_f in range(n_frames):
+        if movie:
+            end_frame = i_f+1
+            if i_f == n_frames-1:
+                end_frame = None
+            if type(trail) != bool:
+                if i_f >= trail:
+                    init_frame =  end_frame - trail
+                else:
+                    init_frame = None
         else:
-            color = 'black'
+            end_frame = None
+            init_frame = n_it-trail
+            i_f = -1
         
-        if d3 == False:
-            ax[0,0].plot(data[:,1+3*i],  data[:,2+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
-            ax[0,1].plot(data[:,2+3*i],  data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
-            ax[1,0].plot(data[:,1+3*i],  data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+            
         if d3:
-            ax.plot(data[:,1+3*i],  data[:,2+3*i], data[:,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.5)
+            ax.clear()
+        else:
+            for i, j in zip([0,0,1,1],[0,1,0,1]):
+                ax[i,j].clear()
+              
+        for i in range(N_bodies):
+            if N_bodies <=10:
+                color = plt.colormaps['tab10'](i)
+            else:
+                color = 'black'
+            
+            if d3 == False:
+                ax[0,0].plot(data[i_f,1+3*i],  data[i_f,2+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.7)
+                ax[0,0].plot(data[i_f,2+3*i],  data[i_f,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.7)
+                ax[0,0].plot(data[i_f,1+3*i],  data[i_f,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.7)
+                ax[0,0].plot(data[init_frame:end_frame,1+3*i],  data[init_frame:end_frame,2+3*i], color = color, marker = '', lw = 0.7, alpha = 0.5)
+                ax[0,1].plot(data[init_frame:end_frame,2+3*i],  data[init_frame:end_frame,3+3*i], color = color, marker = '', lw = 0.7, alpha = 0.5)
+                ax[1,0].plot(data[init_frame:end_frame,1+3*i],  data[init_frame:end_frame,3+3*i], color = color, marker = '', lw = 0.7, alpha = 0.5)
+            if d3:
+                ax.plot(data[i_f,1+3*i],  data[i_f,2+3*i], data[i_f,3+3*i], color = color, marker = '.', ls = '', label = 'm%i'%(i+1), alpha = 0.7)
+                ax.plot(data[init_frame:end_frame,1+3*i],  data[init_frame:end_frame,2+3*i], data[init_frame:end_frame,3+3*i], color = color, marker = '', lw = 0.7, alpha = 0.5)
 
+        if movie:
+            fig.suptitle('N-body sim with $\\epsilon$=%.1e\nTime: %.2f  Iteration: %i   dt=%.2e\nBarnes-Hut: %s     $\\theta$=%.2f'%(epsilon,dt*i, i, dt, tree, theta))
+    
+    if movie == False:
+        fig.suptitle('N-body sim with $\\epsilon$=%.1e\nTime: %.2f  Iteration: %i   dt=%.2e\nBarnes-Hut: %s     $\\theta$=%.2f'%(epsilon, n_it*dt, n_it, dt, tree, theta))
+        
     for i in range(2):
         for j in range(2):
             if d3 == False:
@@ -101,8 +153,6 @@ if ploteo:
                 ax[i,j].grid()
                 ax[i,j].set_xlim(-radius,radius)
                 ax[i,j].set_ylim(-radius,radius)
-
-    fig.suptitle('N-body sim with $\\epsilon$=%.1e\nTotal time: %.2f\nTotal number of iterations: %i\nBarnes-Hut: %s     $\\theta$=%.2f'%(epsilon,t_end, t_end/dt, tree, theta))
     if d3 == False:
         ax[0,0].set_xlabel('x')
         ax[0,1].set_xlabel('y')
@@ -118,10 +168,10 @@ if ploteo:
         ax.set_ylim(-radius, radius)
         ax.set_zlim(-radius, radius)
         ax.minorticks_on()
-        ax.grid()
-    
-    if N_bodies <=10:
-        if d3 == False:
-            ax[1,0].legend()
+        ax.grid()    
         
     plt.tight_layout()
+
+ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta,
+            trail = 10000, movie = False,
+            d3 = d3, fnum=fnum)
