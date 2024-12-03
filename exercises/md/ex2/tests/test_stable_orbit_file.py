@@ -36,7 +36,7 @@ class TestEx2Output:
             print("Something wrong with output time steps")
             self.all_good = False
 
-        if r[-1] > 1.01 and r[-1] < 0.98 and r[-2] > 1e-5:
+        if r[-1] > 1.01 or r[-1] < 0.98 or r[-2] > 1e-5:
             print("Something wrong in the last position at least")
             self.all_good = False
 

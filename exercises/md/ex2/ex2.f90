@@ -13,7 +13,7 @@ program tree
     integer, parameter :: in = 1, out = 2
     real(real64) :: dt, t_end, t, dt_out, t_out
     real(real64) :: epsilon, theta_local
-    real(real64) :: start_time, end_time
+    integer(int64) :: start_time,  end_time, time_rate
     type(particle3d), allocatable :: particles(:)
     character(len=100) :: sim_name, file_out
     !Input file of initial conditions
@@ -65,7 +65,7 @@ program tree
     print*, "Theta: ", theta_local
     print*, "____________________________________"
     print*, "Starting simulation..."
-    call cpu_time(start_time)
+    call system_clock(start_time, time_rate)
 
     
 
@@ -110,16 +110,16 @@ program tree
             call show_progress(t, t_end)
         end do
 
-        call cpu_time(end_time)
-        write(out, "(A, F12.3)") "#Simulation execution time: ", end_time - start_time
+        call system_clock(end_time)
+        write(out, "(A, F12.6)") "#Simulation execution time: ", real(end_time - start_time, kind=real64) / real(time_rate, kind=real64)    
     close(out)
     
     print*, " "
     print*, "Done!"
-    if (end_time - start_time > 60.0) then
-        print "(A, F6.3, A)", "Simulation execution time: ", (end_time - start_time) / 60.0, " minutes"
+    if (real(end_time - start_time, kind=real64) > 60.0) then
+        print "(A, F6.3, A)", "Simulation execution time: ", real(end_time - start_time, kind=real64) / (real(time_rate, kind=real64) * 60.0), " minutes"
     else
-        print "(A, F6.3, A)", "Simulation execution time: ", end_time - start_time, " seconds"
+        print "(A, F6.3, A)", "Simulation execution time: ", real(end_time - start_time, kind=real64) / real(time_rate, kind=real64), " seconds"
     end if
     print*, "____________________________________"
 end program tree

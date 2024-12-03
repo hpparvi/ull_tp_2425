@@ -1,11 +1,11 @@
 FC = gfortran
 PYTHON = python
 MAKE = make
-FCFLAGS = -c -g -fcheck=bounds
-PARFLAGS = -fopenmp -g -fcheck=bounds
+FCFLAGS = -c 
+PARFLAGS = -fopenmp 
 OBJECTS = ex2.o barnes_hut.o calculations.o utils.o geometry.o particle.o
 OBJECTS_PARALLEL = ex2_par.o barnes_hut_par.o calculations_par.o utils.o geometry.o particle_par.o
-TESTS = tests/test_stable_orbit_file.py
+TESTS = tests/test_stable_orbit_file.py tests/test_execution_time.py
 PLOT_IMAGES_SCRIPT = visual/plot_images.py
 IMAGE_TO_VIDEO_SCRIPT = visual/image_to_video.py
 DELETE_IMAGES_SCRIPT = visual/delete_images.py
@@ -70,8 +70,10 @@ video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 
 all_videos: 
 	for file in output/*.dat; do \
-		SIM_NAME_V=$$(basename $$file .dat); \
-		$(MAKE) video OUTPUT_FILE=$$file SIM_NAME=$$SIM_NAME_V; \
+		if [[ $$file != *test* ]]; then \
+			SIM_NAME_V=$$(basename $$file .dat); \
+			$(MAKE) video OUTPUT_FILE=$$file SIM_NAME=$$SIM_NAME_V; \
+		fi \
 	done
 	@echo "All videos generated"
 
@@ -81,7 +83,9 @@ all_ics:
 	done
 
 test: 
-	$(PYTHON) $(TESTS)
+	for test_script in $(TESTS); do \
+		$(PYTHON) $$test_script; \
+	done
 
 clean:
 	rm -f $(OBJECTS) $(OBJECTS_PARALLEL) ex2
