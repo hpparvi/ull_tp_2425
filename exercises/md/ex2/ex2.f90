@@ -11,7 +11,7 @@ program tree
 
     integer :: i, n
     integer, parameter :: in = 1, out = 2
-    real(real64) :: dt, t_end, t, dt_out, t_out
+    real(real64) :: dt, t_end, t, dt_out, t_out, exec_time
     real(real64) :: epsilon, theta_local
     integer(int64) :: start_time,  end_time, time_rate
     type(particle3d), allocatable :: particles(:)
@@ -43,6 +43,51 @@ program tree
             read*, particles(i)%m
             print*, "____________________________________"
         end do
+        
+        ! Write the initial conditions to a file
+        open(unit=in, file='ics/ic_' // trim(adjustl(sim_name)) // '.txt', action='write')
+            write(in, '(A)') '! Simulation name:'
+            write(in, '(A)') sim_name
+            write(in, *)
+            write(in, '(A)') '! Time step:'
+            write(in, *) dt
+            write(in, *)
+            write(in, '(A)') '! Output time step:'
+            write(in, *) dt_out
+            write(in, *)
+            write(in, '(A)') '! Final time:'
+            write(in, *) t_end
+            write(in, *)
+            write(in, '(A)') '! Number of particles:'
+            write(in, *) n
+            write(in, *)
+            write(in, '(A)') '! Theta:'
+            write(in, *) theta_local
+            write(in, *)
+            write(in, '(A)') '! Epsilon (softening length):'
+            write(in, *) epsilon
+            write(in, *)
+
+            ! Write particle positions
+            write(in, '(A)') '! Positions (x,y,z) (each line, a particle):'
+            do i = 1, n
+            write(in, *) particles(i)%p%x, particles(i)%p%y, particles(i)%p%z
+            end do
+            write(in, *)
+
+            ! Write particle velocities
+            write(in, '(A)') '! Velocity (vx, vy, vz) (each line, a particle):'
+            do i = 1, n
+            write(in, *) particles(i)%v%x, particles(i)%v%y, particles(i)%v%z
+            end do
+            write(in, *)
+
+            ! Write particle masses
+            write(in, '(A)') '! Mass (each line, a particle):'
+            do i = 1, n
+            write(in, *) particles(i)%m
+            end do
+        close(in)
     !If more than one input file was provided, stop the program
     else
         print*, "Error: input file or terminal input not provided"
@@ -111,15 +156,16 @@ program tree
         end do
 
         call system_clock(end_time)
-        write(out, "(A, F12.6)") "#Simulation execution time: ", real(end_time - start_time, kind=real64) / real(time_rate, kind=real64)    
+        exec_time = real(end_time - start_time, kind=real64) / real(time_rate, kind=real64)
+        write(out, "(A, F12.6)") "#Simulation execution time: ", exec_time
     close(out)
     
     print*, " "
     print*, "Done!"
-    if (real(end_time - start_time, kind=real64) > 60.0) then
-        print "(A, F6.3, A)", "Simulation execution time: ", real(end_time - start_time, kind=real64) / (real(time_rate, kind=real64) * 60.0), " minutes"
+    if (exec_time > 60.0) then
+        print "(A, F6.3, A)", "Simulation execution time: ", exec_time / 60.0, " minutes"
     else
-        print "(A, F6.3, A)", "Simulation execution time: ", real(end_time - start_time, kind=real64) / real(time_rate, kind=real64), " seconds"
+        print "(A, F6.3, A)", "Simulation execution time: ", exec_time, " seconds"
     end if
     print*, "____________________________________"
 end program tree

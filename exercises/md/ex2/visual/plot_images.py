@@ -106,8 +106,8 @@ def save_figure(t):
                     alpha=0.6,
                 )
                 ax[j].plot(
-                    pos[particle, xyz[j][0]][t],
-                    pos[particle, xyz[j][1]][t],
+                    pos[particle, xyz[j][0]][t - 1],
+                    pos[particle, xyz[j][1]][t - 1],
                     'o',
                     color=colors[i],
                     ms=10,
@@ -159,7 +159,8 @@ def save_figure_nolines(t):
 
 
 if __name__ == '__main__':
-    time_indexs = range(int(sim_info['final_time'] // dt_out))
+    time_indexs = range(int(sim_info['final_time'] // dt_out) - 1)
+    print(sim_info['final_time'] // dt_out)
     output_dir = './output/images_' + sim_info['simulation_name']
     os.makedirs(output_dir, exist_ok=True)
 
