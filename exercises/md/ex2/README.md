@@ -159,7 +159,7 @@ python visual/image_to_video.py output/images_template/ 30 videos/ template 1
 
 The output files will be saved in the `output/` directory. They start with a Python-commented header that describes the information of each column. Each line represents a particle with its ID, position, mass, and simulation time. As a result, all outputs have the same number of columns, making them easier to read. Since the ID and time for each particle are saved, it is possible to track them over time. The last line of the output file (also commented for Python) shows the time it took to run the simulation.
 
-In `visual/utils.py`, there is a function `called read_data(output_file)` that can be imported to read the output files. This function returns the positions of the particles in an $M\times3$ array, their masses, the simulation times, and the time it took to run the simulation. It also returns a list of $N$ ($N$ = particle number) elements, where each element is a boolean array that can be used to index the positions array to distinguish the particles. For example:
+In `visual/utils.py`, there is a function called `read_data(output_file)` that can be imported to read the output files. This function returns the positions of the particles in an $M\times3$ array, their masses, the simulation times, and the time it took to run the simulation. It also returns a list of $N$ ($N$ = number of particles) elements, where each element is a boolean array that can be used to index the positions array to distinguish the particles. For example:
 
 ```py
 from visual import utils
@@ -186,9 +186,11 @@ Output file example:
      2   2.10830E+00 -2.45678E-02  0.00000E+00  1.00000E+00  2.99000E-01
      3  -1.76030E-00 -2.31456E-01  0.00000E+00  1.00000E+00  2.99000E-01
      ...
-     3   4.09912E-01  9.12125E-01  0.00000E+00  1.00000E-06  1.99970E+00
+     3   4.09912E-01  9.12125E-01  0.00000E+00  1.00000E+00  1.99970E+00
 #Simulation execution time:    17.338968
 ```
+
+In `visual/nbody_check.ipynb`, there are examples of how to plot trajectories using these types of output files.
 
 ## Execution Time
 
