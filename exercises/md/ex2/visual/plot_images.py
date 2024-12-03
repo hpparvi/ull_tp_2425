@@ -160,7 +160,6 @@ def save_figure_nolines(t):
 
 if __name__ == '__main__':
     time_indexs = range(int(sim_info['final_time'] // dt_out) - 1)
-    print(sim_info['final_time'] // dt_out)
     output_dir = './output/images_' + sim_info['simulation_name']
     os.makedirs(output_dir, exist_ok=True)
 

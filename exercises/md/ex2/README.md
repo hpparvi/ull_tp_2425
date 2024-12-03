@@ -1,6 +1,5 @@
-# Exercise 2
-[![GitHub](https://img.shields.io/badge/GitHub-DavidMirabal-blue?logo=github)](https://github.com/DavidMirabal)  
-
+# Exercise 2: multithreaded dynamical simulation using Barnes-Hut and OpenMP
+[![GitHub](https://img.shields.io/badge/GitHub-DavidMirabal-blue?logo=github)](https://github.com/DavidMirabal)   [![Python](https://img.shields.io/badge/Python-3.10.9-green?logo=python)](https://www.python.org/) ![Fortran](https://img.shields.io/badge/Fortran-90%2B-yellow?logo=fortran) [![FFmpeg](https://img.shields.io/badge/FFmpeg-Enabled-violet?logo=ffmpeg)](https://ffmpeg.org/)
 ![!3part_funny2](videos/3part_funny2.gif)
 
 <!-- TABLE OF CONTENTS -->
