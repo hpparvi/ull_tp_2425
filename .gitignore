@@ -1,6 +1,9 @@
 # something weird
 **/*.dSym/
 
+# frames for png files
+**/frames
+
 # Prerequisites
 *.d
 

@@ -16,7 +16,9 @@ PROGRAM main
   INTEGER :: num_args       ! to count the number of given arguments
   character(len=100) :: par_filename, dummy_line     ! to import the stars data and parameters data
   real :: t, t_out !dt, t_end, dt_out
-  real :: t_ini, t_fin, t2, t3_i, t3_f, t_dummy
+  integer :: clock_ini, clock_fin, clock_rate, clock_dummy, clock_dummy_2
+  real :: t_total, t_ini, t_fin, t2, t_tree=0, t_del_tree=0, t_parts=0, t_write=0, t_dummy, t_dummy_2
+  real, dimension(7) :: t_calcs = [0,0,0,0,0,0,0]
   integer :: it_percent=0, it_percent_previous=0
   character(len=100) :: fmt
   logical :: parallelized = .false.
@@ -37,6 +39,7 @@ PROGRAM main
   ! ------------------------------------------------------------
   ! ------------------------------------------------------------
 
+  call system_clock(clock_ini, clock_rate)
   call cpu_time(t_ini)
 
   !$ parallelized = .true. 
@@ -63,7 +66,7 @@ PROGRAM main
     print '(A10, A10, A10, A10, A10, A16, A10, A10)', "dt", "dt_out","t_end","epsilon", "theta", "create_bodies", "N_bodies", "radius"
     print '(F10.2,F10.2,F10.2,F10.2,F10.2,L16,I10, F10.2)', dt, dt_out, t_end, epsilon, theta, create_bodies, N_bodies, radius
     print*, ""
-    print*, "  -  input_file = ", input_file
+    print*, "  -  input_file = ", trim(input_file)
     print*, "  -  output_file = ", trim(output_file)
     print*, ""
     print'(A,L1)', " - Parallelization: ", parallelized
@@ -138,7 +141,9 @@ PROGRAM main
         stop
      end if
      
-call cpu_time(t2)     
+ ! call cpu_time(t2)
+ call system_clock(clock_dummy)
+ t2 = real(clock_dummy-clock_ini) / real(clock_rate)
 
 print*, ""
 print*, "-------------------------------------------------------------"
@@ -154,7 +159,10 @@ print*, "-------------------------------------------------------------"
 ! Initialize head node
   ALLOCATE(head)
   ! Creation of tree
-  CALL Make_Tree(head, partics, n, theta, epsilon)
+  CALL Make_Tree(head, partics, n, theta, epsilon, t_calcs)
+  ! call cpu_time(t_dummy)
+  call system_clock(clock_dummy_2)
+  t_tree = real(clock_dummy_2-clock_dummy) / real(clock_rate)
   
 !---------------------------------------
 ! Main loop
@@ -170,22 +178,47 @@ print*, "-------------------------------------------------------------"
        write(*, '(A)', ADVANCE="NO") CHAR(13)
        it_percent_previous = it_percent
      end if
-  
+
      t = i_t*dt
+     ! call cpu_time(t_dummy)
+     call system_clock(clock_dummy)
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
      partics(:)%p = partics(:)%p + (partics(:)%v * dt)
+     ! call cpu_time(t_dummy_2)
+     call system_clock(clock_dummy_2)
+     !t_parts = t_parts + t_dummy_2-t_dummy
+     t_parts = t_parts + real(clock_dummy_2-clock_dummy) / real(clock_rate)
+
      ! positions have changed so the tree has to be rebuilt
+
      CALL Delete_Tree(head)
-     CALL Make_Tree(head, partics, n, theta, epsilon)
+     ! call cpu_time(t_dummy)
+     call system_clock(clock_dummy)
+     t_del_tree = t_del_tree + real(clock_dummy-clock_dummy_2) / real(clock_rate)
+     ! t_del_tree = t_del_tree + t_dummy-t_dummy_2
+     
+     CALL Make_Tree(head, partics, n, theta, epsilon, t_calcs)
+     ! call cpu_time(t_dummy_2)
+     ! t_tree = t_tree + t_dummy_2-t_dummy
+     call system_clock(clock_dummy_2)
+     t_tree = t_tree + real(clock_dummy_2-clock_dummy) / real(clock_rate)
      
      partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
+     ! call cpu_time(t_dummy)
+     ! t_parts = t_parts + t_dummy-t_dummy_2
+     call system_clock(clock_dummy)
+     t_parts = t_parts + real(clock_dummy-clock_dummy_2) / real(clock_rate)
+     
      t_out = t_out + dt
 
      ! Store all values of positions:
      ! t p1x, p1y, ... pNz
      write(fmt, "(A,I0,A,I0,A)") "(F10.2, ", 3*N, "F12.5)"
      write(20, fmt) t, (partics(k)%p, k=1,N)
-          
+     ! call cpu_time(t_dummy_2)
+     ! t_write = t_write + t_dummy_2-t_dummy
+     call system_clock(clock_dummy_2)
+     t_write = t_write + real(clock_dummy_2-clock_dummy) / real(clock_rate)   
   END DO
 
   close(20)
@@ -198,9 +231,23 @@ print*, "-------------------------------------------------------------"
 print*, trim(output_file), " created."
 
 call cpu_time(t_fin)
+call system_clock(clock_fin)
+t_total = real(clock_fin-clock_ini)/real(clock_rate)
 
-print '("Total time = ",f0.3," seconds.")',t_fin-t_ini
+print '("Total wall time = ",f0.3," seconds.")', t_total
+print '("CPU times:")'
 print '("  - Time spent in input setup = ",f0.3," seconds.")',t2-t_ini
 print '("  - Time spent in main loop = ",f0.3," seconds.")',t_fin-t2
+print '("     - Makig trees = ",f0.3," seconds.")', t_tree
+print '("        - Calculating ranges = ",f0.3," seconds.")', t_calcs(1)
+print '("        - Nullifying pointers = ",f0.3," seconds.")', t_calcs(2)
+print '("        - Finding and placing cells = ",f0.3," seconds.")', t_calcs(3)
+print '("        - Deleting empty leaves = ",f0.3," seconds.")', t_calcs(4)
+print '("        - Calculating masses = ",f0.3," seconds.")', t_calcs(5)
+print '("        - Initializing accelerations = ",f0.3," seconds.")', t_calcs(6)
+print '("        - Calculating forces = ",f0.3," seconds.")', t_calcs(7)
+print '("     - Deleting trees = ",f0.3," seconds.")', t_del_tree
+print '("     - Updating particles = ",f0.3," seconds.")', t_parts
+print '("     - Writing results = ",f0.3," seconds.")', t_write
   
 END PROGRAM main

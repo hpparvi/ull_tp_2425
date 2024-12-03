@@ -56,8 +56,8 @@ CONTAINS
   SUBROUTINE Nullify_Pointers(goal)
     TYPE(CELL), POINTER :: goal
     INTEGER :: i,j,k
-    !$omp parallel private(i,j,k) shared(goal)
-    !$omp do 
+    ! !$omp parallel private(i,j,k) shared(goal)
+    ! !$omp do 
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
@@ -65,8 +65,8 @@ CONTAINS
           END DO
        END DO
     END DO
-    !$omp end do
-    !$omp end parallel
+    ! !$omp end do
+    ! !$omp end parallel
   END SUBROUTINE Nullify_Pointers
 
 !------------------------------------------------------------- 
@@ -223,8 +223,8 @@ CONTAINS
     TYPE(CELL),POINTER :: goal
     INTEGER :: i, j, k
     IF (ASSOCIATED(goal%subcell(1,1,1)%ptr)) THEN
-       !$omp parallel private(i,j,k) shared(goal)
-       !$omp do
+       ! !$omp parallel private(i,j,k) shared(goal)
+       ! !$omp do
        DO i = 1,2
           DO j = 1,2
              DO k = 1,2
@@ -235,8 +235,8 @@ CONTAINS
              END DO
           END DO
        END DO
-       !$omp end do
-       !$omp end parallel
+       ! !$omp end do
+       ! !$omp end parallel
     END IF
   END SUBROUTINE Delete_empty_leaves
 
@@ -257,8 +257,8 @@ CONTAINS
        goal%mass = p_arr(goal%pos)%m
        goal%c_o_m = p_arr(goal%pos)%p
     CASE (2)
-       !$omp parallel private(i,j,k) shared(goal, p_arr)
-       !$omp do
+       ! !$omp parallel private(i,j,k) shared(goal, p_arr)
+       ! !$omp do
        DO i = 1,2
           DO j = 1,2
              DO k = 1,2
@@ -272,8 +272,8 @@ CONTAINS
              END DO
           END DO
        END DO
-       !$omp end do
-       !$omp end parallel
+       ! !$omp end do
+       ! !$omp end parallel
     END SELECT
   END SUBROUTINE Calculate_masses
 
@@ -357,8 +357,8 @@ CONTAINS
   RECURSIVE SUBROUTINE Delete_Tree(goal)
     TYPE(CELL),POINTER :: goal
     INTEGER :: i,j,k
-    !$omp parallel private(i,j,k) shared(goal)
-    !$omp do
+    ! !$omp parallel private(i,j,k) shared(goal)
+    ! !$omp do
     DO i = 1,2
        DO j = 1,2
           DO k = 1,2
@@ -369,38 +369,78 @@ CONTAINS
           END DO
        END DO
     END DO
-    !$omp end do
-    !$omp end parallel
+    ! !$omp end do
+    ! !$omp end parallel
   END SUBROUTINE Delete_Tree
 
 !-------------------------------------------------------------  
   ! Make_Tree calls all previous functions to make the tree from scratch
   
-  SUBROUTINE Make_Tree(root, p_arr, n, theta, epsilon)
+  SUBROUTINE Make_Tree(root, p_arr, n, theta, epsilon, t_calcs)
     type(CELL), pointer :: root, temp_cell
     type(particle), dimension(:) :: p_arr
+    real, dimension(7), intent(inout) :: t_calcs
+    integer :: t_dummy, t_dummy_2, t_rate
     INTEGER :: n, i
     real, intent(in) :: theta, epsilon
     
     ! calculates its min and max values
+    ! call cpu_time(t_dummy)
+    call system_clock(t_dummy, t_rate)
     CALL Calculate_Ranges(root, p_arr)
+    !call cpu_time(t_dummy_2)
+    !t_calcs(1) = t_calcs(1) + t_dummy_2-t_dummy
+    call system_clock(t_dummy_2)
+    t_calcs(1) = t_calcs(1) + real(t_dummy_2-t_dummy) / real(t_rate)
+    
     root%type = 0 ! empty cell
     ! remove the subcell pointers
     CALL Nullify_Pointers(root)
+    ! call cpu_time(t_dummy)
+    ! t_calcs(2) = t_calcs(2) + t_dummy-t_dummy_2
+    call system_clock(t_dummy)
+    t_calcs(2) = t_calcs(2) + real(t_dummy-t_dummy_2) / real(t_rate)
+    
     ! Creation of the tree, particle by particle
     DO i = 1,n
        ! find the corresponding cell and place particle there
        CALL Find_Cell(root,temp_cell,p_arr(i))
        CALL Place_Cell(temp_cell,p_arr(i),i)
     END DO
-    ! Clean the tree and calculate masses in each cell
+    ! call cpu_time(t_dummy_2)
+    ! t_calcs(3) = t_calcs(3) + t_dummy_2-t_dummy
+    call system_clock(t_dummy_2)
+    t_calcs(3) = t_calcs(3) + real(t_dummy_2-t_dummy) / real(t_rate)
+    
+    ! Clean the tree 
     CALL Delete_empty_leaves(root)
+    ! call cpu_time(t_dummy)
+    ! t_calcs(4) = t_calcs(4) + t_dummy-t_dummy_2
+    call system_clock(t_dummy)
+    t_calcs(4) = t_calcs(4) + real(t_dummy-t_dummy_2) / real(t_rate)
+
+    ! Calculate masses in each cell
     CALL Calculate_masses(root, p_arr)
+    ! call cpu_time(t_dummy_2)
+    ! t_calcs(5) = t_calcs(5) + t_dummy_2-t_dummy
+    call system_clock(t_dummy_2)
+    t_calcs(5) = t_calcs(5) + real(t_dummy_2-t_dummy) / real(t_rate)
+
     ! Initialization of accelerations
     do i = 1,n
      p_arr(i)%a = vector3d(0,0,0)
     end do
+    ! call cpu_time(t_dummy)
+    ! t_calcs(6) = t_calcs(6) + t_dummy-t_dummy_2
+    call system_clock(t_dummy)
+    t_calcs(6) = t_calcs(6) + real(t_dummy-t_dummy_2) / real(t_rate)
+
+    ! Calculation of forces
     CALL Calculate_forces(root, p_arr, n, theta, epsilon)
+    ! call cpu_time(t_dummy_2)
+    ! t_calcs(7) = t_calcs(7) + t_dummy_2-t_dummy
+    call system_clock(t_dummy_2)
+    t_calcs(7) = t_calcs(7) + real(t_dummy_2-t_dummy) / real(t_rate)
   END SUBROUTINE Make_Tree
 
 End MODULE barnes_hut
