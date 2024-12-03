@@ -38,7 +38,9 @@
 The goal of this exercise is to implement a parallel version of the sequential program from exercise 1. 
 The program must be implemented using OpenMP. Additionally, the Barnes-Hut algorithm is used for the N-body simulation.
 
-The Barnes-Hut algorithm is an approximation algorithm used to simulate the motion of a particle system under the influence of gravity. It reduces the complexity of the problem from $O(N^2)$ to $O(N \log N)$ by dividing the space into a hierarchical tree structure (octree in 3D) and approximating the influence of distant bodies with their center of mass.
+The Barnes-Hut algorithm is an approximation algorithm used to simulate the motion of a particle system under the influence of gravity. It reduces the complexity of the problem from $O(N^2)$ to $O(N \log N)$ by dividing the space into a hierarchical tree structure (octree in 3D) and approximating the influence of distant bodies with their center of mass. 
+
+The parameter $\theta$ (usually set to 1) is fixed in the initial conditions files. This parameter serves as a criterio for grouping or not certain particles when calculating the acceleration of another one. If $\theta$ is small, the algorithm requires higher precision in the calculations and only groups particles if the angle subtended by the center of mass of a group is small, meaning the group is more "compact". If $\theta$ is large, the algorithm allows larger approximations and can group particles that are more dispersed, so reducing computation time.
 
 > [!IMPORTANT]  
 > All commands in this `README` must be executed from the main directory: `ex2/`
