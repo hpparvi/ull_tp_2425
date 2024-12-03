@@ -5,7 +5,7 @@
 
 <!-- TABLE OF CONTENTS -->
 <details>
-  <summary>Table of Contents</summary>
+<summary><strong><span style="font-size: 20px;">Table of Contents</strong></summary>
   <ol>
     <li>
       <a href="#description">Description</a>
