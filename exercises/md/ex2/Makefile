@@ -83,6 +83,9 @@ all_ics:
 	done
 
 test: 
+	$(PYTHON) tests/test_stable_orbit_file.py
+
+test_all: 
 	for test_script in $(TESTS); do \
 		$(PYTHON) $$test_script; \
 	done

@@ -74,6 +74,12 @@ class TestEx2extimes:
         if self.all_good:
             print('Everything seems OK')
 
+    def delete_files(self):
+        for ic_file in self.input_files:
+            os.remove(ic_file)
+        for output_file in self.output_files:
+            os.remove(output_file)
+
 
 if __name__ == '__main__':
     print('-----------------------------------')
@@ -88,4 +94,5 @@ if __name__ == '__main__':
     test.test_times_many_particles()
     end_time = time.time()
     print(f"Test execution time: {end_time - start_time} seconds")
+    test.delete_files()
     print('-----------------------------------')
