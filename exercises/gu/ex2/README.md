@@ -18,3 +18,27 @@ For 1000 particles, 1k steps:
 - parallel: 5.2 seconds
 
 For 10 particles the parallelized version is slower than the non-parallelized version. This was expected as the benefit from parallelizing is negligible compared to its cost. For the other tests, we see parallelizing the code consistently makes the code run faster.
+
+# Some examples
+These examples are more or less arbitrary, though they all helped fix issues in the code. All plots were made with the `graph_2d.py` code, with minor aesthetic modifications.
+
+## 3-body
+Using Ángel de Vicente's initial conditions (3 particles, included as `initial_conditions_adv.dat`), we recover the same solution as with the previous version:
+
+<img src="https://github.com/user-attachments/assets/aa88bdd5-4401-4bfd-a972-4b62e5ae27b0" width="500">
+
+As we can see, it is a stable configuration.
+
+## 10-body
+The 10-body initial conditions found in `initial_conditions_10.dat` yield a solution with 3 gravitationally bound particles that are ejected from the larger system, but continue orbiting each other as they careen on through space.
+
+<img src="https://github.com/user-attachments/assets/455b4a0d-98b9-4cea-bce2-793ca01310fd" width="500">
+
+## 1000-body
+These are found in `initial_conditions_star.dat`, and the ejected particles form a rather symmetrical shape:
+
+<img src="https://github.com/user-attachments/assets/d2dd7c37-eed6-4735-9cb6-1062d3f4f092" width="500">
+
+Zooming in on the center reveals that quite a few of the particles remain orbiting the center: 
+
+<img src="https://github.com/user-attachments/assets/94bb3184-efc6-4c65-90f4-c5a4ad5f9c22" width="500">
