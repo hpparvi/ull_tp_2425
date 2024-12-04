@@ -112,12 +112,13 @@ program tree
     print*, "Starting simulation..."
     call system_clock(start_time, time_rate)
 
-    
-
     allocate(head)
-    call barnes_hut_tree(particles, head, n)
 
+    !Create the octree
+    call barnes_hut_tree(particles, head, n)
+    !Calculate the masses of the cells
     call calculate_masses(particles, head)
+
     !$omp parallel shared(particles, head, epsilon, theta_local, n, dt)
     call reset_a(particles)
     call calculate_forces(particles, head, epsilon, theta_local)
@@ -152,6 +153,7 @@ program tree
 
             t = t + dt
 
+            !Progress bar
             call show_progress(t, t_end)
         end do
 

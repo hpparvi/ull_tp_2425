@@ -153,7 +153,7 @@ python visual/plot_images.py output/template.txt ics/ic_template.txt 8
 python visual/image_to_video.py output/images_template/ 30 videos/ template 1
 ```
 
-8 is the number of cores (threads) to use, 30 is fps and 1 is the resize factor.
+8 is the number of cores to use, 30 is fps and 1 is the resize factor.
 
 ## Output files
 
