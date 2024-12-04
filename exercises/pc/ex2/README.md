@@ -56,9 +56,9 @@ make -f Makefile_random_input clean
 ~~~
 
 # Parallelization with OpenMP
-The code is parallelized with OpenMP in the modules ```barnes.f90```, ```cals.f90``` and the main program, ```ex2.f90```. The Barnes-Hut algorithm is parallelized only in the calculation of the forces. Due to the way of coding, inside the recursive subroutine ```Calculate_forces_aux``` the CRITICAL directive has been implemented to prevent race conditions by ensuring that only one thread executes this block of code at a time.
+The code is parallelized with OpenMP in the modules ```barnes.f90```and ```cals.f90```, and the main program, ```ex2.f90```. The Barnes-Hut algorithm is parallelized only in the calculation of the forces. Due to the way of coding, inside the recursive subroutine ```Calculate_forces_aux``` the CRITICAL directive has been implemented to prevent race conditions by ensuring that only one thread executes this block of code at a time.
 
-Several time tests were made on a 4-cores computer using a time step of $dt = 0.01$, an output time step of $dt_{out} = 0.1$ and a final time of $t_{final} = 50. The results are shown in the following table:
+Several time tests were made on a 4-cores computer using a time step of $dt = 0.01$, an output time step of $dt_{out} = 0.1$ and a final time of $t_{final} = 50$. The results are shown in the following table:
 
 | Particles | Time direct-sum (ex1) [s]| Time non-parallelized Barnes-Hut [s]| Time parallelized Barnes Hut [s]|
 |:---------:|:-----:               |:--------:                        |:--------------:|
@@ -71,7 +71,7 @@ Several time tests were made on a 4-cores computer using a time step of $dt = 0.
 |    500    |   58  |    33    |       121      |
 |    1000   |  196  |    79    |       286      |
 
-We observe that for a small number of particles, the direct-sum algorithm is computationally faster as the Barnes-Hut has to build the tree and recursively computing the center of mass and total mass for each cell. However, for a larger number of particles the Barnes-Hut algorithm becomes more efficient due its optimized method for calculating forces between particles. Contrary to expectations, the parallelized version of the Barnes-Hut algorithm takes more time to perform simulations when dealing with a significant number of particles. This could be attributed to the use of the CRITICAL directive in the calculation of the forces. For a more detailed explanation of these results see the ```plot_times.ipynb```, which includes a plot of these results and more extended explanations. 
+For a small number of particles, the direct-sum algorithm is computationally faster as the Barnes-Hut has to build the tree and recursively computing the center of mass and total mass for each cell. However, for a larger number of particles the Barnes-Hut algorithm becomes more efficient due its optimized method for calculating forces between particles. Contrary to expectations, the parallelized version of the Barnes-Hut algorithm takes more time to perform simulations when dealing with a significant number of particles. This could be attributed to the use of the CRITICAL directive in the calculation of the forces. For a more detailed explanation of these results see the ```plot_times.ipynb```, which includes a plot and more extended explanations. 
 
 
 
