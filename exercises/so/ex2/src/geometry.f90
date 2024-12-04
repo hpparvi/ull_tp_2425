@@ -25,7 +25,7 @@ module geometry
   end type point3d
 
   interface operator(+)
-     module procedure sumvp, sumpv, sumvv
+     module procedure sumvp, sumpv, sumvv, sumpp
   end interface
 
   interface operator(-)
@@ -33,11 +33,11 @@ module geometry
   end interface
 
   interface operator(*)
-     module procedure mulrv, mulvr
+     module procedure mulrv, mulvr, mulrp, mulpr
   end interface
 
   interface operator(/)
-     module procedure divvr
+     module procedure divvr, divpr
   end interface
 
   interface operator(.dot.)
@@ -63,6 +63,11 @@ contains
     type(vector3d), intent(in) :: a, b
     sumvv = vector3d(a%x + b%x, a%y + b%y, a%z + b%z)
   end function sumvv
+
+  elemental type(point3d) function sumpp(a, b)
+    type(point3d), intent(in) :: a, b
+    sumpp = point3d(a%x + b%x, a%y + b%y, a%z + b%z)
+  end function sumpp
   
 ! Substracting vectors and points
   elemental type(point3d) function subvp(av, bp)
@@ -95,12 +100,32 @@ contains
     mulvr = vector3d(b*a%x, b*a%y, b*a%z)
   end function mulvr
 
+! Multiplication of real number and point
+  elemental type(point3d) function mulrp(a, b)
+    real, intent(in) :: a
+    type(point3d), intent(in) :: b
+    mulrp = point3d(a*b%x, a*b%y, a*b%z)
+  end function mulrp
+
+  elemental type(point3d) function mulpr(a, b)
+    type(point3d), intent(in) :: a
+    real, intent(in) :: b
+    mulpr = point3d(b*a%x, b*a%y, b*a%z)
+  end function mulpr
+
 ! Division of vector by real
   elemental type(vector3d) function divvr(v, r)
     real, intent(in) :: r
     type(vector3d), intent(in) :: v
     divvr = vector3d(v%x/r, v%y/r, v%z/r)
   end function divvr
+  
+! Division of point by real
+  elemental type(point3d) function divpr(p, r)
+    real, intent(in) :: r
+    type(point3d), intent(in) :: p
+    divpr = point3d(p%x/r, p%y/r, p%z/r)
+  end function divpr
 
 ! Norm of a vector
   pure real function norm(a)
