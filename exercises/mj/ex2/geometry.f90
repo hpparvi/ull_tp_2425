@@ -1,6 +1,6 @@
 module geometry
     implicit none
-
+    
     ! types vector3d and point3d
     type :: vector3d
         real(kind=8) :: x, y, z
