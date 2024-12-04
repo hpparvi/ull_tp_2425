@@ -17,16 +17,16 @@ N = int((df.shape[1]-1)/3)  # Número de partículas
 frames = len(df)  # Número de cuadros basado en las filas del archivo
 
 # Configuración inicial
-particles, = ax.plot([], [], [], 'bo', markersize=2, label="Partículas")  # Puntos para las partículas
+particles, = ax.plot([], [], [], 'bo', markersize=2, label="Partículas", alpha = 0.5)  # Puntos para las partículas
 trails = []  # Para las trayectorias
 for _ in range(N):
-    trail, = ax.plot([], [], [], alpha=1)  # Una línea para cada órbita
+    trail, = ax.plot([], [], [], alpha=0.05)  # Una línea para cada órbita
     trails.append(trail)
 
 # Límites del gráfico
-ax.set_xlim(-2, 2)
-ax.set_ylim(-2, 2)
-ax.set_zlim(-2, 2)
+ax.set_xlim(-5, 5)
+ax.set_ylim(-5, 5)
+ax.set_zlim(-5, 5)
 
 # Etiquetas de los ejes
 ax.set_xlabel('Eje X')
@@ -59,6 +59,6 @@ def update(frame):
 
 # Crear la animación
 ani = FuncAnimation(fig, update, frames=frames, init_func=init, blit=True, interval=50)
-ani.save('animacion_inf.mp4', writer='ffmpeg', fps=20)
+ani.save('ani_2gal.mp4', writer='ffmpeg', fps=20)
 # Mostrar la animación
 plt.show()

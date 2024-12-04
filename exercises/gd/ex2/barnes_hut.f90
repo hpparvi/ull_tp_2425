@@ -18,9 +18,9 @@ CONTAINS
 !! Calculate_Ranges !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Calcula los rangos de las part´ıculas en la
-!! matriz r en las 3 dimensiones y lo pone en la
-!! variable apuntada por goal
+!! Calculates the ranges of the particles in the
+!! matrix `r` across the 3 dimensions and stores them in the
+!! variable pointed to by `goal`.
 !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -28,15 +28,15 @@ CONTAINS
     TYPE(CELL),POINTER :: goal
     TYPE(point3d) :: mins,maxs,medios
     REAL(REAL64) :: span
-    ! Se calculan los mínimos y máximos coordenada a coordenada
+      ! The minimum and maximum are calculated coordinate by coordinate.
     mins%x = MINVAL(pt%p%x)
     mins%y = MINVAL(pt%p%y)
     mins%z = MINVAL(pt%p%z)
     maxs%x = MAXVAL(pt%p%x)
     maxs%y = MAXVAL(pt%p%y)
     maxs%z = MAXVAL(pt%p%z)
-      ! Al calcular span le sumo un 10% para que las
-      ! particulas no caigan justo en el borde
+      ! When calculating the span, it add 10% so that the
+      ! particles do not fall exactly on the edge.
     span = MAX(maxs%x - mins%x, maxs%y - mins%y, maxs%z - mins%z) * 1.1
     medios%x = (maxs%x + mins%x) / 2.0
     medios%y = (maxs%y + mins%y) / 2.0
@@ -53,19 +53,19 @@ CONTAINS
 !! Find_Cell !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Encuentra la celda donde colocaremos la particula.
-!! Si la celda que estamos considerando no tiene
-!! particula o tiene una particula, es esta celda donde
-!! colocaremos la particula.
-!! Si la celda que estamos considerando es un "conglomerado",
-!! buscamos con la funci´on BELONGS a que subcelda de las 8
-!! posibles pertenece y con esta subcelda llamamos de nuevo
-!! a Find_Cell
+!! Finds the cell where we will place the particle.
+!! If the cell we are considering does not have a particle
+!! or has a particle, it is this cell where we will place
+!! the particle.
+!! If the cell we are considering is a "cluster",
+!! we use the BELONGS function to find which of the 8
+!! possible subcells it belongs to, and with this subcell,
+!! we call Find_Cell again.
 !!
-!! NOTA: Cuando se crea una celda "conglomerado" se crean las
-!! 8 subceldas, por lo que podemos asumir que siempre existen
-!! las 8. Las celdas vac´ıas se borran al final del todo, cuando
-!! todo el ´arbol ha sido ya creado.
+!! NOTE: When a "cluster" cell is created, the 8 subcells are
+!! also created, so we can assume that all 8 always exist.
+!! Empty cells are deleted at the very end, when
+!! the entire tree has already been created.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -96,13 +96,12 @@ CONTAINS
 !! Place_Cell !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Se ejecuta tras Find_Cell, en la celda que
-!! esa funci´on nos devuelve, por lo que siempre
-!! es una celda de tipo 0 (sin particula) o de tipo 1
-!! (con una particula). En el caso de que es una celda
-!! de tipo 1 habra que subdividir la celda y poner en
-!! su lugar las dos particulas (la que originalmente
-!! estaba, y la nueva).
+!! It is executed after Find_Cell, in the cell that
+!! the function returns, so it is always a cell of type 0
+!! (without a particle) or of type 1 (with a particle).
+!! In the case of a type 1 cell, the cell must be subdivided
+!! and both particles (the one that was originally there,
+!! and the new one) must be placed in it.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   RECURSIVE SUBROUTINE Place_Cell(goal,part,n)
@@ -128,16 +127,16 @@ CONTAINS
 !! Crear_Subcells !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Esta funcion se llama desde Place_Cell y
-!! solo se llama cuando ya hay una particula
-!! en la celda, con lo que la tenemos que
-!! subdividir. Lo que hace es crear 8 subceldas
-!! que "cuelgan" de goal y la particula que
-!! estaba en goal la pone en la subcelda que
-!! corresponda de la 8 nuevas creadas.
+!! This function is called from Place_Cell and
+!! it is only called when there is already a particle
+!! in the cell, so it needs to be subdivided.
+!! What it does is create 8 subcells
+!! that "hang" from goal, and the particle that
+!! was in goal is placed in the corresponding subcell
+!! among the 8 newly created ones.
 !!
-!! Para crear las subceldas utilizar las funciones
-!! CALCULAR_RANGE, BELONGS y NULLIFY_POINTERS
+!! To create the subcells, use the functions
+!! CALCULATE_RANGE, BELONGS, and NULLIFY_POINTERS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   SUBROUTINE Crear_Subcells(goal)
@@ -171,11 +170,11 @@ CONTAINS
 !! Nullify_Pointers !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Simplemente me NULLIFYca los punteros de
-!! las 8 subceldas de la celda "goal"
+!! It simply NULLIFYes the pointers of
+!! the 8 subcells of the "goal" cell.
 !!
-!! Se utiliza en el bucle principal y por
-!! CREAR_SUBCELLS
+!! It is used in the main loop and by
+!! CREATE_SUBCELLS.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   SUBROUTINE Nullify_Pointers(goal)
@@ -194,10 +193,10 @@ CONTAINS
 !! Belongs !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Devuelve TRUE si la particula "part" est´a
-!! dentro del rango de la celda "goal"
+!! Returns TRUE if the particle "part" is
+!! within the range of the "goal" cell.
 !!
-!! Utilizada por FIND_CELL
+!! Used by FIND_CELL.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   FUNCTION Belongs (part,goal)
@@ -221,10 +220,10 @@ CONTAINS
 !! Calcular_Range !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Dado un octante "otctant" (1,1,1, 1,1,2 ... 2,2,2),
-!! calcula sus rangos en base a los rangos de
-!! "goal". Si "what" = 0 calcula los minimos. Si what=1
-!! calcula los maximos.
+!! Given an octant (1,1,1, 1,1,2 ... 2,2,2),
+!! it calculates its ranges based on the ranges of
+!! "goal". If "what" = 0, it calculates the minimums.
+!! If "what" = 1, it calculates the maximums.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   FUNCTION Calcular_Range (what,goal,octant)
@@ -232,8 +231,7 @@ CONTAINS
     TYPE(CELL), POINTER :: goal
     INTEGER, DIMENSION(3) :: octant
     TYPE(point3d) :: Calcular_Range, valor_medio
-    ! Se calculan los valores medios, máximos y mínimos coordenada a coordenada.
-    
+    !! The average, maximum, and minimum values are calculated coordinate by coordinate.    
     valor_medio%x = (goal%range%min%x + goal%range%max%x) / 2.0
     valor_medio%y = (goal%range%min%y + goal%range%max%y) / 2.0
     valor_medio%z = (goal%range%min%z + goal%range%max%z) / 2.0
@@ -283,9 +281,9 @@ CONTAINS
 !! Borrar_empty_leaves !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Se llama una vez completado el arbol para
-!! borrar (DEALLOCATE) las celdas vac´ıas (i.e.
-!! sin part´ıcula).
+!! It is called once the tree is completed to
+!! DEALLOCATE the empty cells (i.e.
+!! cells without a particle).
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   RECURSIVE SUBROUTINE Borrar_empty_leaves(goal)
@@ -309,11 +307,11 @@ CONTAINS
 !! Borrar_tree !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Borra el arbol completo, excepto la "head".
+!! Deletes the entire tree, except for the "head".
 !!
-!! El arbol se ha de regenerar continuamente,
-!! por lo que tenemos que borrar el antiguo
-!! para evitar "memory leaks".
+!! The tree needs to be regenerated continuously,
+!! so we must delete the old one
+!! to avoid "memory leaks".
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   RECURSIVE SUBROUTINE Borrar_tree(goal)
@@ -335,15 +333,16 @@ CONTAINS
 !! Calculate_masses !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Nos calcula para todas las celdas que cuelgan
-!! de "goal" su masa y su center-of-mass.
+!! It calculates for all the cells hanging
+!! from "goal" their mass and their center-of-mass.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   RECURSIVE SUBROUTINE Calculate_masses(goal)
     TYPE(CELL),POINTER :: goal
     INTEGER :: i,j,k
     REAL(REAL64) :: mass
-    ! Tratamos el centro de masa como el vector que une el punto 0,0,0 con la posición del centro de masa.
+    !! We treat the center of mass as the vector that connects the point (0,0,0) 
+    !! with the position of the center of mass.
     TYPE(vector3d) :: c_o_m
     TYPE(point3d) :: V3d_0 = point3d(0,0,0)
 
@@ -374,22 +373,20 @@ CONTAINS
 !! Calculate_forces !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Calcula las fuerzas de todas las particulas contra "head".
-!! Se sirve de la funcion Calculate_forces_aux que es la
-!! que en realidad hace los calculos para cada particula
+!! Calculates the forces of all the particles against "head".
+!! It uses the function Calculate_forces_aux, which is the
+!! one that actually performs the calculations for each particle.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   SUBROUTINE Calculate_forces(head)
     TYPE(CELL),POINTER :: head
     INTEGER :: i,j,k,start,end
-    
-    !$omp parallel private(i) shared(head,temp_cell,pt)
+
     !$omp do
     DO i = 1,n
       CALL Calculate_forces_aux(i,head)
     END DO
     !$omp end do
-    !$omp end parallel
     
   END SUBROUTINE Calculate_forces
 
@@ -397,27 +394,26 @@ CONTAINS
 !! Calculate_forces_aux !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!
-!! Dada una particula "goal" calcula las fuerzas
-!! sobre ella de la celda "tree". Si "tree" es una
-!! celda que contiene una sola particula el caso
-!! es sencillo, pues se tratan de dos particulas.
+!! Given a particle "goal", it calculates the forces
+!! on it from the "tree" cell. If "tree" is a
+!! cell containing a single particle, the case is simple
+!! because there are only two particles involved.
 !!
-!! Si "tree" es una celda conglomerado, hay que ver primero
-!! si l/D < theta. Es decir si el lado de la celda (l)
-!! dividido entre la distancia de la particula goal
-!! al center_of_mass de la celda tree (D) es menor que theta.
-!! En caso de que asi sea, tratamos a la celda como una
-!! sola particula. En caso de que no se menor que theta,
-!! entonces tenemos que considerar todas las subceldas
-!! de tree y para cada una de ellas llamar recursivamente
-!! a Calculate_forces_aux
+!! If "tree" is a cluster cell, we first need to check
+!! if l/D < theta. That is, if the cell side length (l)
+!! divided by the distance from the "goal" particle to the
+!! center_of_mass of the "tree" cell (D) is smaller than theta.
+!! If this is the case, we treat the cell as a single particle.
+!! If it is not smaller than theta, then we must consider all
+!! subcells of "tree" and recursively call Calculate_forces_aux
+!! for each of them.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   RECURSIVE SUBROUTINE Calculate_forces_aux(goal,tree)
     TYPE(CELL),POINTER :: tree
     INTEGER :: i,j,k,goal
     REAL(REAL64) :: l,D
-    !para las fuerzas, convertinos el centro de masa en un punto
+    !! For the forces, we treat the center of mass as a point.    
     TYPE(vector3d) :: r
     TYPE(point3d) :: c_o_m
     TYPE(point3d) :: V3d_0 = point3d(0,0,0)
@@ -448,18 +444,5 @@ CONTAINS
       END IF
     END SELECT
   END SUBROUTINE Calculate_forces_aux
-
-! Subroutine to calculate acelerations. Actualmente sin uso
- SUBROUTINE calc_acc
- ! Init acceleration
-  a = vector3d(0,0,0)
-  DO i = 1,n
-    DO j = i+1,n ! j > i to avoid duplications
-      r = pt(i)%p - pt(j)%p  ! We need the vector thar separate the particla i and j
-      a(i) = a(i) + (pt(j)%m *r)/ distance(pt(i)%p,pt(j)%p)**3 !accel of particle i due to j
-      a(j) = a(j) - (pt(i)%m *r)/ distance(pt(i)%p,pt(j)%p)**3 !accel of particle j due to i
-    END DO
-  END DO
- END SUBROUTINE calc_acc
  
 END MODULE barnes_hut

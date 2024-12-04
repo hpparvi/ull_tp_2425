@@ -20,3 +20,9 @@
 	* Change Makefile to create ex2_pall and test_pall method
 	* Change python rutine. Now create animation
 	* Changes particulas module: now create a sphere of rotating particles.
+	
+[v1.0 Final version]
+	* Add comments.
+	* Add four examples and their animations.
+	* Add readme.md with explanations for the diferent cases
+	

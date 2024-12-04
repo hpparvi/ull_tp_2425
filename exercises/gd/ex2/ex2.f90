@@ -10,8 +10,14 @@ PROGRAM ex2
   REAL(REAL64) :: dt, t_end, t, dt_out, t_out    
   character(len=25) :: input, output, orbit
   
-!! Lectura de datos
+
+  ! To test time of execution
+  INTEGER :: count_begin, count_end, count_rate
+  
+  
+!! Data reading
 !!!!!!!!!!!!!!!!!!!
+
   input = "initial_conditions.dat"
   output = "output.dat"
   
@@ -27,16 +33,24 @@ PROGRAM ex2
   DO i = 1, n
     READ(1,*) pt(i)%m, pt(i)%p, pt(i)%v
   END DO
+
+  CLOSE (UNIT=1) 
   
-!! Inicialización head node
+  ! Start measuring time here
+  CALL SYSTEM_CLOCK(count_begin, count_rate)
+  !PRINT*, "The count rate is ", count_rate
+  
+  
+!! Initialization of head node
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   ALLOCATE(head)
   CALL Calculate_ranges(head)
   head%type = 0
   CALL Nullify_Pointers(head)
   
   
-!! Creaci´on del ´arbol inicial
+!! Creation of the initial tree
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   DO i = 1,n
@@ -47,13 +61,20 @@ PROGRAM ex2
   CALL Calculate_masses(head)
 
 
-!! Calcular aceleraciones iniciales
+!! Calculate initial acceleration
+!! Parallelization will be applied, and when it is parallelized, 
+!! a message will be show with the number of cores.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   a = vector3d(0,0,0)
+  !$omp parallel private(i) shared(head,temp_cell,pt,a)  
+  !$ IF (omp_get_thread_num() == 0) THEN
+  !$   PRINT'(A,I2,A)', 'Parallelized process with ', omp_get_num_threads(), ' cores' 
+  !$ END IF
   CALL Calculate_forces(head)
+  !$omp end parallel
 
-!! Bucle principal
+!! Main loop
 !!!!!!!!!!!!!!!!!!
   
   OPEN(3, file = output, status = 'replace', action = 'write')
@@ -64,8 +85,8 @@ PROGRAM ex2
     t_out = t_out + dt
     pt%v = pt%v + a * (dt/2)
     pt%p = pt%p + pt%v * dt
-    !! Las posiciones han cambiado, por lo que tenemos que borrar
-    !! y reinicializar el ´arbol
+    
+    !! The positions have changed, so the tree needs to be reset.
 
     CALL Borrar_tree(head)
     CALL Calculate_ranges(head)
@@ -78,8 +99,16 @@ PROGRAM ex2
     CALL Borrar_empty_leaves(head)
     CALL Calculate_masses(head)
     a = vector3d(0,0,0)
+    
+    !! The calculation of forces is parallelized.
+    
+    !$omp parallel private(i) shared(head,temp_cell,pt,a)
     CALL Calculate_forces(head)
+    !$omp workshare
     pt%v = pt%v + a * (dt/2)
+    !$omp end workshare
+    !$omp end parallel
+    
     IF (t_out >= dt_out) THEN
       write (3, '(3F12.4)', advance='no') t
       DO i = 1,n
@@ -97,5 +126,12 @@ PROGRAM ex2
     END IF
   END DO
   
+  CLOSE (3)
+  !! End measuring time here
+  CALL SYSTEM_CLOCK(count_end)
+
+  PRINT'(A,F7.3,A)', "The elapsed time is ", &
+       REAL(count_end-count_begin) / REAL(count_rate), &
+       " seconds"  
  
 END PROGRAM ex2
