@@ -68,8 +68,8 @@ PROGRAM ex2
      
      !Rebuild the tree with updated particle positions
      DO i = 1, n
-        CALL Find_Cell(head, temp_cell, p(i))!Find the cell for the particle
-        CALL Place_Cell(temp_cell, p(i), i)  !Place the particle in the cell
+        CALL Find_Cell(head, temp_cell, p(i)) !Find the cell for the particle
+        CALL Place_Cell(temp_cell, p(i), i)   !Place the particle in the cell
      END DO
      
      CALL Borrar_empty_leaves(head) !Delete subcells with no particles

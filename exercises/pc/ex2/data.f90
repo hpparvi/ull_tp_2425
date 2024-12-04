@@ -26,7 +26,7 @@ CONTAINS
     PRINT*, "Insert the input file name: "
     READ*, input
 
-    !Checking if input file name contains 'input_'
+    !Checking if input file name contains 'input'
     input_pos = INDEX(input, 'input')
     dot_pos = INDEX(input, '.')
 
