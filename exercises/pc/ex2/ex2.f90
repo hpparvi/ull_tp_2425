@@ -42,7 +42,7 @@ PROGRAM ex2
   CALL Borrar_empty_leaves(head) !Delete subcells with no particles
   CALL Calculate_masses(head, p) !Calculate the masses and centers of mass for the cells
   
-  !$OMP PARALLEL PRIVATE(i, rji) SHARED(head, n, p, theta)
+  !$OMP PARALLEL PRIVATE(i, rji) SHARED(head, p)
   CALL set_acceleration(n, p) !Reset accelerations of particles to zero
   CALL Calculate_forces(head, n, p, rji, theta) !Calculate forces between particles based on the tree
   !$OMP END PARALLEL
@@ -55,7 +55,7 @@ PROGRAM ex2
  
   !Main loop to update properties of particles until final time is reached
   DO WHILE (t .LE. t_end)
-     !$OMP PARALLEL PRIVATE(i, rji) SHARED(head, dt, n, p, theta)
+     !$OMP PARALLEL PRIVATE(i, rji) SHARED(head, dt, p)
      CALL velocity(n, dt, p) !Update the velocities of particles
      CALL position(n, dt, p) !Update the positions of particles
 

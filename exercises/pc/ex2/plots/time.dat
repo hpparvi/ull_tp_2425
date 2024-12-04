@@ -1,6 +1,11 @@
-#Time is represented under each set of particles in units of seconds. 
+#Time (in seconds) spent on performing the N-body simulation using the direct-sum and the Barnes-Hut algorithm, either parallelized or not
 
-			3	5	10	25	50	100	250	500	1000		
-ex1			3	4	6	11	22	87	541	962	3788	
-Barnes-hut		2	3	5	14	31	53	180	487	1056	
-Parallelized		96	98	96	90			
+Particles	t_ex1		t_barnes	t_parallelized
+5		2		2			7		
+10		2		3			6
+25		2		3			8
+50		3		3			12
+100		5		6			18
+250		14		16			48
+500		58		33			121
+1000		196		79			286			

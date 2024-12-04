@@ -297,11 +297,11 @@ CONTAINS
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
-    !$OMP SINGLE
+    !$OMP DO
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
     END DO
-    !$OMP END SINGLE
+    !$OMP END DO
     
   END SUBROUTINE Calculate_forces
 
@@ -315,11 +315,13 @@ CONTAINS
 
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
-       IF (goal .NE. tree%pos) THEN 
+       IF (goal .NE. tree%pos) THEN
+          !$OMP CRITICAL
           rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
           r2 = (NORM(rji))**2 !Square of the vector
           r3 = r2 * SQRT(r2)  !Cube of the vector
           p(goal)%a = p(goal)%a + p(tree%pos)%m * rji / r3 !Acceleration of the particle
+          !$OMP END CRITICAL
        END IF
        
     CASE (2) !Conglomerate in the cell
@@ -328,9 +330,10 @@ CONTAINS
        D = NORM(rji) !Distance between particle and center of mass
        
        IF (l/D .LT. theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
+          !$OMP CRITICAL
           r3 = D**3 !Cube of the distance between particle and center of mass
           p(goal)%a = p(goal)%a + tree%mass * rji / r3 !Accelaration of the particle
-          
+          !$OMP END CRITICAL
        ELSE !Cell too close
           DO i = 1, 2
              DO j = 1, 2

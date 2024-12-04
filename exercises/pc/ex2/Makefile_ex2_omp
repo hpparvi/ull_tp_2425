@@ -1,5 +1,5 @@
 FC = gfortran
-FCFLAGS = -c -fopenmp
+FCFLAGS = -c -fopenmp -march=native
 OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex2.o
 
 all: ex2
