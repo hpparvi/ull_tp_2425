@@ -11,7 +11,7 @@ In the folder init_files, there are some examples of initial conditions files (i
 
 The code has been parallelised using OpenMP, which reduces the computational time for a large number of particles. Tests have been done under the same time conditions ($dt = 0.01, t_{end} = 0.1$). Few time steps are used, because time cannot be parallelised in the simulation, so it is not so important to demonstrate the difference in computation for each time step. First testing record (10 particles) shows that the parallelised program works slower than without parallelise, because in this case takes more time to call OpenMP and start to parallelise than calculate directly the interactions. 
      
-| N | Time without OpenMp (s) | Time with OpenMP (s) |
+| N | Time with OpenMp (s) | Time without OpenMP (s) |
 |--|--|--|
 | 10 | 8e-3 | 3e-3 |
 | 100 | 9.9e-3 | 2.7e-2 |

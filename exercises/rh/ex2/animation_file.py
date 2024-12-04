@@ -20,8 +20,8 @@ for i in range(num_particles):
 
 # Create the figure
 fig, ax = plt.subplots()
-ax.set_xlim(-1,2)
-ax.set_ylim(-1,2)
+ax.set_xlim(-2,2)
+ax.set_ylim(-2,2)
 particles, = ax.plot([], [], 'bo', markersize=5)  # Particle markers
 traces = [ax.plot([], [], '-', alpha=0.5)[0] for _ in range(num_particles)]  # Trajectories
 
