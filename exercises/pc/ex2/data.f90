@@ -16,6 +16,7 @@ CONTAINS
   SUBROUTINE read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
     INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
     REAL(REAL64), INTENT(INOUT) :: dt, t_end, t, dt_out, t_out, theta !Time step, final time, current time, output time step, output time and parameter that determines the accuracy of the                                                                       !simulation
+    INTEGER(INT64) :: i !Loop indexing variable
     TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
 
     REAL(REAL64) :: dummy !Temporary variable for reading input data
@@ -102,6 +103,7 @@ CONTAINS
   !Subroutine to open an output file
   SUBROUTINE open_output(n)
     INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
+    INTEGER(INT64) :: i !Loop indexing variable
 
     CHARACTER(len = 10) :: temp_str !Temporary character variable for the header of the output file
 
@@ -132,6 +134,7 @@ CONTAINS
   SUBROUTINE save_data(n, p, t)
     INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
     REAL(REAL64), INTENT(INOUT) :: t   !Current time
+    INTEGER(INT64) :: i !Loop indexing variable
     TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
 
     WRITE(13, "(F12.2)", ADVANCE = 'no') t !Write the current time to the output file

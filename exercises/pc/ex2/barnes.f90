@@ -5,12 +5,6 @@ MODULE barnes
   !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
-  !Define integer variables for loop indexing
-  INTEGER(INT64) :: i, j, k
-
-  !Define real variables for squared and cubed distances
-  REAL(REAL64) :: r2, r3
-
   !Define a RANGE type to hold the minimum and maximum range in 3D space
   TYPE RANGE
      TYPE(vector3d) :: min, max
@@ -312,16 +306,15 @@ CONTAINS
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
     REAL(REAL64) :: l, D, theta  !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
+    REAL(REAL64) :: r2, r3 !Real variables for squared and cubed distances
 
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
        IF (goal .NE. tree%pos) THEN
-          !$OMP CRITICAL !Used to prevent race conditions that were happening without it
           rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
           r2 = (NORM(rji))**2 !Square of the vector
           r3 = r2 * SQRT(r2)  !Cube of the vector
           p(goal)%a = p(goal)%a + p(tree%pos)%m * rji / r3 !Acceleration of the particle
-          !$OMP END CRITICAL
        END IF
        
     CASE (2) !Conglomerate in the cell
@@ -330,10 +323,8 @@ CONTAINS
        D = NORM(rji) !Distance between particle and center of mass
        
        IF (l/D .LT. theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
-          !$OMP CRITICAL !Used to prevent race conditions that were happening without it
           r3 = D**3 !Cube of the distance between particle and center of mass
           p(goal)%a = p(goal)%a + tree%mass * rji / r3 !Accelaration of the particle
-          !$OMP END CRITICAL
        ELSE !Cell too close
           DO i = 1, 2
              DO j = 1, 2

@@ -8,7 +8,7 @@ PROGRAM ex2
   !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
-  INTEGER(INT64) :: n !Number of bodies
+  INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
   REAL(REAL64) :: dt, t_end, t, dt_out, t_out, theta !Time step, final time, current time, output time step, output time and parameter that determines the accuracy of the simulation
   TYPE(vector3d) :: rji !Vector from one particle to another
   TYPE(particle3d), allocatable :: p(:) !Particles

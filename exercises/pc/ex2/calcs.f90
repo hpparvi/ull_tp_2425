@@ -13,6 +13,7 @@ contains
     integer(int64), intent(in) :: n !Number of particles
     real(real64), intent(in) :: dt  !Time step
     type(particle3d), intent(inout) :: p(:) !Particles
+    INTEGER(INT64) :: i !Loop indexing variable
     !$omp do
     do i = 1, n
        p(i)%p = p(i)%p + p(i)%v * dt !Update position using velocity
@@ -25,6 +26,7 @@ contains
     integer(int64), intent(in) :: n !Number of particles
     real(real64), intent(in) :: dt  !Time step
     type(particle3d), intent(inout) :: p(:) !Particles
+    INTEGER(INT64) :: i !Loop indexing variable
     !$omp do
     do i = 1, n
        p(i)%v = p(i)%v + p(i)%a * (dt * 0.5) !Update velocity using acceleration
@@ -36,6 +38,7 @@ contains
   subroutine set_acceleration(n, p)
     integer(int64), intent(in) :: n !Number of particles
     type(particle3d), intent(inout) :: p(:) !Particles
+    INTEGER(INT64) :: i !Loop indexing variable
     !$omp do
     do i = 1, n
        p(i)%a = vector3d(0.0, 0.0, 0.0) !Set initial acceleration of each particle to zero
