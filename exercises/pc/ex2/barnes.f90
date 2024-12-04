@@ -316,7 +316,7 @@ CONTAINS
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
        IF (goal .NE. tree%pos) THEN
-          !$OMP CRITICAL
+          !$OMP CRITICAL !Used to prevent race conditions that were happening without it
           rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
           r2 = (NORM(rji))**2 !Square of the vector
           r3 = r2 * SQRT(r2)  !Cube of the vector
@@ -330,7 +330,7 @@ CONTAINS
        D = NORM(rji) !Distance between particle and center of mass
        
        IF (l/D .LT. theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
-          !$OMP CRITICAL
+          !$OMP CRITICAL !Used to prevent race conditions that were happening without it
           r3 = D**3 !Cube of the distance between particle and center of mass
           p(goal)%a = p(goal)%a + tree%mass * rji / r3 !Accelaration of the particle
           !$OMP END CRITICAL
