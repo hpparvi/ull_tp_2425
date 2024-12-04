@@ -13,5 +13,4 @@ module particles
      real  :: m  ! mass
   end type particle
 
-  !pure 
 end module particles

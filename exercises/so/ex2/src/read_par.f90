@@ -1,10 +1,10 @@
 module parameter_reader
     implicit none
     ! Declare parameter variables
-    real :: dt, dt_out, t_end, epsilon
+    real :: dt, dt_out, t_end, epsilon, theta, radius
     character(len=100) :: input_file, output_file
     logical :: create_bodies
-    integer :: N_bodies
+    integer :: N_bodies, N_threads = 1
 
 contains
 
@@ -13,10 +13,8 @@ contains
         character(len=*), intent(in) :: filename
         character(len=256) :: line
         character(len=30) :: key, key_short
-        character(len=20) :: dummy_char, dummy_two, dummy_one, dummy_three, dummy_four, dummy_five
-        real :: r_value
-        integer :: i_value, ios
-        logical :: b_value
+        character(len=20) :: dummy_char, dummy_two, dummy_one
+        integer :: ios
 
         open(unit=10, file=filename, status='old', action='read', iostat=ios)
         if (ios /= 0) then
@@ -47,13 +45,18 @@ contains
                    read(line, *) dummy_one, dummy_two, input_file
                 case ("output_file")
                    read(line, *) dummy_one, dummy_two, output_file
-                   print*, output_file
                 case ("create_bodies")
                     read(line, *) dummy_one, dummy_two, create_bodies
                 case ("N_bodies")
                    read(line, *) dummy_one, dummy_two, N_bodies
+                case ("radius")
+                   read(line, *) dummy_one, dummy_two, radius
                 case ("epsilon")
                    read(line, *) dummy_one, dummy_two, epsilon
+                case ("theta")
+                   read(line, *) dummy_one, dummy_two, theta
+                case ("N_threads")
+                   read(line, *) dummy_one, dummy_two, N_threads
                 case default
                     print *, "Warning: Unrecognized parameter:", key
                  end select
