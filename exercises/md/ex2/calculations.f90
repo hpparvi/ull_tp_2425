@@ -1,31 +1,34 @@
 module calculations
+    !$use omp_lib
     use iso_fortran_env
     use geometry
     use particle
 
     implicit none
-    real(real64), parameter :: theta = 1.0
 
+    !Type to store the range of a cell
     type range 
-    real(real64), dimension(3) :: min, max
+        real(real64), dimension(3) :: min, max
     end type range
 
+    !Pointer type to a cell
     type CPtr
         type(cell), pointer :: ptr
     end type CPtr
 
+    !Type to store a cell
     type cell
         type(range) :: range
         type(point3d) :: part
         integer :: pos
-        integer :: type ! 0 = no particle; 1 = particle; 2 = conglomerado
+        integer :: type ! 0 = no particle; 1 = particle; 2 = group of particles
         real(real64) :: mass
-        type(point3d) :: c_o_m
+        type(point3d) :: c_o_m ! Center of mass
         type(CPtr), dimension(2,2,2) :: subcell
     end type cell
 
-
     contains
+        !Calculate the ranges of the particles 
         subroutine calculate_ranges(particles, goal)
             type(cell), pointer :: goal
             type(particle3d), intent(in) :: particles(:)
@@ -47,6 +50,7 @@ module calculations
             goal%range%max = medios + span * 0.5
         end subroutine calculate_ranges
 
+        !Find the cell where a particle belongs
         recursive subroutine find_cell(root, goal, part)
             type(point3d) :: part
             type(cell), pointer :: root, goal, temp
@@ -70,6 +74,7 @@ module calculations
             end select
         end subroutine find_cell
 
+        !Place a particle in a cell
         recursive subroutine place_cell(goal, part, n)
             type(cell), pointer :: goal, temp
             type(point3d) :: part
@@ -89,6 +94,7 @@ module calculations
             end select
         end subroutine place_cell
 
+        !Create the subcells of a cell
         subroutine crear_subcells(goal)
             type(cell), pointer :: goal
             type(point3d) :: part
@@ -119,6 +125,7 @@ module calculations
             end do
         end subroutine crear_subcells
 
+        !Nullify the pointers of a cell
         subroutine nullify_pointers(goal)
             type(cell), pointer :: goal
             integer :: i,j,k
@@ -132,20 +139,22 @@ module calculations
             end do
         end subroutine nullify_pointers
 
+        !Check if a particle belongs to a cell
         function belongs(part, goal)
             type(point3d) :: part
             type(cell), pointer :: goal
             logical :: belongs
 
-            if (part%x >= goal%range%min(1) .and. part%x <= goal%range%max(1) &
-                .and. part%y >= goal%range%min(2) .and. part%y <= goal%range%max(2) &
-                .and. part%z >= goal%range%min(3) .and. part%z <= goal%range%max(3)) then
+            if (part%x >= goal%range%min(1) .and. part%x < goal%range%max(1) &
+                .and. part%y >= goal%range%min(2) .and. part%y < goal%range%max(2) &
+                .and. part%z >= goal%range%min(3) .and. part%z < goal%range%max(3)) then
                 belongs = .true.
             else
                 belongs = .false.
             end if
         end function belongs
 
+        !Calculate the range of a cell
         function calcular_range(what, goal, octant)
             integer :: what
             type(cell), pointer :: goal
@@ -170,6 +179,7 @@ module calculations
             end select 
         end function calcular_range
 
+        !Delete the empty leaves of the tree
         recursive subroutine borrar_empty_leaves(goal)
             type(cell), pointer :: goal
             integer :: i, j, k
@@ -188,6 +198,7 @@ module calculations
             end if
         end subroutine borrar_empty_leaves
 
+        !Delete the tree
         recursive subroutine borrar_tree(goal)
             type(cell), pointer :: goal
             integer :: i, j, k
@@ -204,6 +215,7 @@ module calculations
             end do
         end subroutine borrar_tree
 
+        !Calculate the masses of the cells
         recursive subroutine calculate_masses(particles, goal)
             type(particle3d), intent(in) :: particles(:)
             type(cell), pointer :: goal
@@ -237,22 +249,27 @@ module calculations
             end select
         end subroutine calculate_masses
 
-        subroutine calculate_forces(particles, head)
+        !Calculate the forces of the particles
+        subroutine calculate_forces(particles, head, epsilon, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: head
             integer :: i, n
+            real(real64), intent(in) :: epsilon, theta
             
             n = size(particles)
+            !$omp do private(i)
             do i = 1, n
-                call calculate_forces_aux(particles, i, head)
+                call calculate_forces_aux(particles, i, head, epsilon, theta)
             end do
+            !$omp end do
         end subroutine calculate_forces
 
-        recursive subroutine calculate_forces_aux(particles, goal, tree)
+        recursive subroutine calculate_forces_aux(particles, goal, tree, epsilon, theta)
             type(particle3d), intent(inout) :: particles(:)
             type(cell), pointer :: tree
             integer :: i, j, k, goal
             real(real64) :: l, D, r2, r3
+            real(real64), intent(in) :: epsilon, theta
             type(vector3d) :: rji
 
             select case (tree%type)
@@ -260,7 +277,7 @@ module calculations
                 if (goal .ne. tree%pos) then
                     rji = tree%c_o_m - particles(goal)%p
                     r2 = normsquare(rji)
-                    r3 = r2*sqrt(r2)
+                    r3 = r2*sqrt(r2) + epsilon
                     particles(goal)%a = particles(goal)%a + particles(tree%pos)%m * rji / r3
                 end if
             case(2)
@@ -268,15 +285,15 @@ module calculations
                 rji = tree%c_o_m - particles(goal)%p
                 r2 = normsquare(rji)
                 D = sqrt(r2)
-                if (1/D < theta) then
-                    r3 = r2 * D
+                if (l/D < theta) then
+                    r3 = r2 * D + epsilon
                     particles(goal)%a = particles(goal)%a + tree%mass * rji / r3
                 else
                     do i = 1,2
                         do j = 1,2
                             do k = 1,2
                                 if (associated(tree%subcell(i,j,k)%ptr)) then
-                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr)
+                                    call calculate_forces_aux(particles, goal, tree%subcell(i,j,k)%ptr, epsilon, theta)
                                 end if
                             end do
                         end do

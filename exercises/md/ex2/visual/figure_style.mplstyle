@@ -1,0 +1,19 @@
+
+figure.figsize: 8, 6
+savefig.dpi: 200
+text.usetex: True
+font.family: serif
+font.serif: Charter
+text.latex.preamble: \usepackage{amsmath}\usepackage{bm}
+font.size: 16
+axes.titlesize: 18
+axes.labelsize: 18
+xtick.minor.visible: True
+ytick.minor.visible: True
+legend.edgecolor: black
+legend.frameon: True
+legend.framealpha: 1
+legend.fancybox: False
+text.antialiased: True
+axes.labelweight: bold
+lines.antialiased: True
