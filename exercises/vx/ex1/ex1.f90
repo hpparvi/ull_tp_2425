@@ -4,6 +4,8 @@ PROGRAM leapfrog       !This program does the calculations for solving the N-bod
   use particle         !This module defines the particle structure with position, velocity, and mass.
   IMPLICIT NONE
 
+  integer(int64) :: start, finish, rate
+  real :: elapsed_time
   INTEGER(int64) :: i, j, k
   INTEGER(int64) :: n                                 !Number of bodies.
   REAL(real64) :: dt, t_end, t, dt_out, t_out         !Time step, total simulation time, output time step.
@@ -21,6 +23,8 @@ PROGRAM leapfrog       !This program does the calculations for solving the N-bod
   data = 'data_input.dat'                            
   orbits = 'data_output.dat'
 
+  call system_clock(count_rate=rate)
+  call system_clock(count=start)
   
   !Read the needed parameters.
   OPEN(10, file=data, status='old', action='read')
@@ -43,14 +47,12 @@ PROGRAM leapfrog       !This program does the calculations for solving the N-bod
 
   !Read positions, velocities, and masses of particles.
   DO i = 1, n
-     READ(10, *) p(i)%p
-     print *, "The read value of the position of particle", i, "is:", p(i)%p
-
-     READ(10, *) p(i)%v
-     print *, "The read value of the velocity of particle", i, "is:", p(i)%v
-
-     READ(10, *) p(i)%m
-     print *, "The read value of the mass of particle", i, "is:", p(i)%m
+     READ(10, *) p(i)%m, p(i)%p%x, p(i)%p%y, p(i)%p%z, &
+                                      p(i)%v%x, p(i)%v%y, p(i)%v%z
+     PRINT *, "Particle", i, ":"
+     PRINT *, "  Position:", p(i)%p
+     PRINT *, "  Velocity:", p(i)%v
+     PRINT *, "  Mass:    ", p(i)%m
   END DO
 
   CLOSE(10)
@@ -111,5 +113,18 @@ PROGRAM leapfrog       !This program does the calculations for solving the N-bod
   END DO
 
   CLOSE(11)
+
+  call system_clock(count=finish)
+
+  elapsed_time = real(finish - start, kind=real64) / real(rate, kind=real64)
+  if (elapsed_time >= 60) then
+     !print *, "Tiempo transcurrido:", floor(elapsed_time/60), "minutos ", floor((elapsed_time/60 - floor(elapsed_time/60))*60), "segundos"
+     print *, "Tiempo transcurrido:", floor(elapsed_time / 60), "minutos", &
+         floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+         "segundos"
+  else
+     print *, "Tiempo transcurrido:", elapsed_time, "segundos"
+  end if
+  
   
 END PROGRAM leapfrog
