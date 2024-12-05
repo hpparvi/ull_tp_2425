@@ -2,10 +2,10 @@ FC = gfortran -fopenmp
 FCFLAGS = -c
 OBJECTS = geometry.o particle.o tree.o
 
-all: ex2
+all: ex3
 
-ex2 : $(OBJECTS) ex2.o
-	$(FC) -o $@ $(OBJECTS) ex2.o
+ex3 : $(OBJECTS) ex3.o
+	$(FC) -o $@ $(OBJECTS) ex3.o
 
 particulas : $(OBJECTS) particulas.o
 	$(FC) -o $@ $(OBJECTS) particulas.o
@@ -17,5 +17,5 @@ particulas : $(OBJECTS) particulas.o
 clean :
 	rm -f *.o *.mod
 
-test : ex2
-	./ex2
+test : ex3
+	./ex3
