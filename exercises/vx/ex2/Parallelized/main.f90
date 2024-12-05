@@ -1,5 +1,5 @@
 PROGRAM tree           !This program simulates the N-body problem using the Barnes-Hut algorithm.
-  
+
   use iso_fortran_env  !This module ensures all variables are defined as 64-bit.
   use omp_lib          !This module is used for parallelization with OpenMP
   use geometry         !This module defines 3D vector and point operations for vector3d and point3d types.
@@ -50,7 +50,7 @@ PROGRAM tree           !This program simulates the N-body problem using the Barn
   ! Read positions, velocities, and masses of each particle.
   DO i = 1, n
      READ(10, *) p(i)%m, p(i)%p%x, p(i)%p%y, p(i)%p%z, &            
-                                      p(i)%v%x, p(i)%v%y, p(i)%v%z  
+          p(i)%v%x, p(i)%v%y, p(i)%v%z  
      PRINT *, "Particle", i, ":"
      PRINT *, "  Position:", p(i)%p
      PRINT *, "  Velocity:", p(i)%v
@@ -109,7 +109,7 @@ PROGRAM tree           !This program simulates the N-body problem using the Barn
      END DO
      CALL Borrar_empty_leaves(head)
      CALL Calculate_masses(head, p)
-     
+
      DO i = 1, n
         a(i) = vector3d(0.0, 0.0, 0.0)
      END DO
@@ -130,7 +130,7 @@ PROGRAM tree           !This program simulates the N-body problem using the Barn
         WRITE(11, '(E12.2)', ADVANCE='NO') t
         DO i = 1, n
            WRITE(11, '(3X, E12.6, 3X, E12.6, 3X, E12.6)', ADVANCE='NO') & 
-               p(i)%p%x, p(i)%p%y, p(i)%p%z
+                p(i)%p%x, p(i)%p%y, p(i)%p%z
         END DO
         WRITE(11, *)
         t_out = 0.0
@@ -138,17 +138,18 @@ PROGRAM tree           !This program simulates the N-body problem using the Barn
 
      t = t + dt
   END DO
-
+  
   CLOSE(11)
 
   ! Calculate and print the elapsed time of the simulation.
   CALL system_clock(count=finish)
   elapsed_time = real(finish - start, kind=real64) / real(rate, kind=real64)
   IF (elapsed_time >= 60) THEN
-     PRINT *, "Elapsed time:", floor(elapsed_time / 60), "minutes", &
-              floor(mod(elapsed_time, 60)), "seconds"
+     print *, "Elapsed time:", floor(elapsed_time / 60), "min", &
+          floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+          "s"
   ELSE
      PRINT *, "Elapsed time:", elapsed_time, "seconds"
   END IF
 
-END PROGRAM tree
+END PROGRAM

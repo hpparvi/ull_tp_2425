@@ -138,8 +138,9 @@ PROGRAM tree           !This program simulates the N-body problem using the Barn
   CALL system_clock(count=finish)
   elapsed_time = real(finish - start, kind=real64) / real(rate, kind=real64)
   IF (elapsed_time >= 60) THEN
-     PRINT *, "Elapsed time:", floor(elapsed_time / 60), "minutes", &
-              floor(mod(elapsed_time, 60)), "seconds"
+     print *, "Elapsed time:", floor(elapsed_time / 60), "min", &
+         floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+         "s"
   ELSE
      PRINT *, "Elapsed time:", elapsed_time, "seconds"
   END IF
