@@ -39,11 +39,11 @@ set OMP_NUM_THREADS = n
 
 In case you don't want to use the default input files, you can generate one with random body data by using the ```random_input.f90``` program located in the ```generate input``` directory. To compile and run it write
 ~~~
-make -f Makefile_random_input
+make -f Makefile_input
 ~~~
 To remove compilations use 
 ~~~
-make -f Makefile_random_input clean
+make -f Makefile_input clean
 ~~~
 
 # Parallelization with OpenMP
