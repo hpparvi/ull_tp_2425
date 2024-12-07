@@ -22,19 +22,10 @@ The initial conditions for the simulations are stored in their corresponding inp
 ~~~
 make -f Makefile_ex2
 ~~~
-or 
-~~~
-make -f Makefile_ex2_omp
-~~~
-depending if you want to use the code parallelized with OpenMP or not. To remove compilations use
+The ```ex2``` executable runs the non-parallelized version of the code, while the ```ex2_omp``` runs the parallelized version. To remove compilations use
 ~~~
 make -f Makefile_ex2 clean
 ~~~
-or 
-~~~
-make -f Makefile_ex2_omp clean
-~~~
-
 In the parallelized version, you can specify the number of threads (n) to use by writing
 - **Linux**: 
 ~~~

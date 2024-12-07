@@ -14,4 +14,4 @@ clean:
 	del /Q *.o *.mod random_input.exe
 
 test: random_input
-	random_input
+	./random_input
