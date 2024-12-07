@@ -1,0 +1,26 @@
+FC = gfortran
+FCFLAGS = -c
+OMPFLAGS = -fopenmp -march=native
+OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex2.o
+OBJECTS_OMP = geometry.o particle.o barnes_omp.o calcs_omp.o data.o ex2_omp.o
+
+all: ex2 ex2_omp
+
+ex2: $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
+
+ex2_omp: $(OBJECTS_OMP)
+	$(FC) $(OMPFLAGS) -o $@ $(OBJECTS_OMP)
+
+%.o: %.f90
+	$(FC) $(FCFLAGS) $<
+
+%_omp.o: %.f90
+	$(FC) $(FCFLAGS) $(OMPFLAGS) -o $@ $<
+
+clean:
+	del /Q *.o *.mod ex2.exe ex2_omp.exe
+
+test: ex2 ex2_omp
+	./ex2
+	./ex2_omp

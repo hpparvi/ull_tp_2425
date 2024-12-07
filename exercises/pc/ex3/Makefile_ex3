@@ -1,0 +1,18 @@
+FC = gfortran
+FCFLAGS = -c
+OMPFLAGS = -fopenmp -march=native
+OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex3.o
+
+all: ex3
+
+ex3: $(OBJECTS)
+	$(FC) $(OMPFLAGS) -o $@ $(OBJECTS)
+
+%.o: %.f90
+	$(FC) $(FCFLAGS) $(OMPFLAGS) $<
+
+clean:
+	del /Q *.o *.mod ex3.exe 
+
+test: ex3
+	./ex3
