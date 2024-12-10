@@ -2,19 +2,12 @@ MODULE barnes
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits for variables
+  !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
-
-  !Define integer variables for loop indexing
-  INTEGER(INT64) :: i, j, k
-
-  !Define real variables for squared and cubed distances
-  REAL(REAL64) :: r2, r3
-
-  REAL(REAL64), PARAMETER :: theta = 1
 
   !Define a RANGE type to hold the minimum and maximum range in 3D space
   TYPE RANGE
-     REAL(REAL64), DIMENSION(3) :: min, max
+     TYPE(vector3d) :: min, max
   END TYPE RANGE
   
   !Define a CPtr type to hold a pointer to a CELL type
@@ -26,8 +19,7 @@ MODULE barnes
   TYPE CELL
      TYPE(RANGE) :: range
      TYPE(particle3d) :: part !Particle information for the cell
-     INTEGER(INT64) :: pos
-     INTEGER(INT64) :: type !0 = no particle; 1 = particle; 2 = conglomerate (group of particles)
+     INTEGER(INT64) :: pos, type !In type: 0 = no particle; 1 = particle; 2 = conglomerate (group of particles)
      TYPE(vector3d) :: c_o_m !Center of mass of the particles in the cell
      REAL(REAL64) :: mass !Mass of the particles in the cell
      TYPE(CPtr), DIMENSION(2, 2, 2) :: subcell !Subcells of the current cell
@@ -38,23 +30,24 @@ CONTAINS
   !Subroutine to calculate the ranges of the particles in the 3D position matrix and store them in goal
   SUBROUTINE Calculate_Ranges(goal, p)
     TYPE(CELL), POINTER :: goal !Target cell
-    REAL(REAL64), DIMENSION(3) :: mins, maxs, medios
+    TYPE(vector3d) :: mins, maxs, medios !Vectors to store the minimum, maximum and mean values
     REAL(REAL64) :: span !Range of the particle positions
     TYPE(particle3d), INTENT(IN) :: p(:) !Particles
     
     !Calculate the minimum and maximum values for x, y, z coordinates of the particles
-    mins = [MINVAL([p(:)%p%x]), MINVAL([p(:)%p%y]), MINVAL([p(:)%p%z])]
-    maxs = [MAXVAL([p(:)%p%x]), MAXVAL([p(:)%p%y]), MAXVAL([p(:)%p%z])]
+    mins = vector3d(MINVAL([p(:)%p%x]), MINVAL([p(:)%p%y]), MINVAL([p(:)%p%z]))
+    maxs = vector3d(MAXVAL([p(:)%p%x]), MAXVAL([p(:)%p%y]), MAXVAL([p(:)%p%z]))
     
     !Calculate the span
-    span = MAXVAL(maxs - mins) * 1.1
-    
-    medios = (maxs + mins) * 0.5
-    
+    span = MAXVAL([maxs%x - mins%x, maxs%y - mins%y, maxs%z - mins%z]) * 1.1
+
+    !Calculate the mean value for x, y, z coordinates of the particles
+    medios = (maxs + mins) * REAL(0.5, REAL64)
+   
     !Set the minimum and maximum ranges for the goal cell
-    goal%range%min = medios - span * 0.5
-    goal%range%max = medios + span * 0.5
-    
+    goal%range%min = medios - vector3d(span, span, span) * REAL(0.5, REAL64)
+    goal%range%max = medios + vector3d(span, span, span) * REAL(0.5, REAL64)
+
   END SUBROUTINE Calculate_Ranges
 
   !Recursive subroutine to find the appropriate subcell for placing the particle
@@ -168,9 +161,12 @@ CONTAINS
     LOGICAL :: Belongs
     
     !Check if the particle is within the bounds of the cell's range
-    IF ((part%p%x .GE. goal%range%min(1) .AND. part%p%x .LT. goal%range%max(1)) .AND. &
-        (part%p%y .GE. goal%range%min(2) .AND. part%p%y .LT. goal%range%max(2)) .AND. &
-        (part%p%z .GE. goal%range%min(3) .AND. part%p%z .LT. goal%range%max(3))) THEN
+    IF ((part%p%x .GE. goal%range%min%x) .AND. &
+        (part%p%x .LT. goal%range%max%x) .AND. &
+        (part%p%y .GE. goal%range%min%y) .AND. &
+        (part%p%y .LT. goal%range%max%y) .AND. &
+        (part%p%z .GE. goal%range%min%z) .AND. &
+        (part%p%z .LT. goal%range%max%z)) THEN
        Belongs = .TRUE.
        
     ELSE
@@ -181,29 +177,26 @@ CONTAINS
 
   !Function to calculate the range for a subcell
   FUNCTION Calcular_Range(what, goal, octant)
-    INTEGER(INT64) :: what
+    INTEGER(INT64) :: what !Integer variable that determines the range for a subcell
     TYPE(CELL), POINTER :: goal !Target cell
     INTEGER(INT64), DIMENSION(3) :: octant !Subcells
-    REAL(REAL64), DIMENSION(3) :: Calcular_Range, valor_medio
-    
-    valor_medio = (goal%range%min + goal%range%max) * 0.5
+    TYPE(vector3d) :: Calcular_Range, valor_medio
+
+    !Calculate the mean value of the range
+    valor_medio = (goal%range%min + goal%range%max) * REAL(0.5, REAL64)
     
     SELECT CASE (what)
-    CASE (0) !Calculate the minimum ranges
-       WHERE (octant == 1)
-          Calcular_Range = goal%range%min
-          
-       ELSEWHERE
-          Calcular_Range = valor_medio
-       ENDWHERE
+    CASE (0) !Calculate the range for a subcell with either the minimum or the mean value
+       !If octant == 1, Calcular_Range = goal%range%min (minimum). If not, Calcular_Range = valor_medio (mean)
+       Calcular_Range%x = MERGE(goal%range%min%x, valor_medio%x, octant(1) == 1)
+       Calcular_Range%y = MERGE(goal%range%min%y, valor_medio%y, octant(2) == 1)
+       Calcular_Range%z = MERGE(goal%range%min%z, valor_medio%z, octant(3) == 1)
        
-    CASE (1) !Calculate the maximum ranges
-       WHERE (octant == 1)
-          Calcular_Range = valor_medio 
-          
-       ELSEWHERE
-          Calcular_Range = goal%range%max
-       ENDWHERE
+    CASE (1) !Calculate the range for a subcell with either the maximum or the mean value
+        !If octant == 1, Calcular_Range = goal%range%max (maximum). If not, Calcular_Range = valor_medio (mean)
+       Calcular_Range%x = MERGE(valor_medio%x, goal%range%max%x, octant(1) == 1)
+       Calcular_Range%y = MERGE(valor_medio%y, goal%range%max%y, octant(2) == 1)
+       Calcular_Range%z = MERGE(valor_medio%z, goal%range%max%z, octant(3) == 1)
        
     END SELECT
     
@@ -220,10 +213,10 @@ CONTAINS
        DO i = 1, 2
           DO j = 1, 2
              DO k = 1, 2
-                CALL Borrar_empty_leaves(goal%subcell(i, j, k)%ptr)  !Recursively call for subcells
+                CALL Borrar_empty_leaves(goal%subcell(i, j, k)%ptr) !Recursively call for subcells
                 !If a subcell has no particles, deallocate it
                 IF (goal%subcell(i, j, k)%ptr%type == 0) THEN
-                   DEALLOCATE(goal%subcell(i, j, k)%ptr)  !Deallocate empty subcells
+                   DEALLOCATE(goal%subcell(i, j, k)%ptr) !Deallocate empty subcells
                 END IF
              END DO
           END DO
@@ -243,10 +236,9 @@ CONTAINS
           DO k = 1, 2
              !If the subcell exists, recursively call for deletion of subcells
              IF (ASSOCIATED(goal%subcell(i, j, k)%ptr)) THEN
-                CALL Borrar_tree(goal%subcell(i, j, k)%ptr)  !Recursively call for subcells
-                DEALLOCATE(goal%subcell(i, j, k)%ptr)  !Deallocate the subcell
+                CALL Borrar_tree(goal%subcell(i, j, k)%ptr) !Recursively call for subcells
+                DEALLOCATE(goal%subcell(i, j, k)%ptr) !Deallocate the subcell
              END IF
-             
           END DO
        END DO
     END DO
@@ -258,7 +250,7 @@ CONTAINS
     TYPE(CELL), POINTER :: goal !Target cell
     TYPE(vector3d) :: c_o_m !Center of mass for the cell
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
-    REAL(REAL64) :: mass  !Temporary mass variable 
+    REAL(REAL64) :: mass !Temporary mass variable 
     INTEGER(INT64) :: i, j, k !Loop indexing variables
 
     !Initialize mass and center of mass
@@ -267,8 +259,8 @@ CONTAINS
 
     SELECT CASE (goal%type)
     CASE (1) !One particle in the cell
-       !Sets the mass and the center of mass
-       goal%mass = goal%part%m
+       !Set the mass and the center of mass
+       goal%mass = p(goal%pos)%m
        goal%c_o_m = point_to_vector(p(goal%pos)%p)
 
     CASE (2) !Conglomerate in the cell
@@ -277,13 +269,12 @@ CONTAINS
           DO j = 1, 2
              DO k = 1, 2
                 IF (ASSOCIATED(goal%subcell(i, j, k)%ptr)) THEN
-                   CALL Calculate_masses(goal%subcell(i, j, k)%ptr, p)  !Recursively call subcells
+                   CALL Calculate_masses(goal%subcell(i, j, k)%ptr, p) !Recursively call subcells
                    mass = goal%mass
-                   goal%mass = goal%mass + goal%subcell(i, j, k)%ptr%mass  !Accumulate mass from subcell
+                   goal%mass = goal%mass + goal%subcell(i, j, k)%ptr%mass !Accumulate mass from subcell
                    goal%c_o_m = (mass * goal%c_o_m + &
                                   goal%subcell(i, j, k)%ptr%mass * goal%subcell(i, j, k)%ptr%c_o_m) / goal%mass !Update center of mass based on contributions from subcells
                 END IF
-               
              END DO
           END DO
        END DO
@@ -292,31 +283,34 @@ CONTAINS
   END SUBROUTINE Calculate_masses
 
   !Subroutine to calculate forces between particles based on their positions and masses
-  SUBROUTINE Calculate_forces(head, n, p, rji)
+  SUBROUTINE Calculate_forces(head, n, p, rji, theta)
     TYPE(CELL), POINTER :: head !Head of the tree or root cell
-    INTEGER(INT64) :: n !Number of bodies
+    INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    INTEGER(INT64) :: i !Loop indexing varibale
+    REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
+    !$OMP DO
     DO i = 1, n
-       CALL Calculate_forces_aux(i, head, p, rji) !Auxiliary subroutine for force calculation
+       CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
     END DO
+    !$OMP END DO
     
   END SUBROUTINE Calculate_forces
 
   !Recursive subroutine to calculate forces between a specific particle and the tree structure
-  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji)
-    INTEGER(INT64) :: goal !Index of the current particle
+  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji, theta)
+    INTEGER(INT64) :: goal, i, j, k !Index of the current particle and loop indexing variables
     TYPE(CELL), POINTER :: tree !Current cell or subcell being processed
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    REAL(REAL64) :: l, D !Length of the side of the cell and distance between particles
+    REAL(REAL64) :: l, D, theta  !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
+    REAL(REAL64) :: r2, r3 !Real variables for squared and cubed distances
 
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
-       IF (goal .NE. tree%pos) THEN 
+       IF (goal .NE. tree%pos) THEN
           rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
           r2 = (NORM(rji))**2 !Square of the vector
           r3 = r2 * SQRT(r2)  !Cube of the vector
@@ -324,20 +318,19 @@ CONTAINS
        END IF
        
     CASE (2) !Conglomerate in the cell
-       l = tree%range%max(1) - tree%range%min(1) !Calculate the size of the cell
+       l = tree%range%max%x - tree%range%min%x !Calculate the size of the cell
        rji = tree%c_o_m - point_to_vector(p(goal)%p) !Vector from particle to center of mass
        D = NORM(rji) !Distance between particle and center of mass
        
-       IF (l/D < theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
+       IF (l/D .LT. theta) THEN !Barnes-Hut approximation: cell treated as a point mass when is sufficiently distant
           r3 = D**3 !Cube of the distance between particle and center of mass
-          p(goal)%a = p(goal)%a + tree%part%m * rji / r3 !Accelaration of the particle
-          
+          p(goal)%a = p(goal)%a + tree%mass * rji / r3 !Accelaration of the particle
        ELSE !Cell too close
           DO i = 1, 2
              DO j = 1, 2
                 DO k = 1, 2
                    IF (ASSOCIATED(tree%subcell(i, j, k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji) !Recursive call into the subcells to calculate forces on individual particles
+                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji, theta) !Recursive call into the subcells to calculate forces on individual particles
                    END IF
                 END DO
              END DO
