@@ -132,4 +132,4 @@ PROGRAM ex3
 
   print *, 'Elapsed time: ', elapsed_time, ' seconds'
 
-END PROGRAM ex2
+END PROGRAM ex3
