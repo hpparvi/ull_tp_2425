@@ -1,4 +1,4 @@
-FC = gfortran -fopenmp
+FC = gfortran #mpifort
 FCFLAGS = -c
 OBJECTS = geometry.o particle.o tree.o
 

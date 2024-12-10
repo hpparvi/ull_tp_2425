@@ -1,6 +1,6 @@
-PROGRAM ex2
+PROGRAM ex3
   USE, INTRINSIC :: iso_fortran_env
-  use omp_lib
+  use mpi_f08
   USE geometry
   USE particle
   USE tree
