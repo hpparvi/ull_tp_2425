@@ -20,20 +20,26 @@ PROGRAM ex3
   INTEGER, ALLOCATABLE :: sendcounts(:), displs(:)
 
 
+  ! Initialize mpi
   CALL mpi_init(ierr)
   CALL mpi_comm_size(mpi_comm_world, size, ierr)
   CALL mpi_comm_rank(mpi_comm_world, rank, ierr)
 
+  ! these will be used for sending and receiving the messages
   ALLOCATE(sendcounts(size), displs(size))
-
+  
+  ! build the derived types (these subroutines are in create_mpi_types)
   CALL build_derived_particle(MPI_particle3d)
   CALL build_derived_vector(MPI_vector3d)
   CALL build_derived_point(MPI_point3d)
 
   !Start timer
-  CALL system_CLOCK(count_rate = rate)
-  CALL system_CLOCK(count = start_time)
+  if (rank.eq.master) then
+     CALL system_CLOCK(count_rate = rate)
+     CALL system_CLOCK(count = start_time)
+  end if
 
+  ! read the initial data with the master node
   IF (rank.EQ.master) THEN
      OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = stat) !opens input file
      IF (stat/=0) WRITE (*,*) 'Cannot open file ' , filename
@@ -55,7 +61,6 @@ PROGRAM ex3
      READ (3, *) t_end
 
      ALLOCATE(parts(n)) !allocates the particles now that it knows how many there are
-     ALLOCATE(aa(n))
 
      DO i = 1, n !reads initial conditions for all particles
         READ (3, *) parts(i)
@@ -63,6 +68,7 @@ PROGRAM ex3
      CLOSE(3)
   END IF
 
+  ! and send the relevant data to all other nodes
   CALL mpi_bcast(n, 1, MPI_INTEGER, master, mpi_comm_world)
 
   IF (rank.NE.master) ALLOCATE(parts(n))
@@ -71,7 +77,7 @@ PROGRAM ex3
   CALL mpi_bcast(dt, 1, MPI_Double_precision, master, mpi_comm_world)
   CALL mpi_bcast(parts, n, MPI_particle3d, master, mpi_comm_world)
 
-  !! Initializing the head node
+  !! Initializing the tree. we do it with all nodes because pointers
   ALLOCATE(head)
   CALL calculate_ranges(parts, head)
   head%TYPE = 0
@@ -86,27 +92,21 @@ PROGRAM ex3
   CALL delete_empty_leaves(head)
   CALL calculate_masses(head)
 
+  ! calculate how much of each array each node will be working on
   sendcounts(:) = FLOOR(REAL(n)/REAL(size))
   sendcounts(size) = FLOOR(REAL(n)/REAL(size)) + MOD(REAL(n), REAL(size))
 
-  IF (rank.NE.master) ALLOCATE(aa(n))
+  
+  ALLOCATE(aa(n))
   aa = vector3d(0.,0.,0.)
 
+  ! give each node the start and end id of the particles it works on
   IF (rank.EQ.0) THEN
      istart=1
   ELSE
      istart=(SUM(sendcounts(1:rank)))+1
   END IF
   iend = SUM(sendcounts(1:(rank+1)))
-
-  ALLOCATE(aa_sub(sendcounts(rank+1)))
-  ALLOCATE(parts_sub(sendcounts(rank+1)))
-
-  CALL calculate_forces(head, aa, parts, theta, istart, iend)
-
-  aa_sub = aa(istart:iend)
-
-  CALL mpi_barrier(mpi_comm_world)
 
   DO i = 1, size
      IF (i.EQ.1) THEN
@@ -117,32 +117,39 @@ PROGRAM ex3
   END DO
 
 
-!!$  CALL mpi_gatherv(aa_sub, sendcounts(rank+1), MPI_vector3d,&
-!!$       &aa, sendcounts, displs, MPI_vector3d, master,&
-!!$       &MPI_comm_world)
-  !CALL mpi_bcast(aa, n, MPI_vector3d, master, mpi_comm_world)
+  ! and allocate the subarrays it'll work on
+  ALLOCATE(aa_sub(sendcounts(rank+1)))
+  ALLOCATE(parts_sub(sendcounts(rank+1)))
 
+  ! each node calculates the accelerations for particles in (istart, iend)
+  CALL calculate_forces(head, aa, parts, theta, istart, iend)
 
+  ! and saves it to its subarray
+  aa_sub = aa(istart:iend)
+
+  ! wait til everyone is done
+  CALL mpi_barrier(mpi_comm_world)
+
+  ! opens the output file ONLY ONCE
   if (rank.eq.master) then
      OPEN (file = outname, action = 'write', status = 'replace', unit =&
           & 4, iostat = stat)
      IF (stat/=0) WRITE (*,*) 'Cannot open file ', outname
   end if
 
-  t_out = 0.0
-  t=0.
-
-  do while (t .le. t_end)
-!!$     CALL mpi_scatterv(aa, sendcounts, displs, MPI_vector3d, &
-!!$          &aa_sub, sendcounts(rank+1), MPI_vector3d, master, mpi_Comm_World)
+  do while (t .le. t_end) ! main loop
+     ! sends everyone their chunk of particles
      CALL mpi_scatterv(parts, sendcounts, displs, MPI_particle3d, &
           & parts_sub, sendcounts(rank+1), MPI_particle3d, master, MPI_comm_world)
+     ! leapfrog part 1
      parts_sub%v = parts_sub%v + aa_sub * (dt/2.)
      parts_sub%p = parts_sub%p + parts_sub%v * dt
+     ! and then gathers the updated particles and shares it with everyone
      CALL mpi_gatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
           & parts, sendcounts, displs, MPI_particle3d, master, MPI_COMM_WORLD)
      CALL mpi_bcast(parts, n, MPI_particle3d, master, mpi_comm_world)
-     
+
+     ! redo the tree (again, pointers)
      call delete_tree(head)
 
      call calculate_ranges(parts, head)
@@ -154,45 +161,58 @@ PROGRAM ex3
         call place_cell(temp_cell, parts(i), i)
      end do
 
-
      call delete_empty_leaves(head)
      call calculate_masses(head)
 
+     ! and it's back to calculating the forces
      aa = vector3d(0.,0.,0.)
 
      call calculate_forces(head, aa, parts, theta, istart, iend)
      aa_sub = aa(istart:iend)
 
+     ! re-divide the particles
      CALL mpi_scatterv(parts, sendcounts, displs, MPI_particle3d, &
           & parts_sub, sendcounts(rank+1), MPI_particle3d, master, MPI_comm_world)
+     ! leapfrog part 2
      parts_sub%v = parts_sub%v + aa_sub * (dt/2.)
+     ! and gather/share again
      CALL mpi_gatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
           & parts, sendcounts, displs, MPI_particle3d, master, MPI_COMM_WORLD)
      call mpi_bcast(parts, n, MPI_particle3d, master, mpi_comm_world)
+
+     ! update output timer
      t_out = t_out + dt
      if (t_out.ge.dt_out) then
         if (rank.eq.master) then
+           ! write ONLY ONCE with the master node
            WRITE(4, fmt='(F11.3)', advance='no') t
            DO i = 1, n
               WRITE(4, fmt='(4ES13.4)', advance='no') parts(i)%p
            END DO
            WRITE(4,*) ''
         end if
+        ! wait just in case
         call mpi_barrier(mpi_comm_world)
         t_out = 0.0
      end if
+     
+     ! update general time
      t=t+dt
   end do
 
+  ! close the file (all file operations are handled by the master node)
   if (rank.eq.master) close(4)
 
+  ! make sure everyone is done
   call mpi_barrier(mpi_comm_world)
+  ! and then check the time
   if (rank.eq.master) then
      CALL system_CLOCK(count = end_time)
      elapsed_time = REAL(end_time-start_time)/REAL(rate)
      print *, 'Elapsed time: ', elapsed_time, 'seconds'
   end if
 
+  ! free the data types and finalize mpi
   CALL mpi_type_free(mpi_vector3d)
   CALL mpi_type_free(mpi_point3d)
   CALL mpi_type_free(mpi_particle3d)
