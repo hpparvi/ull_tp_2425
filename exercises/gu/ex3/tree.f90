@@ -1,6 +1,6 @@
 MODULE tree
   USE iso_fortran_env
-  use omp_lib
+  use mpi_f08
   USE geometry
   USE particle
   IMPLICIT NONE
@@ -399,6 +399,7 @@ logical FUNCTION Belongs (part, goal)
     END SELECT
   END SUBROUTINE Calculate_forces_aux
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! Calculate_forces !!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -407,22 +408,20 @@ logical FUNCTION Belongs (part, goal)
   !! Se sirve de la funcion Calculate_forces_aux que es la
   !! que en realidad hace los calculos para cada particula
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE Calculate_forces(head, aa, parts, theta)
+  SUBROUTINE Calculate_forces(head, aa, parts, theta, istart, iend)
     TYPE(CELL), POINTER, intent(in) :: head
     type(vector3d), intent(inout) :: aa(:)
     type(particle3d), intent(in) :: parts(:)
     real(real64), intent(in) :: theta
+    integer, intent(in) :: istart, iend
     INTEGER :: i, n
-    n = size(aa)
-    !!$omp parallel private(i) shared(head, parts, aa)
-    !$omp do
-    DO i = 1, n
+    n = size(parts)
+    
+    DO i = istart, iend
        CALL Calculate_forces_aux(i, head, parts, aa, theta)
     END DO
-    !$omp end do
-    !!$omp end parallel
-  END SUBROUTINE Calculate_forces
 
+  END SUBROUTINE Calculate_forces
 
   
 END MODULE tree
