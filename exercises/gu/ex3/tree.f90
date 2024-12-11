@@ -419,6 +419,7 @@ logical FUNCTION Belongs (part, goal)
     
     DO i = istart, iend
        CALL Calculate_forces_aux(i, head, parts, aa, theta)
+       !aa(i) = vector3d(i,i,i)
     END DO
 
   END SUBROUTINE Calculate_forces

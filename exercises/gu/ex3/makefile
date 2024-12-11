@@ -2,9 +2,9 @@ FC = mpifort
 FCFLAGS = -c
 OBJECTS = geometry.o particle.o tree.o create_mpi_types.o
 
-all: test
+all: ex3
 
-test : $(OBJECTS) test.o
+ex3 : $(OBJECTS) ex3.o
 	$(FC) -o $@ $(OBJECTS) test.o
 
 particulas : $(OBJECTS) particulas.o
