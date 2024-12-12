@@ -145,9 +145,8 @@ PROGRAM ex3
      parts_sub%v = parts_sub%v + aa_sub * (dt/2.)
      parts_sub%p = parts_sub%p + parts_sub%v * dt
      ! and then gathers the updated particles and shares it with everyone
-     CALL mpi_gatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
-          & parts, sendcounts, displs, MPI_particle3d, master, MPI_COMM_WORLD)
-     CALL mpi_bcast(parts, n, MPI_particle3d, master, mpi_comm_world)
+     CALL mpi_allgatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
+          & parts, sendcounts, displs, MPI_particle3d, MPI_COMM_WORLD)
 
      ! redo the tree (again, pointers)
      call delete_tree(head)
@@ -176,9 +175,8 @@ PROGRAM ex3
      ! leapfrog part 2
      parts_sub%v = parts_sub%v + aa_sub * (dt/2.)
      ! and gather/share again
-     CALL mpi_gatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
-          & parts, sendcounts, displs, MPI_particle3d, master, MPI_COMM_WORLD)
-     call mpi_bcast(parts, n, MPI_particle3d, master, mpi_comm_world)
+     CALL mpi_allgatherv(parts_sub, sendcounts(rank+1), MPI_particle3d,&
+          & parts, sendcounts, displs, MPI_particle3d, MPI_COMM_WORLD)
 
      ! update output timer
      t_out = t_out + dt
