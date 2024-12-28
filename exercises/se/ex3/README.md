@@ -11,13 +11,6 @@ the mpirun -n flag.
 ierr: integer that stores types of errors or lack
 thereof.
 
-offsets_vector: this stores the offsets in memory
-of the vector3d type. It tells MPI how many bytes
-to grab for each of the vector3d components.
-
-example_vector: just a vector to get the sizes
-of the components in bytes for the offsets.
-
 MPI_vector3d [and others]: the MPI necessary
 types of the user-defined variables so that MPI
 knows how to deal with them.
@@ -38,13 +31,8 @@ many particles to tackle
 displacements: how many elements to move between 
 node-assigned chunks
 
-vel_msg_per: the velocities to send to the first nodes
-
-vel_msg_last: the velocities to send to the last node
-
-a_msg_per: the accelerations to send to the first nodes
-
-a_msg_last: the accelerations to send to the last node
+first, last: for each rank, there determine the indices
+in between to grab the particles for each node.
 
 i, j, k: loop indices
 
@@ -66,7 +54,14 @@ loops
 
 particles: particle array
 
+particles_node: array that contains the subset of
+particles for each node to carry out the leapfrog
+method of integration (is different for each node).
+
 a: accelerations
+
+a_node: same as particles_node but for the 
+accelerations.
 
 openstatus_input: to check whether the inputs have 
 been opened correctly
@@ -95,7 +90,7 @@ temp_cell: temporary cell to keep track of the current cell
 
 Some comments about the way I parallelized this exercise:
 
-1. It is not possible to parallelize by sending the function
+It is not possible to parallelize by sending the function
 Calculate_Forces a subarray of the particles, because in order
 to get the forces it is necessary to know the position (via the
 tree) of ALL the particles. Therefore it is necessary to modify
@@ -103,3 +98,11 @@ the original Calculate_Forces function to take two extra
 arguments: a start and end for the loop indices, and then, 
 passing the entire particles array, each process calculates the 
 total forces on that subset of particles.
+
+============ Discussion of elapsed time ============
+
+Below is an updated table to show the elapsed time for 
+different several cases (excluding 3 particles because
+I set the number of nodes to 8 for all runs for a fair
+comparison to OpenMP). Again I excluded the printing
+statements and writing to file. 

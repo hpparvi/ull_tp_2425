@@ -17,10 +17,6 @@ PROGRAM ex3
   INTEGER :: first, last
   !todo Include these in the README
   
-  ! (Considering more particles than nodes)
-  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: vel_msg_per, vel_msg_last
-  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: a_msg_per, a_msg_last
-  
   ! Loop indices
   INTEGER :: i,j,k
 
@@ -55,9 +51,7 @@ PROGRAM ex3
   CALL mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
 
   ! Create new structures for MPI
-  !todo Is it possible to just call the particle, since it internally calls the other 2? 
-  CALL create_MPI_vector(MPI_vector3d)
-  CALL create_MPI_point(MPI_point3d)
+  ! This internally calls the subroutines to create MPI_point3d and MPI_vector3d
   CALL create_MPI_particle(MPI_particle3d)
 
   
@@ -120,7 +114,6 @@ PROGRAM ex3
   ! processes reaching next step
 
   ! Send the particle info to all nodes
-  !todo If this does not work, bcast n, allocate the particles to all nodes and then bcast particles
   CALL MPI_Bcast(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
   IF (rank /= 0) ALLOCATE(particles(n))
@@ -136,7 +129,6 @@ PROGRAM ex3
   ELSE IF (n/comsize < 1 .AND. rank==0) THEN
      PRINT '(A, I3, A, I3, A)', "The number of processes (", comsize, ") exceeds the number &
           of particles (", n, "). Please try again with fewer nodes."
-     !todo Make sure this works properly
      CALL MPI_ABORT(MPI_COMM_WORLD, ierr)
   END IF
 
@@ -182,19 +174,18 @@ PROGRAM ex3
 
   ! Get the beginning and end of the particles to be assigned to each node
   ! (via the already created integers npart_per_node and npart_last_node)
-  !todo Make sure this is correct
   IF (rank == 0) THEN
      first = 1
      last  = npart_per_node
-     PRINT*, "Rank:", rank, "First and last:", first, last
+     !PRINT*, "Rank:", rank, "First and last:", first, last
   ELSE IF (rank < comsize-1) THEN
      first = rank*npart_per_node + 1 
      last  = first + npart_per_node -1
-     PRINT*, "Rank:", rank, "First and last:", first, last
+     !PRINT*, "Rank:", rank, "First and last:", first, last
   ELSE
      first = rank*npart_per_node + 1
      last = n
-     PRINT*, "Rank:", rank, "First and last:", first, last
+     !PRINT*, "Rank:", rank, "First and last:", first, last
   END IF
 
   ! Arrays for MPI messaging
