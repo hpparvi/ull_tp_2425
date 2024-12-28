@@ -136,3 +136,18 @@ statements and writing to file.
 | N = 80                      | 2.709 | 2.329 | 2.304 | 2.332 | 2.309 |   2.4 &plusmn; 0.2   |
 | N = 150                     | 4.916 | 4.911 | 5.166 | 4.917 | 4.885 |   5.0 &plusmn; 0.1   |
 | N = 400                     | 18.45 | 18.73 | 17.79 | 18.57 | 17.88 |  18.3 &plusmn; 0.4   |
+
+
+In this table we can see that, although the MPI parallelization 
+strategy is better than the non-parallel options for large
+numbers of particles, it is not faster than OpenMP in these 
+cases. It is possible that the way of splitting the data 
+might create an overhead that is less efficient than the way
+OpenMP is internally optimized. It is also possible that 
+there is a source of inefficiency that I have not found in 
+my code. 
+
+It is also remarkable that the MPI results are slightly 
+more variable when doing repeated tests (I did them all
+in succession). This might also point to some slight 
+overheads in the way the code works.
