@@ -151,3 +151,8 @@ It is also remarkable that the MPI results are slightly
 more variable when doing repeated tests (I did them all
 in succession). This might also point to some slight 
 overheads in the way the code works.
+
+Lastly, I have noticed that the total time the simulation
+takes might be shorter for fewer nodes. In my opinion, 
+this is because the communication between so many processes
+is a net loss of efficiency for such low numbers of particles. 
