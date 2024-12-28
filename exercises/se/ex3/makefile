@@ -14,4 +14,4 @@ clean :
 	rm -f *.o *.mod
 
 test : ex3
-	mpirun -n 8 ex3
+	mpirun -n 3 ex3
