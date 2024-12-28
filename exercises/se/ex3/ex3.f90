@@ -9,9 +9,7 @@ PROGRAM ex3
 
   ! For initializing MPI and setting new MPI type (vector3d)
   INTEGER :: rank, comsize, ierr
-  INTEGER(MPI_ADDRESS_KIND), DIMENSION(3) :: offsets_vector
-  TYPE(vector3d) :: example_vector
-  TYPE(MPI_datatype) :: MPI_vector3d, MPI_point3d, MPI_particle3d
+  ! TYPE(MPI_datatype) :: MPI_vector3d, MPI_point3d, MPI_particle3d
   
   ! For distributing work within MPI
   INTEGER :: npart_per_node, npart_last_node
@@ -55,12 +53,7 @@ PROGRAM ex3
   CALL mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
 
   ! Create new structure for MPI
-  example_vector = vector3d(1.,1.,1.)
-  offsets_vector = [0*sizeof(example_vector%x), sizeof(example_vector%x), 2*sizeof(example_vector%x)]
-  CALL MPI_Type_create_struct(3, [1, 1, 1], offsets_vector, &
-       [MPI_DOUBLE_PRECISION, MPI_DOUBLE_PRECISION, MPI_DOUBLE_PRECISION], &
-       MPI_vector3d, ierr)
-  CALL MPI_Type_commit(MPI_vector3d, ierr)
+  CALL create_MPI_vector(MPI_vector3d)
 
   
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -225,8 +218,8 @@ PROGRAM ex3
         ! + a remainder)
 
         ! Scatter the information
-        ALLOCATE(counts_nodes(n_workers))
-        ALLOCATE(displacements(n_workers))
+        ALLOCATE(counts_nodes(comsize))
+        ALLOCATE(displacements(comsize))
 
         ! Set the counts and displacements depending on whether nodes < particles
         IF (n/comsize > 0) THEN
@@ -306,6 +299,23 @@ PROGRAM ex3
   CALL mpi_finalize(ierr)
 
 
+
+CONTAINS
+
+  SUBROUTINE create_MPI_vector(MPI_vector3d)
+    TYPE(MPI_datatype), INTENT(out) :: MPI_vector3d
+    INTEGER(MPI_ADDRESS_KIND), DIMENSION(3) :: offsets_vector
+    TYPE(vector3d) :: example_vector
+    INTEGER :: ierr
+    
+    example_vector = vector3d(1.,1.,1.)
+    offsets_vector = [0*sizeof(example_vector%x), sizeof(example_vector%x), 2*sizeof(example_vector%x)]
+    CALL MPI_Type_create_struct(3, [1, 1, 1], offsets_vector, &
+         [MPI_DOUBLE_PRECISION, MPI_DOUBLE_PRECISION, MPI_DOUBLE_PRECISION], &
+         MPI_vector3d, ierr)
+    CALL MPI_Type_commit(MPI_vector3d, ierr)
+
+  END SUBROUTINE create_MPI_vector
 
   
 
