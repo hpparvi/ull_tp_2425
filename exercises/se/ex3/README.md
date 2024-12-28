@@ -89,3 +89,17 @@ count_rate: conversion between counts and seconds
 head: main cell of the tree
 
 temp_cell: temporary cell to keep track of the current cell
+
+
+================ About the parallelization ================
+
+Some comments about the way I parallelized this exercise:
+
+1. It is not possible to parallelize by sending the function
+Calculate_Forces a subarray of the particles, because in order
+to get the forces it is necessary to know the position (via the
+tree) of ALL the particles. Therefore it is necessary to modify
+the original Calculate_Forces function to take two extra
+arguments: a start and end for the loop indices, and then, 
+passing the entire particles array, each process calculates the 
+total forces on that subset of particles.

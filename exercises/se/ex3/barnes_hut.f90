@@ -456,23 +456,15 @@ CONTAINS
   !!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  SUBROUTINE Calculate_forces(head, particles, a)
+  SUBROUTINE Calculate_forces(head, particles, a, idx_begin, idx_end)
     TYPE(CELL),POINTER :: head
-    INTEGER :: i,n
+    INTEGER :: i, idx_begin, idx_end
     TYPE(particle3d), DIMENSION(:) :: particles
     TYPE(vector3d), DIMENSION(:) :: a
-    ! MPI related variables
-    ! ?!
-
-    n = SIZE(particles)
     
-    ! (Parallel block opened in the program)
-    
-    ! 
-    DO i = 1,n
+    DO i = idx_begin, idx_end
        CALL Calculate_forces_aux(i, head, particles, a)
     END DO
-    ! 
 
   END SUBROUTINE Calculate_forces
 
