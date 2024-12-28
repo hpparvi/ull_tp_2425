@@ -13,6 +13,6 @@ The structure of the program is as follows:
 8. All nodes build their tree again, calculate their section of the accelerations, get and update their section of the particles, and then share them with all other nodes.
 9. All nodes update the timer.
 10. Master node checks if an output should be written, and if it does, it writes it. A barrier is placed here so all other nodes idle while the output is written.
-11. All nodes check if loop should be started again. If affirmative, steps 6-11 are repeated. This happens until the end time is reached.\
+11. All nodes check if loop should be started again. If affirmative, steps 6-11 are repeated. This happens until the end time is reached.
 12. Master node closes the output file.
 13. Master node checks the clock and outputs the elapsed time.
