@@ -5,7 +5,8 @@ PROGRAM ex3
   USE calcs    !Importing the calcs module, where subroutines to update properties of the particles are defined
   USE data     !Importing the data module, where subroutines to read and save data are defined
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits of the variables
-  !$USE omp_lib  !Importing the omp library to use OpenMP
+  USE mpi_types !Importing the mpi_type module, where subroutines to use MPI types are defined
+  USE mpi_f08   !Importing the mpi library to use MPI 
   IMPLICIT NONE
 
   INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
@@ -16,13 +17,23 @@ PROGRAM ex3
 
   INTEGER(INT64) :: start, finish, rate !Variables to store the initial, final and frequency values of the system clock counter
   REAL(REAL64) :: elapsed_time !Variable to calculate and store the elapsed time
-  
-  CALL system_clock(count_rate = rate) !Get the system clock frequency and stored it in the rate variable
-  CALL system_clock(count = start) !Get the current clock counter state and stored it in the start variable
 
-  !Read the input file
-  CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
+  INTEGER(INT64) :: ierr, comsize, rank
 
+  CALL MPI_INIT(ierr) !Initialize the MPI execution environment
+  CALL MPI_COMM_SIZE(MPI_COMM_WORLD, comsize, ierr) !Get the number of MPI processes
+  CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr) !Get the rank of the calling MPI process
+
+  IF (rank .EQ. 0) THEN 
+     CALL system_clock(count_rate = rate) !Get the system clock frequency and stored it in the rate variable
+     CALL system_clock(count = start) !Get the current clock counter state and stored it in the start variable
+
+     CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta) !Read the input file
+
+  END IF 
+
+
+     
   !Output message to notify the user that the simulation is being performed
   PRINT*, "Performing the simulation..."
   
@@ -55,7 +66,9 @@ PROGRAM ex3
  
   !Main loop to update properties of particles until final time is reached
   DO WHILE (t .LE. t_end)
-     !$OMP PARALLEL PRIVATE(i, rji) SHARED(head, dt, p)
+     CALL MPI_Scatter(p, count_send, )
+     
+    
      CALL velocity(n, dt, p) !Update the velocities of particles
      CALL position(n, dt, p) !Update the positions of particles
 
@@ -94,20 +107,26 @@ PROGRAM ex3
      
   END DO
 
-  CALL close_output !Close the output file
+  IF (rank .EQ. 0) THEN
+     CALL close_output !Close the output file
+  END IF 
 
   CALL system_clock(count = finish)    !Get the current clock counter value and stored it in the finish variable
   elapsed_time = (finish - start)/rate !Calculates the elapsed time in seconds
 
-  !Output the elapsed time
-  IF (elapsed_time .GT. 60) THEN
-     PRINT *, "Time spent on performing the simulation: ", floor(elapsed_time/60), "min", &
-         floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
-         "s" !Output in minutes and seconds if the elapsed_time > 60 s
-  ELSE
-     PRINT *, "Time spent on performing the simulation: ", elapsed_time, "s" !Ouput in seconds if the elapsed_time < 60 s
+  IF (rank .EQ. 0) THEN
+     !Output the elapsed time
+     IF (elapsed_time .GT. 60) THEN
+        PRINT *, "Time spent on performing the simulation: ", floor(elapsed_time/60), "min", &
+             floor((elapsed_time / 60 - floor(elapsed_time / 60)) * 60), &
+             "s" !Output in minutes and seconds if the elapsed_time > 60 s
+     ELSE
+        PRINT *, "Time spent on performing the simulation: ", elapsed_time, "s" !Ouput in seconds if the elapsed_time < 60 s
+     END IF
+
+     PRINT*, "Data calculated stored in file: ", output !End of program message
   END IF
 
-  PRINT*, "Data calculated stored in file: ", output !End of program message
+  CALL MPI_FINALIZE(ierr) !Shut down the MPI environment
   
 END PROGRAM ex3

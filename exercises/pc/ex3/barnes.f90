@@ -2,7 +2,6 @@ MODULE barnes
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module
   USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits for variables
-  !$USE omp_lib  !Importing the omp library to use OpenMP
   IMPLICIT NONE
 
   !Define a RANGE type to hold the minimum and maximum range in 3D space
@@ -291,11 +290,9 @@ CONTAINS
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
     
     !Calculate forces for each particle
-    !$OMP DO
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
     END DO
-    !$OMP END DO
     
   END SUBROUTINE Calculate_forces
 
