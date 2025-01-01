@@ -27,7 +27,7 @@ program tree
     call mpi_comm_size(MPI_COMM_WORLD, comsize, ierr)
     call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
     
-    call create_mpi_particle_type(mpi_particle3d, mpi_point3d, mpi_vector3d, ierr)
+    call create_mpi_particle_type(mpi_particle3d, ierr)
     
     if (rank == 0) then
         ! Check if an input file was provided or use terminal input

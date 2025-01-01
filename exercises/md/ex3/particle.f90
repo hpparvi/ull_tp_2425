@@ -15,11 +15,12 @@ module particle
     end type particle3d
 
     type(MPI_Datatype) :: mpi_particle3d
-    type(MPI_Datatype) :: mpi_point3d, mpi_vector3d
+    
 
     contains
-    subroutine create_mpi_particle_type(mpi_particle3d, mpi_point3d, mpi_vector3d, ierr)
+    subroutine create_mpi_particle_type(mpi_particle3d, ierr)
         type(MPI_Datatype) :: mpi_particle3d
+        type(MPI_Datatype) :: mpi_point3d, mpi_vector3d
         type(vector3d) :: vect3d
         type(point3d) :: pont3d
         integer, intent(inout) :: ierr
@@ -27,31 +28,28 @@ module particle
         integer :: block_lengths(block_count)
         integer(kind=MPI_ADDRESS_KIND) :: displacements(block_count)
         type(MPI_Datatype) :: block_types(block_count)
-        type(MPI_Datatype) :: mpi_point3d, mpi_vector3d
 
-        ! Crear tipos contiguos para point3d y vector3d
+    
         call MPI_Type_contiguous(3, mpi_real8, mpi_point3d, ierr)
         call MPI_Type_commit(mpi_point3d, ierr)
 
         call MPI_Type_contiguous(3, mpi_real8, mpi_vector3d, ierr)
         call MPI_Type_commit(mpi_vector3d, ierr)
 
-        ! Definir las longitudes de los bloques
+
         block_lengths = [1, 1, 1, 1]
 
-        ! Definir los tipos de cada bloque
+    
         block_types = [mpi_point3d, mpi_vector3d, mpi_vector3d, mpi_real8]
 
-        ! Calcular los desplazamientos para cada componente
         displacements = [0_mpi_address_kind, &
                         sizeof(pont3d), &
                         sizeof(pont3d) + sizeof(vect3d), &
                         sizeof(pont3d) + 2*sizeof(vect3d)]
 
-        ! Crear el tipo derivado para particle3d
+
         call mpi_type_create_struct(block_count, block_lengths, displacements, block_types, mpi_particle3d, ierr)
 
-        ! Confirmar el tipo en MPI
         call mpi_type_commit(mpi_particle3d, ierr)
     end subroutine create_mpi_particle_type
 
