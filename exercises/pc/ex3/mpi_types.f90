@@ -11,7 +11,7 @@ module mpi_types
 contains
 
   !Subroutine to create an MPI datatype for a 3D point
-  subroutine MPI_POINT3D(MPI_POINT3D, ierr)
+  subroutine create_MPI_POINT3D(MPI_POINT3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_POINT3D !MPI 3D point
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
@@ -33,10 +33,10 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine MPI_POINT3D
+  end subroutine create_MPI_POINT3D
   
   !Subroutine to create an MPI datatype for a 3D vector
-  subroutine MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+  subroutine create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_VECTOR3D !MPI 3D vector
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
@@ -58,14 +58,14 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
     
-  end subroutine MPI_VECTOR3D
+  end subroutine create_MPI_VECTOR3D
 
   !Subroutine to create an MPI datatype for a 3D particle
-  subroutine MPI_PARTICLE3D(MPI_PARTICLE3D, ierr)
+  subroutine create_MPI_PARTICLE3D(MPI_PARTICLE3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_PARTICLE3D !MPI 3D particle
     type(MPI_Datatype) :: MPI_POINT3D, MPI_VECTOR3D   !MPI 3D point and MPI 3D vector to create MPI 3D particle
-    type(vector3d) :: vector3d !3D vector
-    type(point3d) :: point3d   !3D point
+    type(vector3d) :: vector !3D vector
+    type(point3d) :: point   !3D point
     
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
     integer, parameter :: block_count = 4 !Number of blocks to create for a 3D particle
@@ -74,8 +74,8 @@ contains
     type(MPI_Datatype) :: block_types(block_count) !Contain the types of each block
     
     !Call subroutines to create MPI datatypes for 3D points and 3D vectors
-    call MPI_POINT3D(MPI_POINT3D, ierr)
-    call MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+    call create_MPI_POINT3D(MPI_POINT3D, ierr)
+    call create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
 
     !Define block lengths for the MPI 3D particle structure
     block_lengths = [1, 1, 1, 1] ![position, velocity, acceleration, mass]
@@ -84,7 +84,7 @@ contains
     block_types = [MPI_POINT3D, MPI_VECTOR3D, MPI_VECTOR3D, MPI_DOUBLE_PRECISION] ![position, velocity, acceleration, mass]
 
     !Calculate displacements for each block type
-    displacements = [0, sizeof(point3d), sizeof(point3d) + sizeof(vector3d), sizeof(point3d) + 2*sizeof(vector3d)]![position, velocity, acceleration, mass]
+    displacements = [0_MPI_ADDRESS_KIND, sizeof(point), sizeof(point) + sizeof(vector), sizeof(point) + 2*sizeof(vector)] ![position, velocity, acceleration, mass]
     
     !Create an MPI 3D particle structure
     call MPI_Type_create_struct(block_count, block_lengths, displacements, block_types, MPI_PARTICLE3D, ierr)
@@ -104,7 +104,7 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine MPI_PARTICLE3D
+  end subroutine create_MPI_PARTICLE3D
   
   !Subroutine to deallocate MPI datatypes
   subroutine deallocate_MPI_Types(MPI_POINT3D, MPI_VECTOR3D, MPI_PARTICLE3D, ierr)
