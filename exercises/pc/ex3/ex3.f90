@@ -12,27 +12,28 @@ PROGRAM ex3
   INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
   REAL(REAL64) :: dt, t_end, t, dt_out, t_out, theta !Time step, final time, current time, output time step, output time and parameter that determines the accuracy of the simulation
   TYPE(vector3d) :: rji !Vector from one particle to another
-  TYPE(particle3d), allocatable :: p(:) !Particles
+  TYPE(particle3d), ALLOCATABLE :: p(:) !Particles
   TYPE(CELL), POINTER :: head, temp_cell !Pointers for the root cell and temporary cells in the tree structure
 
   INTEGER(INT64) :: start, finish, rate !Variables to store the initial, final and frequency values of the system clock counter
   REAL(REAL64) :: elapsed_time !Variable to calculate and store the elapsed time
 
-  INTEGER(INT64) :: ierr, comsize, rank
+  !Initialize the MPI environment
+  CALL Initialize_MPI
 
-  CALL MPI_INIT(ierr) !Initialize the MPI execution environment
-  CALL MPI_COMM_SIZE(MPI_COMM_WORLD, comsize, ierr) !Get the number of MPI processes
-  CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr) !Get the rank of the calling MPI process
-
-  IF (rank .EQ. 0) THEN 
+  IF (rank .EQ. master) THEN 
      CALL system_clock(count_rate = rate) !Get the system clock frequency and stored it in the rate variable
      CALL system_clock(count = start) !Get the current clock counter state and stored it in the start variable
 
-     CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta) !Read the input file
+     CALL read_data(n, p, dt, t_end, dt_out, t_out, theta) !Read the input file
 
-  END IF 
+  END IF
 
+  !Send the number of particles to the worker nodes
+  CALL send_n(n)
 
+  IF (rank .NE. master) ALLOCATE(p(n)) !Allocate memory for particles array
+  CALL send_data(p, dt, t_end, t, dt_out, t_out, theta) !Send time parameters, theta and the particles data to the worker nodes
      
   !Output message to notify the user that the simulation is being performed
   PRINT*, "Performing the simulation..."
@@ -66,8 +67,7 @@ PROGRAM ex3
  
   !Main loop to update properties of particles until final time is reached
   DO WHILE (t .LE. t_end)
-     CALL MPI_Scatter(p, count_send, )
-     
+
     
      CALL velocity(n, dt, p) !Update the velocities of particles
      CALL position(n, dt, p) !Update the positions of particles
@@ -107,7 +107,7 @@ PROGRAM ex3
      
   END DO
 
-  IF (rank .EQ. 0) THEN
+  IF (rank .EQ. master) THEN
      CALL close_output !Close the output file
   END IF 
 
@@ -127,6 +127,7 @@ PROGRAM ex3
      PRINT*, "Data calculated stored in file: ", output !End of program message
   END IF
 
-  CALL MPI_FINALIZE(ierr) !Shut down the MPI environment
+  !Finalize the MPI environment
+  CALL Finalize_MPI
   
 END PROGRAM ex3

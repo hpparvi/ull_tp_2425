@@ -51,7 +51,7 @@ The code is parallelized with OpenMP in the modules ```barnes.f90```and ```calcs
 
 Several time tests were made on a 4-cores computer using a time step of $dt = 0.01$, an output time step of $dt_{out} = 0.1$ and a final time of $t_{final} = 50$. The results are plotted in the figure ```times.png``` located in the ```plots``` directory, and are shown in the following table:
 
-| Particles | Time direct-sum (ex1) [s]| Time non-parallelized Barnes-Hut [s]| Time parallelized Barnes-Hut [s]|
+| Particles | Direct-sum time (ex1) [s]| Non-parallelized Barnes-Hut time [s]| Parallelized Barnes-Hut time with OpenMP [s]|
 |:---------:|:-----:               |:--------:                        |:--------------:|
 |     5     |   2   |     3    |        8       |
 |     10    |   2   |     4    |        7       |
