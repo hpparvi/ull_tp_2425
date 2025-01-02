@@ -21,7 +21,7 @@ PROGRAM ex2
   CALL system_clock(count = start) !Get the current clock counter state and stored it in the start variable
 
   !Read the input file
-  CALL read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
+  CALL read_data(n, p, dt, t_end, dt_out, t_out, theta)
 
   !Output message to notify the user that the simulation is being performed
   PRINT*, "Performing the simulation..."
