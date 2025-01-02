@@ -9,64 +9,135 @@ module mpi_types
   implicit none
 
 contains
-  !Subroutine to create an MPI datatype for a 3D vector
-  subroutine mpi_vector3d(mpi_vector3d)
-    type(MPI_datatype), intent(out) :: mpi_vector3d
-    integer(int64) :: ierr
-
-    call MPI_Type_contiguous(3, MPI_REAL8, mpi_vector3d, ierr)
-
-    !Check for errors in MPI_Type_contiguos
-    if (ierr /= MPI_SUCCESS) then
-       print*, "Error in creating MPI type for 3D vector:", ierr
-       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminates all MPI processes
-    end if
-    
-    call MPI_Type_commit(mpi_vector3d, ierr)
-
-    !Check for errors in MPI_Type_commit
-    if (ierr /= MPI_SUCCESS) then
-        print *, "Error in commiting MPI type for 3D vector: ", ierr
-        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminates all MPI processes
-    end if
-    
-  end subroutine mpi_vector3d
 
   !Subroutine to create an MPI datatype for a 3D point
-  subroutine mpi_point3d(mpi_point3d)
-    type(MPI_datatype), intent(out) :: mpi_point3d
-    integer(int64) :: ierr
+  subroutine MPI_POINT3D(MPI_POINT3D, ierr)
+    type(MPI_Datatype), intent(out) :: MPI_POINT3D !MPI 3D point
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
-    call MPI_Type_contiguos(3, MPI_REAL8, mpi_point3d, ierr)
+    !Create an MPI 3D point datatype
+    call MPI_Type_contiguous(3, MPI_DOUBLE_PRECISION, MPI_POINT3D, ierr)
 
-    !Check for errors in MPI_Type_contiguos
-    if (ierr /= MPI_SUCCESS) then
-       print*, "Error in creating MPI type for 3D point:", ierr
-       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminates all MPI processes
+    !Check for errors in creating the MPI 3D point datatype
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in creating MPI datatype for 3D point: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-    call MPI_Type_commit(mpi_point3d, ierr)
+    !Commit the MPI 3D point datatype to make it usable in MPI operations
+    call MPI_Type_commit(MPI_POINT3D, ierr)
 
-    !Check for errors in MPI_Type_commit
-    if (ierr /= MPI_SUCCESS) then
-        print *, "Error in commiting MPI type for 3D point: ", ierr
-        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminates all MPI processes
+    !Check for errors in commiting the MPI 3D point datatype
+    if (ierr .NE. MPI_SUCCESS) then
+        print *, "Error in commiting MPI datatype for 3D point: ", ierr !Print error message
+        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine mpi_point3d
+  end subroutine MPI_POINT3D
   
-  !Subroutine to create an MPI datatype for particle
-  subroutine mpi_particle(mpi_particle)
+  !Subroutine to create an MPI datatype for a 3D vector
+  subroutine MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+    type(MPI_Datatype), intent(out) :: MPI_VECTOR3D !MPI 3D vector
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
+
+    !Create an MPI 3D vector datatype
+    call MPI_Type_contiguous(3, MPI_DOUBLE_PRECISION, MPI_VECTOR3D, ierr)
+
+    !Check for errors in creating the MPI 3D vector datatype
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in creating MPI datatype for 3D vector: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+    !Commit the MPI 3D vector datatype to make it usable in MPI operations
+    call MPI_Type_commit(MPI_VECTOR3D, ierr)
+
+    !Check for errors in commiting the MPI 3D vector datatype
+    if (ierr .NE. MPI_SUCCESS) then
+        print *, "Error in commiting MPI datatype for 3D vector: ", ierr !Print error message
+        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
     
-  end subroutine mpi_particle
+  end subroutine MPI_VECTOR3D
+
+  !Subroutine to create an MPI datatype for a 3D particle
+  subroutine MPI_PARTICLE3D(MPI_PARTICLE3D, ierr)
+    type(MPI_Datatype), intent(out) :: MPI_PARTICLE3D !MPI 3D particle
+    type(MPI_Datatype) :: MPI_POINT3D, MPI_VECTOR3D   !MPI 3D point and MPI 3D vector to create MPI 3D particle
+    type(vector3d) :: vector3d !3D vector
+    type(point3d) :: point3d   !3D point
+    
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
+    integer, parameter :: block_count = 4 !Number of blocks to create for a 3D particle
+    integer :: block_lengths(block_count) !Contain the length of each block
+    integer(MPI_ADDRESS_KIND) :: displacements(block_count) !Contain the displacement for each block
+    type(MPI_Datatype) :: block_types(block_count) !Contain the types of each block
+    
+    !Call subroutines to create MPI datatypes for 3D points and 3D vectors
+    call MPI_POINT3D(MPI_POINT3D, ierr)
+    call MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+
+    !Define block lengths for the MPI 3D particle structure
+    block_lengths = [1, 1, 1, 1] ![position, velocity, acceleration, mass]
+
+    !Define block types 
+    block_types = [MPI_POINT3D, MPI_VECTOR3D, MPI_VECTOR3D, MPI_DOUBLE_PRECISION] ![position, velocity, acceleration, mass]
+
+    !Calculate displacements for each block type
+    displacements = [0, sizeof(point3d), sizeof(point3d) + sizeof(vector3d), sizeof(point3d) + 2*sizeof(vector3d)]![position, velocity, acceleration, mass]
+    
+    !Create an MPI 3D particle structure
+    call MPI_Type_create_struct(block_count, block_lengths, displacements, block_types, MPI_PARTICLE3D, ierr)
+
+    !Check for errors in creating the MPI 3D particle structure
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in creating MPI datatype for 3D particle: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+    !Commit the MPI 3D particle structure to make it usable in MPI operations
+    call MPI_Type_commit(MPI_PARTICLE3D, ierr)
+
+    !Check for errors in commiting the MPI 3D particle structure
+    if (ierr .NE. MPI_SUCCESS) then
+        print *, "Error in commiting MPI datatype for 3D particle: ", ierr !Print error message
+        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+  end subroutine MPI_PARTICLE3D
   
   !Subroutine to deallocate MPI datatypes
-  subroutine deallocate_mpi_types
-    
-    call MPI_Type_free(mpi_vector3d, ierr) !Deallocate MPI 3D vector
-    call MPI_Type_free(mpi_point3, ierr)   !Deallocate MPI 3D point
-    call MPI_Type_free(mpi_particle, ierr) !Deallocate MPI particle
-    
-  end subroutine deallocate_mpi_types
+  subroutine deallocate_MPI_Types(MPI_POINT3D, MPI_VECTOR3D, MPI_PARTICLE3D, ierr)
+    type(MPI_Datatype) :: MPI_POINT3D, MPI_VECTOR3D, MPI_PARTICLE3D   !MPI 3D point, 3D vector and 3D particle
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
+
+    !Deallocate MPI 3D point datatype
+    call MPI_Type_free(MPI_POINT3D, ierr)
+
+    !Check for errors in deallocating the MPI 3D point
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in deallocating MPI 3D point: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+    !Deallocate MPI 3D vector datatype
+    call MPI_Type_free(MPI_VECTOR3D, ierr)
+
+    !Check for errors in deallocating the MPI 3D vector
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in deallocating MPI 3D vector: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+    !Deallocate MPI 3D particle datatype
+    call MPI_Type_free(MPI_PARTICLE3D, ierr)
+
+    !Check for errors in deallocating the MPI 3D particle
+    if (ierr .NE. MPI_SUCCESS) then
+       print*, "Error in deallocating MPI 3D particle: ", ierr !Print error message
+       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
+    end if
+
+  end subroutine deallocate_MPI_Types
     
 end module mpi_types

@@ -15,7 +15,7 @@ CONTAINS
   !Subroutine to read data from an input file
   SUBROUTINE read_data(n, p, dt, t_end, t, dt_out, t_out, theta)
     INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
-    REAL(REAL64), INTENT(INOUT) :: dt, t_end, t, dt_out, t_out, theta !Time step, final time, current time, output time step, output time and parameter that determines the accuracy of the                                                                       !simulation
+    REAL(REAL64), INTENT(INOUT) :: dt, t_end, dt_out, t_out, theta !Time step, final time, output time step, output time and parameter that determines the accuracy of the simulation       
     INTEGER(INT64) :: i !Loop indexing variable
     TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
 
