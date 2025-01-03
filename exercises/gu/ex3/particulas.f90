@@ -12,7 +12,7 @@ PROGRAM particulas
 
   dt = 0.001
   dt_out = 0.1
-  t_end = 100.0
+  t_end = 1.0
 
   
   CALL date_and_time(values=values)
