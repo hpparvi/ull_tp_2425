@@ -31,34 +31,34 @@ contains
    ! As we are dealing with Axis-Aligned Bounding Boxes (AABBs)
    ! this info is enough to get the cooridnates of all the edges
 
-subroutine give_root_octant_a_range(tronco, n_particles, particles)
-   type(octant),pointer :: tronco
-   integer :: n_particles
-   type(particle3d) :: particles(n_particles)
+   subroutine give_root_octant_a_range(tronco, n_particles, particles)
+      type(octant),pointer :: tronco
+      integer :: n_particles
+      type(particle3d) :: particles(n_particles)
 
-   real, dimension(3) :: mins, maxs, span, mids
+      real, dimension(3) :: mins, maxs, span, mids
 
-   ! get global minimum x,y,z within all particles
-   mins(1) = minval([particles(:)%p%x])
-   mins(2) = minval([particles(:)%p%y])
-   mins(3) = minval([particles(:)%p%z])
+      ! get global minimum x,y,z within all particles
+      mins(1) = minval([particles(:)%p%x])
+      mins(2) = minval([particles(:)%p%y])
+      mins(3) = minval([particles(:)%p%z])
 
-   ! get global maxmimu x,y,z within all particles
-   maxs(1) = maxval([particles(:)%p%x])
-   maxs(2) = maxval([particles(:)%p%y])
-   maxs(3) = maxval([particles(:)%p%z])
+      ! get global maxmimu x,y,z within all particles
+      maxs(1) = maxval([particles(:)%p%x])
+      maxs(2) = maxval([particles(:)%p%y])
+      maxs(3) = maxval([particles(:)%p%z])
 
-   ! Get span and add 1%
-   span = maxval(maxs-mins)*1.01
+      ! Get span and add 1%
+      span = maxval(maxs-mins)*1.01
 
-   ! Get half span
-   mids = (maxs + mins) / 2.0
+      ! Get half span
+      mids = (maxs + mins) / 2.0
 
-   ! Assign info of edges
-   tronco%range%r_min = mids - span/2.0
-   tronco%range%r_max = mids + span/2.0
+      ! Assign info of edges
+      tronco%range%r_min = mids - span/2.0
+      tronco%range%r_max = mids + span/2.0
 
-end subroutine give_root_octant_a_range
+   end subroutine give_root_octant_a_range
 
 
    ! Nullification of suboctant pointers
