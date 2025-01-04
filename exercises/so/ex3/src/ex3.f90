@@ -7,7 +7,6 @@ PROGRAM main
   use parameter_reader
   use barnes_hut
 
-  !$ use omp_lib
   use mpi_f08
   use mpi_particles
 
@@ -18,7 +17,6 @@ PROGRAM main
   INTEGER :: num_args       ! to count the number of given arguments
   character(len=100) :: par_filename, dummy_line     ! to import the stars data and parameters data
   real :: t, t_out !dt, t_end, dt_out
-  !integer :: clock_ini, clock_fin, clock_rate, clock_dummy, clock_dummy_2
   real :: t_total, t_ini, t_fin, t2, t_tree=0, t_del_tree=0, t_parts=0, t_write=0, t_bcast = 0, t_dummy = 0, t_dummy_2=0, t_gather = 0
   real, dimension(7) :: t_calcs = [0,0,0,0,0,0,0]
   integer :: it_percent=0, it_percent_previous=0
@@ -38,7 +36,7 @@ PROGRAM main
 
 
   !Expected usage:
-  ! - command line: executable <custom.par>
+  ! - command line: mpirun executable <custom.par>
   ! The file <custom.par> defines the custom variables (as number of bodies in random distribution
   ! or filename with initial conditions, filename for the output, timestep, total time, gravitational
   ! softening scale and so on...
@@ -59,9 +57,6 @@ PROGRAM main
   ! The whole reading and settig up parameters is done only by master process
   if (rank .eq. master_rank) then
      t_ini = MPI_Wtime()
-     !call system_clock(clock_ini, clock_rate)
-     ! call cpu_time(t_ini)
-
      ! Get the number of command-line arguments
      num_args = command_argument_count()
 
@@ -167,6 +162,7 @@ PROGRAM main
   CALL MPI_Bcast(n,   1, MPI_integer, 0, MPI_COMM_WORLD, ierr)
   CALL MPI_Bcast(n_t, 1, MPI_integer, 0, MPI_COMM_WORLD, ierr)
   CALL MPI_Bcast(t,   1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  CALL MPI_Bcast(dt,   1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   CALL MPI_Bcast(epsilon, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   CALL MPI_Bcast(theta,  1,  MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
 
@@ -194,10 +190,10 @@ PROGRAM main
 
   if (rank.eq.master_rank) then
      t_bcast = MPI_Wtime()
-  end if
-  
-! -------------------MPI initialization end ------------------------------------------
 
+  end if
+  call MPI_barrier(MPI_COMM_WORLD)  
+! -------------------MPI initialization end ------------------------------------------
 
  
   ! ------------------------------------------------------------
@@ -223,11 +219,8 @@ PROGRAM main
   if (rank.eq.master_rank) then
      t_tree = MPI_Wtime() - t_bcast
   end if
-  ! After tree calculations each rank has updated its cells accelerations. Now it has to 
-  !call system_clock(clock_dummy_2)
-  !call system_clock(clock_dummy)
+  ! After tree calculations each rank has updated accelerations of it corresponding cells 
   
-  !t_tree = real(clock_dummy_2-clock_dummy) / real(clock_rate)
   
 !---------------------------------------
 ! Main loop
@@ -249,7 +242,7 @@ PROGRAM main
      end if
 
      t = i_t*dt
-     
+
      t_dummy = MPI_Wtime()
      partics(i_send_min:i_send_max)%v = partics(i_send_min:i_send_max)%v + (partics(i_send_min:i_send_max)%a * (dt/2))
      partics(i_send_min:i_send_max)%p = partics(i_send_min:i_send_max)%p + (partics(i_send_min:i_send_max)%v * dt)
@@ -258,24 +251,22 @@ PROGRAM main
      t_parts = t_parts + t_dummy_2-t_dummy
 
      ! positions have changed so the tree has to be rebuilt. First we update all particle information to all processes
-     CALL MPI_Allgatherv(MPI_IN_PLACE, n_send(rank + 1), MPI_particle, &
+     CALL MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_Datatype_Null, & ! n_send(rank + 1), MPI_particle, &
           & partics, n_send, displacements, MPI_particle, MPI_COMM_WORLD, ierr)
+     
      t_dummy = MPI_Wtime()
      t_gather = t_gather + t_dummy - t_dummy_2
      t_dummy_2 = t_dummy
      
      CALL Delete_Tree(head)
-     !call system_clock(clock_dummy)
      t_dummy = MPI_Wtime()
      t_del_tree = t_del_tree + t_dummy - t_dummy_2
      
      CALL Make_Tree(head, partics, n, theta, epsilon, t_calcs, n_send, master_rank, rank)
-     !call system_clock(clock_dummy_2)
      t_dummy_2 = MPI_Wtime()
      t_tree = t_tree + t_dummy_2 - t_dummy
      
-     partics(:)%v = partics(:)%v + (partics(:)%a * (dt/2))
-     !call system_clock(clock_dummy)
+     partics(i_send_min:i_send_max)%v = partics(i_send_min:i_send_max)%v + (partics(i_send_min:i_send_max)%a * (dt/2))
      t_dummy = MPI_Wtime()
      t_parts = t_parts + t_dummy - t_dummy_2
      
@@ -289,7 +280,7 @@ PROGRAM main
            write(20, fmt) t, (partics(k)%p, k=1,N)
            t_dummy_2 = MPI_Wtime()
            t_write = t_write + t_dummy_2 - t_dummy
-           t_out = 0.0
+           t_out = t_out-dt_out
         end if
      end if
   
@@ -307,7 +298,6 @@ PROGRAM main
      print*, trim(output_file), " created."
 
      t_fin = MPI_Wtime()
-     !call system_clock(clock_fin)
      t_total =t_fin - t_ini
 
      print '("Total wall time = ",f0.3," seconds.")', t_fin-t_ini

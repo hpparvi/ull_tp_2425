@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 import os, glob, imageio
 
-directory = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex2'
+directory = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex3'
 
 os.chdir(directory)
 
@@ -43,7 +43,7 @@ N_bodies = N_ic
 radius = 10
 output_file = "output/output.txt"
 
-N_threads = 12
+N_threads = 6
 
 lines_custom = ["# Simulation parameters", 
                 "dt = %.2f       # Time step"%dt,
@@ -75,14 +75,14 @@ if execute:
 
 #%% Data reading and plotting
 
-def ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta, radius,
+def ploteo_func(output_file, N_bodies, t_end, dt, dt_out, epsilon, tree, theta, radius,
                 trail = True,
                 movie = False, dt_movie = False,
                 make_frames = True,
                 make_mp4 = True, sim_name = 'animation', duration = 5,
                 snapshot = False,
                 d3 = False, fnum=1,
-                saving_dir = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex2/frames'):
+                saving_dir = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex3/frames'):
     
     data  = np.loadtxt(output_file)
     n_it = data.shape[0]
@@ -221,10 +221,12 @@ def ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta, radius,
                     ax.plot(data[init_frame:end_frame:n_res,1::3],  data[init_frame:end_frame:n_res,2::3], data[init_frame:end_frame:n_res,3::3], color = color, marker = '', lw = 0.7, alpha = 0.5)
                     
             if movie:
-                fig.suptitle('N-body sim with $N=$%i;   $\\epsilon$=%.1e\nTime: %.2f;   Iteration: %i;   dt=%.2e\nBarnes-Hut: %s;   $\\theta$=%.2f'%(n_bodies_total, epsilon,dt*i_f, i_f, dt, tree, theta))
+                fig.suptitle('N-body sim with $N=$%i;   $\\epsilon$=%.1e\nTime: %.2f;   Iteration: %i;   dt=%.2e\nBarnes-Hut: %s;   $\\theta$=%.2f'%(n_bodies_total, epsilon,dt_out*i_f, dt_out*i_f/dt, dt, tree, theta))
                 plt.savefig(os.path.join(saving_dir, 'frames/frame_'+f'{int(i_f/n_res):04}'))
                 if i_f/n_res%50 == 0:
                     print('Frame '+f'{int(i_f/n_res):04} saved.')
+            else:
+                plt.savefig(os.path.join(saving_dir, 'frames/frame_'+f'{int(i_f/n_res):04}'))
                 
         if movie == False:
             fig.suptitle('N-body sim with $N=$%i;   $\\epsilon$=%.1e\nTime: %.2f;   Iteration: %i;   dt=%.2e\nBarnes-Hut: %s;   $\\theta$=%.2f'%(n_bodies_total, epsilon, t_end, n_it, dt, tree, theta))
@@ -246,28 +248,31 @@ def ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta, radius,
     plt.tight_layout()
 
 # N_bodies = 1000
+
+
+N_bodies = 3
+output_file = "output/output.txt"
+dt, dt_out, t_end = 0.001, 0.05, 5
+epsilon = 0.01
+theta = 1
+radius = 1.5
+
+
 # ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta,
 #             snapshot = 100,
 #             trail = 10, movie = False,
 #             d3 = d3, fnum=fnum)
 
-N_bodies = 3
-output_file = "output/output.txt"
-dt, dt_out, t_end = 0.001, 10, 500
-epsilon = 0.0
-theta = 0
-radius = 1.1
 
 
-
-ploteo_func(output_file, N_bodies, t_end, dt, epsilon, tree, theta, radius,
+ploteo_func(output_file, N_bodies, t_end, dt, dt_out, epsilon, tree, theta, radius,
             # snapshot = 1001, 
-            dt_movie = 0.03,
-            trail = True, 
-            movie = False,
-            saving_dir = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex2/',
+            dt_movie = False,
+            trail = 4, 
+            movie = True,
+            saving_dir = '/Users/oscarna/Documents/Compu/ull_tp_2425/exercises/so/ex3/',
             make_frames = True,
             make_mp4 = True,
-            sim_name = '3body',
+            sim_name = 'test',
             duration = 10,
             d3 = False, fnum=1)

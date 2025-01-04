@@ -3,8 +3,6 @@ MODULE barnes_hut
   use particles
 
   use mpi_f08
-
-  !$use_omp_lib
   
   IMPLICIT NONE
 
@@ -374,20 +372,18 @@ CONTAINS
     type(CELL), pointer :: root, temp_cell
     type(particle), dimension(:) :: p_arr
     real, dimension(7), intent(inout) :: t_calcs
-    integer :: t_dummy, t_dummy_2   !, t_rate
+    real :: t_dummy, t_dummy_2
     INTEGER :: n, i
     real, intent(in) :: theta, epsilon
     integer, dimension(:), intent(in) :: n_send
     integer, intent(in) :: master_rank, rank
     
     ! calculates its min and max values
-    !call system_clock(t_dummy, t_rate)
     if (rank.eq.master_rank) then
        t_dummy = MPI_Wtime()
     end if
     
     CALL Calculate_Ranges(root, p_arr)
-    !call system_clock(t_dummy_2)
     if (rank.eq.master_rank) then
        t_dummy_2 = MPI_Wtime()
        t_calcs(1) = t_calcs(1) + (t_dummy_2 - t_dummy)
@@ -396,7 +392,6 @@ CONTAINS
     root%type = 0 ! empty cell
     ! remove the subcell pointers
     CALL Nullify_Pointers(root)
-    !call system_clock(t_dummy)
     if (rank.eq.master_rank) then
        t_dummy = MPI_Wtime()
        t_calcs(2) = t_calcs(2) + (t_dummy- t_dummy_2)
@@ -408,7 +403,6 @@ CONTAINS
        CALL Find_Cell(root,temp_cell,p_arr(i))
        CALL Place_Cell(temp_cell,p_arr(i),i)
     END DO
-    ! call system_clock(t_dummy_2)
     if (rank.eq.master_rank) then
        t_dummy_2 = MPI_Wtime()
        t_calcs(3) = t_calcs(3) + (t_dummy_2-t_dummy)
@@ -416,7 +410,6 @@ CONTAINS
     
     ! Clean the tree 
     CALL Delete_empty_leaves(root)
-    !call system_clock(t_dummy)
     if (rank.eq.master_rank) then
        t_dummy = MPI_Wtime()
        t_calcs(4) = t_calcs(4) + (t_dummy-t_dummy_2)
@@ -424,7 +417,6 @@ CONTAINS
 
     ! Calculate masses in each cell
     CALL Calculate_masses(root, p_arr)
-    !call system_clock(t_dummy_2)
     if (rank.eq.master_rank) then
        t_dummy_2 = MPI_Wtime()
        t_calcs(5) = t_calcs(5) + (t_dummy_2-t_dummy)
@@ -432,31 +424,22 @@ CONTAINS
     
     ! Initialization of accelerations
     do i = 1,n
-     p_arr(i)%a = vector3d(0,0,0)
+    p_arr(i)%a = vector3d(0,0,0)
     end do
-    !call system_clock(t_dummy)
     if (rank.eq.master_rank) then
        t_dummy = MPI_Wtime()
        t_calcs(6) = t_calcs(6) + (t_dummy-t_dummy_2)
     end if
 
     ! Calculation of forces
-    ! distribute particle information among ranks
-    !!! ME QUEDO POR AQUÍ. FALTA MANDAR LA INFO DE QUÉ PARTÍCULAS USAR A CADA NODO...
-    
     CALL Calculate_forces(root, p_arr, n, theta, epsilon, n_send, master_rank, rank)
-    !call system_clock(t_dummy_2)
     if (rank.eq.master_rank) then
        t_dummy_2 = MPI_Wtime()
        t_calcs(7) = t_calcs(7) + (t_dummy_2-t_dummy)
     end if
+
     ! wait for all processes
     CALL MPI_Barrier(MPI_COMM_WORLD)
-
-    ! all processes should gather the updated particle information in each other process
-    !CALL MPI_Allgatherv(MPI_IN_PLACE, n_send(rank + 1), MPI_particle, &
-    !                    partics, n_send, displs, MPI_particle, MPI_COMM_WORLD, ierr)
-
     
   END SUBROUTINE Make_Tree
 
