@@ -288,7 +288,7 @@ CONTAINS
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
-    INTEGER, INTENT(IN) :: i_start, i_end, rank !First and last index of the range of particles to process and processor's ID
+    INTEGER, INTENT(IN) :: i_start, i_end, rank !First and last index of the range of particles to process and processes IDs
     
     !Calculate forces for each particle
     DO i = i_start, i_end
@@ -305,7 +305,7 @@ CONTAINS
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
     REAL(REAL64) :: l, D, theta !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
     REAL(REAL64) :: r2, r3 !Real variables for squared and cubed distances
-    INTEGER :: rank !Processor's ID
+    INTEGER, INTENT(IN) :: rank !Processes IDs
     
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell

@@ -102,7 +102,7 @@ CONTAINS
 
   !Subroutine to open an output file
   SUBROUTINE open_output(n)
-    INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
+    INTEGER(INT64), INTENT(IN) :: n !Number of bodies
     INTEGER(INT64) :: i !Loop indexing variable
 
     CHARACTER(len = 10) :: temp_str !Temporary character variable for the header of the output file
@@ -132,10 +132,10 @@ CONTAINS
 
   !Subroutine to save data to an output file
   SUBROUTINE save_data(n, p, t)
-    INTEGER(INT64), INTENT(INOUT) :: n !Number of bodies
-    REAL(REAL64), INTENT(INOUT) :: t   !Current time
+    INTEGER(INT64), INTENT(IN) :: n !Number of bodies
+    REAL(REAL64), INTENT(IN) :: t   !Current time
     INTEGER(INT64) :: i !Loop indexing variable
-    TYPE(particle3d), allocatable, INTENT(INOUT) :: p(:) !Particles
+    TYPE(particle3d), allocatable, INTENT(IN) :: p(:) !Particles
 
     WRITE(13, "(F12.2)", ADVANCE = 'no') t !Write the current time to the output file
 

@@ -1,6 +1,6 @@
 FC = mpifort
 FCFLAGS = -c
-OBJECTS = geometry.o particle.o barnes.o calcs.o data.o mpi_types.o ex3.o
+OBJECTS = geometry.o particle.o barnes.o calcs.o data.o mpi_types.o mpi_env.o ex3.o
 
 all: ex3
 
@@ -11,4 +11,4 @@ ex3: $(OBJECTS)
 	$(FC) $(FCFLAGS) $<
 
 clean:
-	rm -f *.o *.mod ex3.exe
+	rm -f *.o *.mod ex3

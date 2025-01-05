@@ -8,33 +8,30 @@ module calcs
 contains
 
   !Subroutine to update the position of particles over time
-  subroutine position(n, dt, p)
-    integer(int64), intent(in) :: n !Number of particles
+  subroutine position(dt, p)
     real(real64), intent(in) :: dt  !Time step
     type(particle3d), intent(inout) :: p(:) !Particles
     INTEGER(INT64) :: i !Loop indexing variable
-    do i = 1, n
+    do i = 1, size(p)
        p(i)%p = p(i)%p + p(i)%v * dt !Update position using velocity
     end do
   end subroutine position
 
   !Subroutine to update the velocity of particles over time
-  subroutine velocity(n, dt, p)
-    integer(int64), intent(in) :: n !Number of particles
+  subroutine velocity(dt, p)
     real(real64), intent(in) :: dt  !Time step
     type(particle3d), intent(inout) :: p(:) !Particles
     INTEGER(INT64) :: i !Loop indexing variable
-    do i = 1, n
+    do i = 1, size(p)
        p(i)%v = p(i)%v + p(i)%a * (dt * 0.5) !Update velocity using acceleration
     end do
   end subroutine velocity
 
   !Subroutine to set acceleration of all particles to zero
-  subroutine set_acceleration(n, p)
-    integer(int64), intent(in) :: n !Number of particles
+  subroutine set_acceleration(p)
     type(particle3d), intent(inout) :: p(:) !Particles
     INTEGER(INT64) :: i !Loop indexing variable
-    do i = 1, n
+    do i = 1, size(p)
        p(i)%a = vector3d(0.0, 0.0, 0.0) !Set initial acceleration of each particle to zero
     end do
   end subroutine set_acceleration

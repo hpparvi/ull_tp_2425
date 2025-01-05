@@ -11,7 +11,7 @@ module mpi_types
 contains
 
   !Subroutine to create an MPI datatype for a 3D point
-  subroutine create_MPI_POINT3D(MPI_POINT3D, ierr)
+  subroutine Create_MPI_POINT3D(MPI_POINT3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_POINT3D !MPI 3D point
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
@@ -33,10 +33,10 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine create_MPI_POINT3D
+  end subroutine Create_MPI_POINT3D
   
   !Subroutine to create an MPI datatype for a 3D vector
-  subroutine create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+  subroutine Create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_VECTOR3D !MPI 3D vector
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
@@ -58,24 +58,24 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
     
-  end subroutine create_MPI_VECTOR3D
+  end subroutine Create_MPI_VECTOR3D
 
-  !Subroutine to create an MPI datatype for a 3D particle
-  subroutine create_MPI_PARTICLE3D(MPI_PARTICLE3D, ierr)
+  !Subroutine to create an MPI datatype for a 3D particle type
+  subroutine Create_MPI_PARTICLE3D(MPI_PARTICLE3D, ierr)
     type(MPI_Datatype), intent(out) :: MPI_PARTICLE3D !MPI 3D particle
     type(MPI_Datatype) :: MPI_POINT3D, MPI_VECTOR3D   !MPI 3D point and MPI 3D vector to create MPI 3D particle
     type(vector3d) :: vector !3D vector
     type(point3d) :: point   !3D point
     
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
-    integer, parameter :: block_count = 4 !Number of blocks to create for a 3D particle
-    integer :: block_lengths(block_count) !Contain the length of each block
-    integer(MPI_ADDRESS_KIND) :: displacements(block_count) !Contain the displacement for each block
-    type(MPI_Datatype) :: block_types(block_count) !Contain the types of each block
+    integer, parameter :: block_count = 4 !Number of blocks to create for a 3D particle type
+    integer :: block_lengths(block_count) !Contains the length of each block
+    integer(MPI_ADDRESS_KIND) :: displacements(block_count) !Contains the displacement for each block
+    type(MPI_Datatype) :: block_types(block_count) !Contains the types of each block
     
     !Call subroutines to create MPI datatypes for 3D points and 3D vectors
-    call create_MPI_POINT3D(MPI_POINT3D, ierr)
-    call create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
+    call Create_MPI_POINT3D(MPI_POINT3D, ierr)
+    call Create_MPI_VECTOR3D(MPI_VECTOR3D, ierr)
 
     !Define block lengths for the MPI 3D particle structure
     block_lengths = [1, 1, 1, 1] ![position, velocity, acceleration, mass]
@@ -104,30 +104,12 @@ contains
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine create_MPI_PARTICLE3D
+  end subroutine Create_MPI_PARTICLE3D
   
   !Subroutine to deallocate MPI datatypes
-  subroutine deallocate_MPI_Types(MPI_POINT3D, MPI_VECTOR3D, MPI_PARTICLE3D, ierr)
-    type(MPI_Datatype) :: MPI_POINT3D, MPI_VECTOR3D, MPI_PARTICLE3D   !MPI 3D point, 3D vector and 3D particle
+  subroutine Deallocate_MPI_Types(MPI_PARTICLE3D, ierr)
+    type(MPI_Datatype), intent(inout) :: MPI_PARTICLE3D !MPI 3D particle
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
-
-    !Deallocate MPI 3D point datatype
-    call MPI_Type_free(MPI_POINT3D, ierr)
-
-    !Check for errors in deallocating the MPI 3D point
-    if (ierr .NE. MPI_SUCCESS) then
-       print*, "Error in deallocating MPI 3D point: ", ierr !Print error message
-       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
-
-    !Deallocate MPI 3D vector datatype
-    call MPI_Type_free(MPI_VECTOR3D, ierr)
-
-    !Check for errors in deallocating the MPI 3D vector
-    if (ierr .NE. MPI_SUCCESS) then
-       print*, "Error in deallocating MPI 3D vector: ", ierr !Print error message
-       call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
 
     !Deallocate MPI 3D particle datatype
     call MPI_Type_free(MPI_PARTICLE3D, ierr)
@@ -138,6 +120,6 @@ contains
        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
     end if
 
-  end subroutine deallocate_MPI_Types
+  end subroutine Deallocate_MPI_Types
     
 end module mpi_types
