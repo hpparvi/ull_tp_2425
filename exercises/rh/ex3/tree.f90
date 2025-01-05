@@ -430,9 +430,9 @@ module tree_algorithm
     TYPE(CELL), POINTER, INTENT(in) :: head
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
-    INTEGER, INTENT(in) :: n 
-    INTEGER :: i, nt, tid 
-    !n = SIZE(particles) ! number of particles
+    INTEGER:: n 
+    INTEGER :: i
+    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
 !!!!!! Parallel programming with OpenMP !!!!      
 !!!!! This subroutine parallelise do loop and

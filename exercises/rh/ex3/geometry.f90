@@ -2,8 +2,6 @@ module geometry
   use mpi_f08
   use iso_fortran_env ! this module allows to have double-precision real variables 
   implicit none
-  integer :: rank, size, ierr
-  
   
 ! 3-dimensional vectors and points type  
   type :: vector3d
@@ -32,16 +30,6 @@ module geometry
   end interface
 
 contains
-
-  subroutine init_mpi()
-        call mpi_init(ierr)
-        call mpi_comm_size(MPI_COMM_WORLD, size, ierr)
-        call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
-    end subroutine init_mpi
-
-    subroutine finalize_mpi()
-        call mpi_finalize(ierr)
-    end subroutine finalize_mpi
 
 ! Addition of two vectors
   elemental type(vector3d) function sumvv(vector1, vector2)
@@ -171,7 +159,3 @@ contains
   end function orthv
   
 end module geometry
-
-
-
-
