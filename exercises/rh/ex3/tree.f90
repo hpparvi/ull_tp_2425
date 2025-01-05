@@ -426,37 +426,20 @@ module tree_algorithm
 !! which is the one that actually calculate
 !! the force for every particle.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE Calculate_forces(head,particles,n,acc)
+  SUBROUTINE Calculate_forces(head,particles,acc,n_start,n_end)
     TYPE(CELL), POINTER, INTENT(in) :: head
     TYPE(particle3d), DIMENSION(:), INTENT(in) :: particles
     TYPE(vector3d), DIMENSION(:), INTENT(inout) :: acc
-    INTEGER:: n 
     INTEGER :: i
+    INTEGER, INTENT(in) :: n_start, n_end
+
+    !n = size(particles)
     
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
-!!!!!! Parallel programming with OpenMP !!!!      
-!!!!! This subroutine parallelise do loop and
-!!!!! that calculate (for each particle) the 
-!!!!! interaction between particles. 
-!!!!! WARNING: omp parallel must be opened in the main code
-!!!!! in order this works (it could be a better optimization
-!!!!! of the code if a conditional open the  omp parallel if
-!!!!! it's not previously opened(?).)      
-    !print *, "Before parallel"
-    !!$omp parallel private(nt, tid, i) shared(head,particles,acc)
-    
-    !!$ nt = omp_get_num_threads()
-    !!$ tid = omp_get_thread_num()
-    !!$omp do
-    DO i = 1,n 
+    ! Loop now only calculate to each chunk of particles
+    DO i = n_start,n_end 
       CALL Calculate_forces_aux(i,head,particles,acc)
-      !print '(xA,i3,xA,i2,xA,i3)', "Do loop, i =", i, &
-          !& "thread ", tid, " of ", nt
     END DO
-    !!$omp end do
-    !!$omp end parallel
-    !print *, "After parallel"
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+      
   END SUBROUTINE Calculate_forces
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

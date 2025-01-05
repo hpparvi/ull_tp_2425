@@ -16,13 +16,17 @@ program e3
   
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
+  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: part_chunk
+  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc_chunk
+  
   CHARACTER(len=*), PARAMETER :: filename = 'init_files/example.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   ! MPI variables for parallelise the program
   INTEGER :: master_rank = 0, rank, pr, ierr
+  INTEGER :: n_start, n_end
   INTEGER, DIMENSION(MPI_STATUS_SIZE) :: mpistatus
-  !INTEGER :: my_n, 
+  INTEGER, DIMENSION(:) = n_counts, n_disp
   
   ! To measure computational time
   INTEGER :: start_time, end_time, count_rate
@@ -33,6 +37,11 @@ program e3
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr) ! process ID number 
   call MPI_COMM_SIZE(MPI_COMM_WORLD, pr, ierr) ! number of processes contained in a communicator
   
+  ! Allocate arrays that will save how many particles will carry each chunk
+  ! to calculate in every process, and the displacement too
+  ALLOCATE(n_counts(pr))
+  ALLOCATE(n_disp) 
+  
   ! Call subroutine to create MPI types used in the simulation
   call create_mpi_types()
   
@@ -41,7 +50,9 @@ program e3
     call system_clock(start_time, count_rate)
   END IF
   
-  ! Only master reads init file
+  ! We are going to read the initial condition file in the master node,
+  ! and then broadcast the info to slaves nodes
+  ! Read init file
   if (rank == master_rank) then  
     ! open the input file
     OPEN (file = filename, action = 'read', status = 'old', unit = 3, iostat = rc)
@@ -74,50 +85,70 @@ program e3
  
   ! broadcast the initial conditions (number of particles 
   ! and time variables)
-  CALL MPI_BCAST(n,1,MPI_INTEGER,0,MPI_COMM_WORLD,error)
-  CALL MPI_BCAST(dt,1,MPI_REAL,0,MPI_COMM_WORLD,error)
-  CALL MPI_BCAST(dt_out,1,MPI_REAL,0,MPI_COMM_WORLD,error)
-  CALL MPI_BCAST(t_end,1,MPI_REAL,0,MPI_COMM_WORLD,error)
+  CALL MPI_BCAST(n,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(dt,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(dt_out,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(t_end,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
   
-  if (rank.nq.master_rank) ALLOCATE(particles(n))
+  ! All nodes needs particles info to construct the tree
+  ! using Barnes-Hut algorithm
+  if (rank.ne.master_rank) ALLOCATE(particles(n))
   
-  CALL MPI_BCAST(particles,n,mpi_particle3d,0,MPI_COMM_WORLD,error) 
-  
-  !!--------------------------------------------------------
-  !! Calculate block to each node 
-  !! this would be can be divided by number of processes()
-  
-  my_n = n/pr ! number of particles to each node 
-  my_start = (my_n * my_rank) + 1 
-  my_end = my_start + my_n - 1
-  
-  !!-----------------------------------------
+  CALL MPI_BCAST(particles,n,mpi_particle3d,0,MPI_COMM_WORLD,ierr) 
   
   
-  !! Initialise head node 
+  !!! Now we proceed to use Barnes-Hut algorithm to implement N body sim 
+  
+  ! First, initialise head node (done in all nodes)
   ALLOCATE(head)
   CALL Calculate_ranges(head, particles) 
   head%type = 0 ! no particle
   CALL Nullify_Pointers(head) ! null all the pointers first just in case
   
-
   ! Create initial tree (must be calculated in all the nodes)
   DO i = 1,n
     CALL Find_Cell(head,temp_cell,particles(i)) 
     CALL Place_Cell(temp_cell,particles(i),i)
-
   END DO
   
   CALL Borrar_empty_leaves(head)
   CALL Calculate_masses(head, particles)
-
+  
   ! Allocate and calculate initial accelerations
-  allocate(acc)
-  acc = vector3d(0.0,0.0,0.0)
+  ALLOCATE(acc(n))
+  acc = vector3d(0.0,0.0,0.0) 
+
+  ! Calculate how many elements will have each node  
+  n_counts(:) = FLOOR(n/pr)
+  ! Last node will have more particles if n is not
+  ! divisible by the number of process (just a few more,
+  ! that correspond to the remainder of the division)
+  n_counts(pr) = n_counts(pr) + MOD(n/pr) 
+  
+  ! Allocate particles and acceleration chunk that corresponds
+  ! to subsets that will be used for calculation in each node
+  ALLOCATE(part_chunk(n_counts(rank+1)))
+  ALLOCATE(acc_chunk(n_counts(rank+1))) !need?
+  
+  ! Set displacement done for collective process
+  n_disp(rank + 1) = rank*FLOOR(n/pr) 
+  
+  ! Calculate where start and end each chunk
+  n_start =  rank*FLOOR(n/pr) + 1
+  if ((rank+1).ne.pr) then
+    n_end = (rank+1)*FLOOR(n/pr)
+  else
+    n_end = n
     
-    
-  CALL Calculate_forces(head,particles,n,acc)
-    
+  CALL Calculate_forces(head,particles,acc,n_start,n_end)
+  ! Save the acceleration calculated in each node
+  acc_chunk = acc(n_start,n_end)
+  !part_chunk = particles(n_start,n_end)
+  
+  ! Make sure that all the process are done
+  CALL mpi_barrier(mpi_comm_world)
+  
+  
   ! open the output file (master node only)
   if (rank.eq.master_rank) then  
     OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
@@ -150,7 +181,7 @@ program e3
       
       acc = vector3d(0.0,0.0,0.0)
  
-      CALL Calculate_forces(head,particles,n,pr,acc)
+      CALL Calculate_forces(head,particles,acc,n_start,n_end)
       
       particles%v = particles%v + acc * (dt/2.)
       
