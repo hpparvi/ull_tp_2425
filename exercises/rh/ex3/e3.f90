@@ -25,7 +25,8 @@ program e3
   !INTEGER :: my_n, 
   
   ! To measure computational time
-  REAL(KIND=MPI_REAL8) :: start_time, end_time, elapsed_time
+  INTEGER :: start_time, end_time, count_rate
+  REAL :: elapsed_time
   
   ! Let's initialise MPI 
   call MPI_INIT(ierr)
@@ -33,11 +34,11 @@ program e3
   call MPI_COMM_SIZE(MPI_COMM_WORLD, pr, ierr) ! number of processes contained in a communicator
   
   ! Call subroutine to create MPI types used in the simulation
-  call create_mpi_types(mpi_point3d,mpi_vector3d,mpi_particle3d)
+  call create_mpi_types()
   
   ! Start timer (only on root process)
   IF (rank == master_rank) THEN
-    start_time = MPI_WTIME()
+    call system_clock(start_time, count_rate)
   END IF
   
   ! Only master reads init file
@@ -93,14 +94,14 @@ program e3
   !!-----------------------------------------
   
   
-  !! Initialise head node
+  !! Initialise head node 
   ALLOCATE(head)
   CALL Calculate_ranges(head, particles) 
   head%type = 0 ! no particle
   CALL Nullify_Pointers(head) ! null all the pointers first just in case
   
 
-  ! Create initial tree
+  ! Create initial tree (must be calculated in all the nodes)
   DO i = 1,n
     CALL Find_Cell(head,temp_cell,particles(i)) 
     CALL Place_Cell(temp_cell,particles(i),i)
@@ -110,33 +111,21 @@ program e3
   CALL Borrar_empty_leaves(head)
   CALL Calculate_masses(head, particles)
 
-  ! Calculate initial accelerations
-    acc = vector3d(0.0,0.0,0.0)
+  ! Allocate and calculate initial accelerations
+  allocate(acc)
+  acc = vector3d(0.0,0.0,0.0)
     
-    local_n = int(n/pr) !number of particles given to each process
-    ! if the number if an odd then add the residuals to the last one
     
-    if (my_rank .EQ. 0) then
-      do i = 1, pr-1
-        call MPI_SEND(particles(:i*local_n), local_n, particle3d, i, tag,
-            & MPI_COMM_WORLD, status, ierr)
-            total = total + integral
-      end do
-      
-      else
-        specount = local_n + (n - pr*local_n)
-        call MPI_SEND(particles(:i*local_n), specounts, particle3d, dest,
-            & tag, MPI_COMM_WORLD, ierr)
-      endif   
+  CALL Calculate_forces(head,particles,n,acc)
     
-    CALL Calculate_forces(head,particles,n,acc)
-    
-  ! open the output file 
-  OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
-    IF (rc/=0) WRITE (*,*) 'Cannot open file ' , outname
+  ! open the output file (master node only)
+  if (rank.eq.master_rank) then  
+    OPEN (file = outname, action = 'write', status = 'replace', unit = 4, iostat = rc) 
+      IF (rc/=0) WRITE (*,*) 'Cannot open file ' , outname
   
-  ! the first record of the output file is the initial positions of the particles
-  WRITE(4, *) t, particles%p
+    ! the first record of the output file is the initial positions of the particles
+    WRITE(4, *) t, particles%p
+  end if
   
   !! Main loop 
   !!!!!!!!!!!!!!!!!!
@@ -167,21 +156,31 @@ program e3
       
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
-        WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
-        t_out = 0.0
+        IF (rank.eq.master_rank) THEN
+          WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
+          t_out = 0.0
+        END IF
       END IF
+      
       t = t + dt
+      
     END DO 
-
-  CLOSE(UNIT=4)
+  
+  ! Close output file (but again only in the master node)
+  IF (rank.eq.master_rank) CLOSE(UNIT=4)
   
   ! End timer (only on root process)
-  IF (rank == 0) THEN
-    end_time = MPI_WTIME()
-    elapsed_time = end_time - start_time
-    PRINT *, "Total execution time (s):", elapsed_time
-  END IF
-
+  if (rank.eq.master_rank) then
+  
+    call system_clock(end_time)
+    
+    ! Calculate elapsed time
+    elapsed_time = REAL(end_time-start_time) / REAL(count_rate)
+    
+    ! Output the elapsed time
+    PRINT *, "The elapsed time is ", elapsed_time, " seconds"
+  end if
+  
   ! Cleanup routine for new mpi types previously created
   CALL free_mpi_types()
 
