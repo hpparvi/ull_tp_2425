@@ -40,9 +40,7 @@ PROGRAM ex3
   END IF
 
   !Send simulation parameters from the input file to all processes
-  CALL send_n(n, ierr) !Send the number of particles
-  CALL send_times(dt, dt_out, t_end, ierr) !Send time parameters
-  CALL send_theta(theta, ierr) !Send theta
+  CALL send_data(n, dt, dt_out, t_end, theta, ierr)
 
   IF (rank .NE. 0) THEN
      ALLOCATE(p(n)) !Allocate memory for particles array for all processes

@@ -21,82 +21,62 @@ contains
     
   end subroutine Initialize_MPI
 
-  !Subroutine to send the number of particles to all processes
-  subroutine send_n(n, ierr)
-    integer(int64), intent(in) :: n !Number of bodies
-    integer, intent(inout) :: ierr  !Integer variable for error handling in MPI operations
-
-    !Send the number of particles
-    call MPI_Bcast(n, 1, MPI_INTEGER8, 0, MPI_COMM_WORLD, ierr)
-
-    !Check for errors in sending the number of particles
-    if (ierr .NE. MPI_SUCCESS) then
-        print *, "Error in broadcasting n to all processes: ", ierr !Print error message
-        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
-    
-  end subroutine send_n
- 
-  !Subroutine to send time parameters to all processes
-  subroutine send_times(dt, dt_out, t_end, ierr)
-    real(real64), intent(in) :: dt, dt_out, t_end !Time step, output time step and final time
+  !Subroutine to send an integer variable to all processes
+  subroutine send_integer(i, ierr)
+    integer(int64) :: i !Integer variable
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
-    !Send the time step
-    call MPI_Bcast(dt, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    !Send the real variable
+    call MPI_Bcast(i, 1, MPI_INTEGER8, 0, MPI_COMM_WORLD, ierr)
 
-    !Check for errors in sending the time step
+    !Check for errors in sending the integer variable
     if (ierr .NE. MPI_SUCCESS) then
-        print *, "Error in broadcasting dt to all processes: ", ierr !Print error message
+        print *, "Error in broadcasting ", i, " to all processes: ", ierr !Print error message
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
+     end if
 
-    !Send the output time step
-    call MPI_Bcast(dt_out, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+   end subroutine send_integer
 
-    !Check for errors in sending the output time step
+  !Subroutine to send a real variable to all processes
+  subroutine send_real(r, ierr)
+    real(real64) :: r !Real variable
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
+
+    !Send the real variable
+    call MPI_Bcast(r, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+
+    !Check for errors in sending the real variable
     if (ierr .NE. MPI_SUCCESS) then
-        print *, "Error in broadcasting dt_out to all processes: ", ierr !Print error message
+        print *, "Error in broadcasting ", r, " to all processes: ", ierr !Print error message
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
+     end if
 
-    !Send the final time
-    call MPI_Bcast(t_end, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+   end subroutine send_real
 
-    !Check for errors in sending the final time
-    if (ierr .NE. MPI_SUCCESS) then
-        print *, "Error in broadcasting t_end to all processes: ", ierr !Print error message
-        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
+  !Subroutine to send simulation parameters to all processes
+  subroutine send_data(n, dt, dt_out, t_end, theta, ierr)
+    integer(int64), intent(in) :: n !Number of bodies
+    real(real64), intent(in) :: dt, dt_out, t_end, theta !Time step, output time step and final time and parameter that determines the accuracy of the simulation
+    integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
+
+    call send_integer(n, ierr)   !Send the number of bodies
+    call send_real(dt, ierr)     !Send the time step
+    call send_real(dt_out, ierr) !Send the output final time
+    call send_real(t_end, ierr)  !Send the final time
+    call send_real(theta, ierr)  !Send theta
     
-  end subroutine send_times
+  end subroutine send_data
 
-  !Subroutine to send theta to all processes
-  subroutine send_theta(theta, ierr)
-    real(real64), intent(in) :: theta !Determines the accuracy of the simulation
-    integer, intent(inout) :: ierr    !Integer variable for error handling in MPI operations
-
-    !Send theta
-    call MPI_Bcast(theta, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-
-    !Check for errors in sending theta
-    if (ierr .NE. MPI_SUCCESS) then
-        print *, "Error in broadcasting theta to all processes: ", ierr !Print error message
-        call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
-    end if
-    
-  end subroutine send_theta
-
-  !Subroutine to send the particles to all processes
+  !Subroutine to send particle data to all processes
   subroutine send_particles(p, MPI_PARTICLE3D, ierr)
     type(particle3d), intent(in) :: p(:) !Particles
     type(MPI_Datatype), intent(in) :: MPI_PARTICLE3D !MPI 3D particle
     integer, intent(inout) :: ierr !Integer variable for error handling in MPI operations
 
-    !Send the particles
+    !Send particle data
     call MPI_Bcast(p, size(p), MPI_PARTICLE3D, 0, MPI_COMM_WORLD, ierr)
 
-    !Check for errors in sending the particles
+    !Check for errors in sending particle data
     if (ierr .NE. MPI_SUCCESS) then
         print *, "Error in broadcasting the particles to all processes: ", ierr !Print error message
         call MPI_Abort(MPI_COMM_WORLD, ierr) !Terminate all MPI processes
