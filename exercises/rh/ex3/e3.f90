@@ -14,19 +14,17 @@ program e3
   REAL (real64) :: dt, t_end, t, dt_out, t_out
   REAL(real64), PARAMETER :: theta = 1
   
-  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles 
-  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc !acceleration
-  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: part_chunk
-  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc_chunk
+  TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles, part_chunk 
+  TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc, acc_chunk
   
-  CHARACTER(len=*), PARAMETER :: filename = 'init_files/example.dat', outname = 'output.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'init_files/initial_conditions_10b.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   ! MPI variables for parallelise the program
   INTEGER :: master_rank = 0, rank, pr, ierr
   INTEGER :: n_start, n_end
   INTEGER, DIMENSION(MPI_STATUS_SIZE) :: mpistatus
-  INTEGER, DIMENSION(:) = n_counts, n_disp
+  INTEGER, DIMENSION(:), ALLOCATABLE :: n_counts, n_disp
   
   ! To measure computational time
   INTEGER :: start_time, end_time, count_rate
@@ -37,10 +35,12 @@ program e3
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr) ! process ID number 
   call MPI_COMM_SIZE(MPI_COMM_WORLD, pr, ierr) ! number of processes contained in a communicator
   
+  print *, "Rank", rank, "out of", pr, "is running."
+  
   ! Allocate arrays that will save how many particles will carry each chunk
   ! to calculate in every process, and the displacement too
   ALLOCATE(n_counts(pr))
-  ALLOCATE(n_disp) 
+  ALLOCATE(n_disp(pr)) 
   
   ! Call subroutine to create MPI types used in the simulation
   call create_mpi_types()
@@ -114,16 +114,13 @@ program e3
   CALL Borrar_empty_leaves(head)
   CALL Calculate_masses(head, particles)
   
-  ! Allocate and calculate initial accelerations
-  ALLOCATE(acc(n))
-  acc = vector3d(0.0,0.0,0.0) 
 
   ! Calculate how many elements will have each node  
-  n_counts(:) = FLOOR(n/pr)
+  n_counts(:) = FLOOR(REAL(n)/REAL(pr))
   ! Last node will have more particles if n is not
   ! divisible by the number of process (just a few more,
   ! that correspond to the remainder of the division)
-  n_counts(pr) = n_counts(pr) + MOD(n/pr) 
+  n_counts(pr) = n_counts(pr) + MOD(n,pr) 
   
   ! Allocate particles and acceleration chunk that corresponds
   ! to subsets that will be used for calculation in each node
@@ -131,23 +128,26 @@ program e3
   ALLOCATE(acc_chunk(n_counts(rank+1))) !need?
   
   ! Set displacement done for collective process
-  n_disp(rank + 1) = rank*FLOOR(n/pr) 
+  n_disp(rank + 1) = rank*FLOOR(REAL(n)/REAL(pr)) 
   
   ! Calculate where start and end each chunk
-  n_start =  rank*FLOOR(n/pr) + 1
+  n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
   if ((rank+1).ne.pr) then
-    n_end = (rank+1)*FLOOR(n/pr)
+    n_end = (rank+1)*FLOOR(REAL(n)/REAL(pr))
   else
     n_end = n
-    
+  end if
+  
+  ! Allocate and calculate initial accelerations
+  ALLOCATE(acc(n))
+  acc = vector3d(0.0,0.0,0.0)   
   CALL Calculate_forces(head,particles,acc,n_start,n_end)
   ! Save the acceleration calculated in each node
-  acc_chunk = acc(n_start,n_end)
+  acc_chunk = acc(n_start:n_end)
   !part_chunk = particles(n_start,n_end)
   
   ! Make sure that all the process are done
   CALL mpi_barrier(mpi_comm_world)
-  
   
   ! open the output file (master node only)
   if (rank.eq.master_rank) then  
@@ -162,9 +162,16 @@ program e3
   !!!!!!!!!!!!!!!!!!
     t_out = 0.0
     DO  WHILE (t <= t_end)
-
-      particles%v = particles%v + acc * (dt/2.)
-      particles%p = particles%p + particles%v * dt
+      ! sends every node their chunk of particles
+      CALL mpi_scatterv(particles, n_counts, n_disp, mpi_particle3d, &
+           & part_chunk, n_counts(rank+1), mpi_particle3d, master_rank, MPI_comm_world)
+          
+      particles%v = part_chunk%v + acc_chunk * (dt/2.)
+      particles%p = part_chunk%p + part_chunk%v * dt
+      
+      ! and then gathers particles again and shares it with everyone
+      CALL mpi_allgatherv(part_chunk, n_counts(rank+1), mpi_particle3d,&
+           & particles, n_counts, n_disp, mpi_particle3d, MPI_COMM_WORLD)
       
       CALL Borrar_tree(head) ! remove previous tree
       CALL Calculate_ranges(head, particles) ! calculate head range again
@@ -180,15 +187,25 @@ program e3
       CALL Calculate_masses(head, particles)
       
       acc = vector3d(0.0,0.0,0.0)
- 
       CALL Calculate_forces(head,particles,acc,n_start,n_end)
+      acc_chunk = acc(n_start:n_end)
       
-      particles%v = particles%v + acc * (dt/2.)
+      ! Divide the particles set again
+      CALL mpi_scatterv(particles, n_counts, n_disp, mpi_particle3d, &
+           & part_chunk, n_counts(rank+1), mpi_particle3d, master_rank, MPI_comm_world)
+      
+      part_chunk%v = part_chunk%v + acc_chunk * (dt/2.)
+      
+      ! Then gather particles info just like before
+      CALL mpi_allgatherv(part_chunk, n_counts(rank+1), mpi_particle3d,&
+          & particles, n_counts, n_disp, mpi_particle3d, MPI_COMM_WORLD)
       
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
         IF (rank.eq.master_rank) THEN
           WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
+          ! make sure every node is in the same step
+        CALL mpi_barrier(mpi_comm_world)
           t_out = 0.0
         END IF
       END IF
