@@ -11,13 +11,13 @@ program e3
   IMPLICIT NONE
 
   INTEGER :: i,j,k,n,rc
-  REAL (real64) :: dt, t_end, t, dt_out, t_out
+  REAL (real64) :: dt, t_end, dt_out, t=0., t_out=0.
   REAL(real64), PARAMETER :: theta = 1
   
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles, part_chunk 
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc, acc_chunk
   
-  CHARACTER(len=*), PARAMETER :: filename = 'init_files/initial_conditions_10b.dat', outname = 'output.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'init_files/example.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   ! MPI variables for parallelise the program
@@ -34,8 +34,6 @@ program e3
   call MPI_INIT(ierr)
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr) ! process ID number 
   call MPI_COMM_SIZE(MPI_COMM_WORLD, pr, ierr) ! number of processes contained in a communicator
-  
-  print *, "Rank", rank, "out of", pr, "is running."
   
   ! Allocate arrays that will save how many particles will carry each chunk
   ! to calculate in every process, and the displacement too
@@ -86,16 +84,15 @@ program e3
   ! broadcast the initial conditions (number of particles 
   ! and time variables)
   CALL MPI_BCAST(n,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-  CALL MPI_BCAST(dt,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
-  CALL MPI_BCAST(dt_out,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
-  CALL MPI_BCAST(t_end,1,MPI_REAL,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(dt,1,MPI_Double_precision,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(dt_out,1,MPI_Double_precision,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(t_end,1,MPI_Double_precision,0,MPI_COMM_WORLD,ierr)
   
   ! All nodes needs particles info to construct the tree
   ! using Barnes-Hut algorithm
   if (rank.ne.master_rank) ALLOCATE(particles(n))
   
   CALL MPI_BCAST(particles,n,mpi_particle3d,0,MPI_COMM_WORLD,ierr) 
-  
   
   !!! Now we proceed to use Barnes-Hut algorithm to implement N body sim 
   
@@ -125,18 +122,38 @@ program e3
   ! Allocate particles and acceleration chunk that corresponds
   ! to subsets that will be used for calculation in each node
   ALLOCATE(part_chunk(n_counts(rank+1)))
-  ALLOCATE(acc_chunk(n_counts(rank+1))) !need?
+  ALLOCATE(acc_chunk(n_counts(rank+1))) 
   
   ! Set displacement done for collective process
-  n_disp(rank + 1) = rank*FLOOR(REAL(n)/REAL(pr)) 
+  !n_disp(rank + 1) = rank*FLOOR(REAL(n)/REAL(pr)) 
   
   ! Calculate where start and end each chunk
-  n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
-  if ((rank+1).ne.pr) then
-    n_end = (rank+1)*FLOOR(REAL(n)/REAL(pr))
-  else
-    n_end = n
-  end if
+  !n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
+  !if ((rank+1).ne.pr) then
+    !n_end = (rank+1)*FLOOR(REAL(n)/REAL(pr))
+  !else
+    !n_end = n
+  !end if
+  
+  IF (rank.EQ.0) THEN
+     n_start=1
+  ELSE
+     n_start=(SUM(n_counts(1:rank)))+1
+  END IF
+  n_end = SUM(n_counts(1:(rank+1)))
+
+  DO i = 1, pr
+     IF (i.EQ.1) THEN
+        n_disp(i) = 0
+     ELSE
+        n_disp(i) = SUM(n_counts(1:(i-1)))
+     END IF
+  END DO
+  
+  print *, "Rank", rank, "start:", n_start
+  print *, "Rank", rank, "end:", n_end
+  print *, "Rank", rank, "counts:", n_counts
+  print *, "Rank", rank, "displms:", n_disp
   
   ! Allocate and calculate initial accelerations
   ALLOCATE(acc(n))
@@ -144,7 +161,6 @@ program e3
   CALL Calculate_forces(head,particles,acc,n_start,n_end)
   ! Save the acceleration calculated in each node
   acc_chunk = acc(n_start:n_end)
-  !part_chunk = particles(n_start,n_end)
   
   ! Make sure that all the process are done
   CALL mpi_barrier(mpi_comm_world)
@@ -159,19 +175,20 @@ program e3
   end if
   
   !! Main loop 
-  !!!!!!!!!!!!!!!!!!
-    t_out = 0.0
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
     DO  WHILE (t <= t_end)
-      ! sends every node their chunk of particles
+      ! Sends every node their chunk of particles
       CALL mpi_scatterv(particles, n_counts, n_disp, mpi_particle3d, &
            & part_chunk, n_counts(rank+1), mpi_particle3d, master_rank, MPI_comm_world)
-          
-      particles%v = part_chunk%v + acc_chunk * (dt/2.)
-      particles%p = part_chunk%p + part_chunk%v * dt
       
-      ! and then gathers particles again and shares it with everyone
+      part_chunk%v = part_chunk%v + acc_chunk * (dt/2.)
+      part_chunk%p = part_chunk%p + part_chunk%v * dt
+      
+      ! Then gathers particles again and shares it with everyone
       CALL mpi_allgatherv(part_chunk, n_counts(rank+1), mpi_particle3d,&
            & particles, n_counts, n_disp, mpi_particle3d, MPI_COMM_WORLD)
+    
       
       CALL Borrar_tree(head) ! remove previous tree
       CALL Calculate_ranges(head, particles) ! calculate head range again
@@ -190,26 +207,28 @@ program e3
       CALL Calculate_forces(head,particles,acc,n_start,n_end)
       acc_chunk = acc(n_start:n_end)
       
+      
       ! Divide the particles set again
       CALL mpi_scatterv(particles, n_counts, n_disp, mpi_particle3d, &
            & part_chunk, n_counts(rank+1), mpi_particle3d, master_rank, MPI_comm_world)
-      
+           
       part_chunk%v = part_chunk%v + acc_chunk * (dt/2.)
       
       ! Then gather particles info just like before
       CALL mpi_allgatherv(part_chunk, n_counts(rank+1), mpi_particle3d,&
           & particles, n_counts, n_disp, mpi_particle3d, MPI_COMM_WORLD)
-      
+       
       t_out = t_out + dt
       IF (t_out >= dt_out) THEN
         IF (rank.eq.master_rank) THEN
           WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
           ! make sure every node is in the same step
-        CALL mpi_barrier(mpi_comm_world)
-          t_out = 0.0
         END IF
+        
+        t_out = 0.0
       END IF
-      
+      ! Make sure all nodes are in the same step
+      CALL mpi_barrier(mpi_comm_world)
       t = t + dt
       
     END DO 
@@ -219,12 +238,9 @@ program e3
   
   ! End timer (only on root process)
   if (rank.eq.master_rank) then
-  
     call system_clock(end_time)
-    
     ! Calculate elapsed time
     elapsed_time = REAL(end_time-start_time) / REAL(count_rate)
-    
     ! Output the elapsed time
     PRINT *, "The elapsed time is ", elapsed_time, " seconds"
   end if
