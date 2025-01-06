@@ -17,7 +17,7 @@ program e3
   TYPE(particle3d), DIMENSION(:), ALLOCATABLE :: particles, part_chunk 
   TYPE(vector3d), DIMENSION(:), ALLOCATABLE :: acc, acc_chunk
   
-  CHARACTER(len=*), PARAMETER :: filename = 'init_files/example.dat', outname = 'output.dat' ! i.c. input/output files names
+  CHARACTER(len=*), PARAMETER :: filename = 'init_files/initial_conditions_10b.dat', outname = 'output.dat' ! i.c. input/output files names
   TYPE (CELL), POINTER :: head, temp_cell ! create cell (as pointer)
   
   ! MPI variables for parallelise the program
@@ -128,19 +128,19 @@ program e3
   !n_disp(rank + 1) = rank*FLOOR(REAL(n)/REAL(pr)) 
   
   ! Calculate where start and end each chunk
-  !n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
-  !if ((rank+1).ne.pr) then
-    !n_end = (rank+1)*FLOOR(REAL(n)/REAL(pr))
-  !else
-    !n_end = n
-  !end if
+  n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
+  if ((rank+1).ne.pr) then
+    n_end = (rank+1)*FLOOR(REAL(n)/REAL(pr))
+  else
+    n_end = n
+  end if
   
-  IF (rank.EQ.0) THEN
-     n_start=1
-  ELSE
-     n_start=(SUM(n_counts(1:rank)))+1
-  END IF
-  n_end = SUM(n_counts(1:(rank+1)))
+  !IF (rank.EQ.0) THEN
+   !  n_start=1
+  !ELSE
+   !  n_start=(SUM(n_counts(1:rank)))+1
+  !END IF
+  !n_end = SUM(n_counts(1:(rank+1)))
 
   DO i = 1, pr
      IF (i.EQ.1) THEN
