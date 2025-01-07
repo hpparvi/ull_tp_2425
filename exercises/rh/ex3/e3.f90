@@ -5,7 +5,7 @@ program e3
   use particle
   use tree_algorithm
   
-  ! included MPI library and module
+  ! included MPI library and MPI new datypes module
   use mpi_f08
   use types_mpi
   IMPLICIT NONE
@@ -71,7 +71,7 @@ program e3
     end if
    
     ALLOCATE(particles(n))
-    
+    ! Read particles info
     DO i = 1, n
       READ (3, *) particles(i)%m, particles(i)%p%x, particles(i)%p%y, particles(i)%p%z, &
             & particles(i)%v%x, particles(i)%v%y, particles(i)%v%z
@@ -96,7 +96,7 @@ program e3
   
   !!! Now we proceed to use Barnes-Hut algorithm to implement N body sim 
   
-  ! First, initialise head node (done in all nodes)
+  ! First, initialise head node (done in all processes)
   ALLOCATE(head)
   CALL Calculate_ranges(head, particles) 
   head%type = 0 ! no particle
@@ -114,6 +114,7 @@ program e3
 
   ! Calculate how many elements will have each node  
   n_counts(:) = FLOOR(REAL(n)/REAL(pr))
+  
   ! Last node will have more particles if n is not
   ! divisible by the number of process (just a few more,
   ! that correspond to the remainder of the division)
@@ -124,8 +125,6 @@ program e3
   ALLOCATE(part_chunk(n_counts(rank+1)))
   ALLOCATE(acc_chunk(n_counts(rank+1))) 
   
-  ! Set displacement done for collective process
-  !n_disp(rank + 1) = rank*FLOOR(REAL(n)/REAL(pr)) 
   
   ! Calculate where start and end each chunk
   n_start =  rank*FLOOR(REAL(n)/REAL(pr)) + 1
@@ -135,13 +134,8 @@ program e3
     n_end = n
   end if
   
-  !IF (rank.EQ.0) THEN
-   !  n_start=1
-  !ELSE
-   !  n_start=(SUM(n_counts(1:rank)))+1
-  !END IF
-  !n_end = SUM(n_counts(1:(rank+1)))
-
+  ! Calculate number of displacements for each chunk
+  ! that will be parallel used 
   DO i = 1, pr
      IF (i.EQ.1) THEN
         n_disp(i) = 0
@@ -149,11 +143,6 @@ program e3
         n_disp(i) = SUM(n_counts(1:(i-1)))
      END IF
   END DO
-  
-  print *, "Rank", rank, "start:", n_start
-  print *, "Rank", rank, "end:", n_end
-  print *, "Rank", rank, "counts:", n_counts
-  print *, "Rank", rank, "displms:", n_disp
   
   ! Allocate and calculate initial accelerations
   ALLOCATE(acc(n))
@@ -224,7 +213,6 @@ program e3
           WRITE(4, *) t, particles%p ! time and positions in one row (one particle position after another)
           ! make sure every node is in the same step
         END IF
-        
         t_out = 0.0
       END IF
       ! Make sure all nodes are in the same step
