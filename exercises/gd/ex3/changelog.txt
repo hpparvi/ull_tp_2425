@@ -1,0 +1,6 @@
+[v0.9 Initial release]
+	* Import the Gemometry, EX2_deriv_types and barnes_hut module
+	* Change name EX2_deriv_types to EX3_deriv_types
+	* Import EX2 main program, rename EX3 and modify to función with MPI parallelisation
+	* Check that the results of the simulations with this program are the same as with EX2
+	
