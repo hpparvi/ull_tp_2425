@@ -14,6 +14,6 @@ clean:
 	del /Q *.o *.mod ex1.exe
 
 test: ex1
-	ex1
+	./ex1
 
 

@@ -1,6 +1,13 @@
 # something weird
 **/*.dSym/
 
+# frames for png files
+**/frames
+
+# outputs
+**/output.txt
+exercises/so/ex2/output/output.txt
+
 # Prerequisites
 *.d
 
