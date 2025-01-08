@@ -1,6 +1,6 @@
-# Exercise 2: multithreaded dynamical simulation using Barnes-Hut and OpenMP
+# Exercise 3: Distributed dynamical simulation using Barnes-Hut and MPI
 [![GitHub](https://img.shields.io/badge/GitHub-DavidMirabal-blue?logo=github)](https://github.com/DavidMirabal)   [![Python](https://img.shields.io/badge/Python-3.10.9-green?logo=python)](https://www.python.org/) ![Fortran](https://img.shields.io/badge/Fortran-90%2B-yellow?logo=fortran) [![FFmpeg](https://img.shields.io/badge/FFmpeg-Enabled-violet?logo=ffmpeg)](https://ffmpeg.org/)
-![!3part_funny2](videos/3part_funny2.gif)
+![!mpi](videos/mpi.gif)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -12,8 +12,6 @@
     <li>
       <a href="#how-to-compile">How to compile</a>
       <ul>
-        <li><a href="#without-parallelization">Without parallelization</a></li>
-        <li><a href="#with-parallelization">With parallelization</a></li>
         <li><a href="#tests">Tests</a></li>
       </ul>
     </li>
@@ -54,18 +52,10 @@ If you have a previous version it is recommended to do first:
 make clean
 ``` 
 
-### Without parallelization:
-To compile the code (non-parallel version) you can use the following command:
-
-```
-make
-```
-
-### With parallelization:
-To compile the code (parallel version) you can use the following command:
+To compile the code you can use the following command:
 
 ```sh
-make parallel
+make 
 ```
 
 ### Tests
@@ -96,13 +86,13 @@ You can use the code with input files or by introducing initial conditions in th
 - With input files:
 
 ```sh
-./ex2 ics/ic_template.txt
+mpirun -np N_process ./ex3 ics/ic_template.txt
 ```
 
 - With terminal input:
 
 ```sh
-./ex2 
+mpirun -np N_process ./ex3 
 ```
 
 This will generate output files with the position of the particles at each simulation time in `ouput/template.txt`.
@@ -167,7 +157,7 @@ from visual import utils
 pos, ids, mass, time, exec_time = utils.read_data('output/template.dat')
 
 pos_part1 = pos[ids[0]]  #Lx3 array that have positions of the first particle along time
-time_part1 = pos[ids[0]] #L array that have times of the first particle
+time_part1 = time[ids[0]] #L array that have times of the first particle
 
 plt.plot(time_part1, pos_part1[:, 0]) #figure that show the change in the X-position of one particle along time
 ```

@@ -37,9 +37,18 @@ if len(sys.argv) == 4:
         print("Core number is invalid. Try it again")
         sys.exit(1)
 elif len(sys.argv) == 6:
+    if str(sys.argv[3]) == 'None':
+        num_cores = os.cpu_count()
+    elif sys.argv[3].isnumeric() and int(sys.argv[3]) <= os.cpu_count():
+        num_cores = int(sys.argv[3])
+    else:
+        print("Core number is invalid. Try it again")
+        sys.exit(1)
     # Limits of the plots
-    lims = (sys.argv[4], sys.argv[5])
-    num_cores = int(sys.argv[3])
+    if sys.argv[4] == 'None' or sys.argv[5] == 'None':
+        pass
+    else:
+        lims = (sys.argv[4], sys.argv[5])
 else:
     num_cores = os.cpu_count()
 
