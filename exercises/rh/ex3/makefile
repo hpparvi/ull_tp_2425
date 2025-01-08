@@ -16,7 +16,7 @@ clean:
 	rm -f *.o *.mod e3
     
 test: e3
-	mpirun -np 1 ./e3
+	mpirun -np 4 ./e3
 
 
     
