@@ -1,4 +1,4 @@
-This code uses the leapfrog integration method to simulate an N-body problem and the Barnes-Hut algorithm to optimize the calculations.
+This code uses the leapfrog integration method to simulate a N-body problem and the Barnes-Hut algorithm to optimize the calculations.
 
 The main program, main.f90, utilizes the following modules:
 
