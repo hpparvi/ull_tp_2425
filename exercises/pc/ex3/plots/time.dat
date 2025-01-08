@@ -1,4 +1,4 @@
-#Time (in seconds) spent on performing the N-body simulation using the direct-sum and the Barnes-Hut algorithm, either parallelized(OpenMP and MPI) or not
+#Time (in seconds) spent on performing the N-body simulation using the direct-sum and the Barnes-Hut algorithm, either parallelized (OpenMP and MPI) or not
 
 Particles	t_ex1		t_barnes	      t_OMP		t_MPI
 5		2		3			8		  2	

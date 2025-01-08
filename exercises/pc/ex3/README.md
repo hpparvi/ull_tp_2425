@@ -47,7 +47,7 @@ The code is structured into 7 modules and a main program, ```ex3.f90```. These m
 * ```calcs.f90```    - stores calculations of particle position, velocity and acceleration.
 * ```data.f90```     - allows to read and save data to files.
 * ```mpi_types.f90```- allows to create MPI dataypes for 3D vectors, 3D points and more complex structures like a 3D particle.
-* ```mpi_env.f90```  - stores subroutines that allows to work on the MPI environment.
+* ```mpi_env.f90```  - stores subroutines that allow working in the MPI environment.
 
 The initial conditions for the simulations are stored in their corresponding input files located in the directory named ```inputs```. To properly compile the code, you need to move these files to the directory where the code is located. Once the files are in place, you can compile the code by running
 ~~~
