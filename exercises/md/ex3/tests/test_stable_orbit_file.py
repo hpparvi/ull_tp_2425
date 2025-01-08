@@ -20,7 +20,7 @@ class TestEx3Output:
     def test_2part(self, file):
         try:
             result = subprocess.run(
-                ['mpirun', './ex3', self.input_file],
+                ['mpirun',  '-np', str(num_cores), './ex3', self.input_file],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -52,7 +52,7 @@ class TestEx3Output:
     def test_5part(self, file):
         try:
             result = subprocess.run(
-                ['mpirun', './ex3', self.input_file],
+                ['mpirun',  '-np', str(num_cores), './ex3', self.input_file],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -88,21 +88,25 @@ class TestEx3Output:
 
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'None':
+        num_cores = os.cpu_count()
+    else:
+        num_cores = int(sys.argv[1])
     print('-----------------------------------')
-    print("Running tests for ex3")
+    print(f'Running tests for ex3 with {num_cores} processes')
     print('-----------------------------------')
-    print("Test 2 particles stable orbit")
+    print('Test 2 particles stable orbit')
     test = TestEx3Output()
     test.setUp('./ics/ic_test_2part_stable_orbit.txt')
     start_time = time.time()
     test.test_2part('./output/test_2part_stable_orbit.dat')
     end_time = time.time()
-    print(f"Test execution time: {end_time - start_time} seconds")
+    print(f'Test execution time: {end_time - start_time} seconds')
     print('-----------------------------------')
-    print("Test 5 particles stable orbit")
+    print('Test 5 particles stable orbit')
     test = TestEx3Output()
     test.setUp('./ics/ic_test_5part_stable_orbit.txt')
     start_time = time.time()
     test.test_5part('./output/test_5part_stable_orbit.dat')
     end_time = time.time()
-    print(f"Test execution time: {end_time - start_time} seconds")
+    print(f'Test execution time: {end_time - start_time} seconds')

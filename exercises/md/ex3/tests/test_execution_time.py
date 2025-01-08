@@ -37,7 +37,7 @@ class TestEx3extimes:
             try:
                 print('Running: ', ic_file)
                 result = subprocess.run(
-                    ['mpirun', './ex3', ic_file],
+                    ['mpirun',  '-np', str(num_cores), './ex3', ic_file],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
@@ -59,6 +59,7 @@ class TestEx3extimes:
 
         for index, output_file in enumerate(self.output_files):
             _, _, _, _, exec_time = utils.read_data(output_file)
+            print(f"Execution time for {self.N_particles[index]} particles: {exec_time}")
             exec_max_time = (
                 100 * A * self.N_particles[index] * np.log10(self.N_particles[index])
             )
@@ -82,17 +83,21 @@ class TestEx3extimes:
 
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'None':
+        num_cores = os.cpu_count()
+    else:
+        num_cores = int(sys.argv[1])
     print('-----------------------------------')
-    print("Test execution time")
+    print(f'Test execution time with {num_cores} processes')
     test = TestEx3extimes()
     print('-----------------------------------')
-    print("Generating ics for test")
+    print('Generating ics for test')
     test.generate_ics()
     test.setUp()
     start_time = time.time()
     print('Starting simulation tests')
     test.test_times_many_particles()
     end_time = time.time()
-    print(f"Test execution time: {end_time - start_time} seconds")
+    print(f'Test execution time: {end_time - start_time} seconds')
     test.delete_files()
     print('-----------------------------------')

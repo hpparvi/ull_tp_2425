@@ -20,6 +20,8 @@ TITLE ?= $(SIM_NAME)
 FPS ?= 30
 RESIZE ?= 1
 DELETE ?= TRUE
+LIM_MIN ?= None
+LIM_MAX ?= None
 
 all: ex3
 
@@ -47,7 +49,7 @@ utils.o: utils.f90
 # To make a video. It is needed ffpmeg installed in the system
 video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 	@echo "Generating images..."
-	$(PYTHON) $(PLOT_IMAGES_SCRIPT) $(OUTPUT_FILE) $(INPUT_FILE) $(NUM_CORES)
+	$(PYTHON) $(PLOT_IMAGES_SCRIPT) $(OUTPUT_FILE) $(INPUT_FILE) $(NUM_CORES) $(LIM_MIN) $(LIM_MAX)
 	@echo "Generating video..."
 	$(PYTHON) $(IMAGE_TO_VIDEO_SCRIPT) $(DIRECTORY_IMAGES) $(FPS) $(DIRECTORY_VIDEO) $(TITLE) $(RESIZE)
 	$(PYTHON) $(DELETE_IMAGES_SCRIPT) $(DIRECTORY_IMAGES) $(DELETE)
@@ -63,15 +65,15 @@ all_videos:
 
 all_ics: 
 	for file in ics/*.txt; do \
-		./ex3 $$file; \
+		mpirun -np $(NUM_CORES) ./ex3 $$file; \
 	done
 
 test: 
-	$(PYTHON) tests/test_stable_orbit_file.py
+	$(PYTHON) tests/test_stable_orbit_file.py $(NUM_CORES)
 
 test_all: 
 	for test_script in $(TESTS); do \
-		$(PYTHON) $$test_script; \
+		$(PYTHON) $$test_script $(NUM_CORES); \
 	done
 
 clean:
