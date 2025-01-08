@@ -1,6 +1,6 @@
-FC = gfortran -fopenmp
+FC = mpifort
 FCFLAGS = -c
-OBJECTS = geometry.o particle.o tree.o
+OBJECTS = geometry.o particle.o tree.o create_mpi_types.o
 
 all: ex3
 
@@ -16,6 +16,3 @@ particulas : $(OBJECTS) particulas.o
 
 clean :
 	rm -f *.o *.mod
-
-test : ex3
-	./ex3
