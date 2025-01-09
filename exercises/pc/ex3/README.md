@@ -17,9 +17,9 @@ The code is a distributed version of the Barnes-Hut algorithm for performing an 
 
 6. ```Build the initial tree and particle distribution```: all processes build the initial tree and calculate how many particles they should handle. The total number of particles is divided as equally possible among the processes. Any leftover particles are assigned to the first processes.
 
-7. ```Initialization of particle accelerations```: each process sets the acceleration of its assigned particles to zero, and performs an all-to-all gather of particle data using MPI_Allgatherv to ensure that each process has access to the full dataset.
+7. ```Initialization of particle accelerations```: each process sets the acceleration of its assigned particles to zero.
 
-8. ```Force calculation and acceleration update```: each process calculates the forces between its particles using the Barnes-Hut tree algorithm. The forces are computed based on the tree of particles built in the previous step. Then, the processes gather particle data again using MPI_Allgatherv to update all particles' information. 
+8. ```Force calculation and acceleration update```: each process calculates the forces between its particles using the Barnes-Hut tree algorithm. The forces are computed based on the tree of particles built in the previous step. Then, the processes gather particle data using MPI_Allgatherv to update all particles' information. 
 
 9. ```Opening output file```: the master process opens the output file to store the results of the simulation. 
 
@@ -27,7 +27,7 @@ The code is a distributed version of the Barnes-Hut algorithm for performing an 
 
 - Each process updates the velocity and position of its particles using the calculated forces. The particles' data is gather across all processes via MPI_Allgatherv. 
 - After each update, all processes rebuild the tree to reflect the new particles' positions. 
-- Each process resets the acceleration of its particles to zero and performs an all-to-all gather of particle data across all processes using MPI_Allgatherv again to ensure synchronization. 
+- Each process resets the acceleration of its particles to zero.
 - After resetting accelerations, each process calculates the new acceleration of its particles based on the updated tree structure. Then, each process updates the velocity of its particles. Once again, particle data is gathered across all processes to keep dataset synchronized. 
 - Each process updates the simulation time. The master process checks if the current time has reached the output time. If it has, it saves the current time and the position of each particle to the ouput file. 
 
@@ -86,7 +86,7 @@ Several time tests were performed using different versions of the code on a 4-co
 |    100    |   5   |     7    |       24       |                  5                 |    
 |    250    |   27  |    29    |       34       |                  9                 |    
 |    500    |  108  |    71    |       51       |                  20                |    
-|    1000   |  441  |    172   |       90       |                  51                |    
+|    1000   |  441  |    172   |       90       |                  49                |    
 
 For a small number of particles, the direct-sum algorithm is computationally faster as the Barnes-Hut has to build the tree and recursively compute the center of mass and total mass for each cell. However, for a larger number of particles the Barnes-Hut algorithm becomes more efficient due its optimized method for calculating forces between particles. As expected, the OpenMP-parallelized version of the Barnes-Hut algorithm takes more time to perform simulations when dealing with a small number of particles. This is because parallelization introduces overhead that outweights its benefits. On the contrary, for simulations involving a large number of particles, the parallelized code becomes computationally faster as the benefits of parallel processing -such as distributing workloads across multiple cores- outweigh the initial overhead. 
 

@@ -66,9 +66,7 @@ PROGRAM ex3
   CALL Calculate_masses(head, p) !Calculate the masses and centers of mass for the cells
 
   CALL particles_nodes(n, comsize, rank, ierr, i_start, i_end, n_local, n_extra, n_nodes, displacements) !Determine how particles are distributed among processes
-  
   CALL set_acceleration(p(i_start:i_end)) !Each process resets the acceleration of its particles to zero
-  CALL gather_particles(p, i_start, i_end, n_nodes, displacements, MPI_PARTICLE3D, rank, ierr) !Gather particle data from all processes
 
   CALL Calculate_forces(head, p, rji, theta, i_start, i_end, rank) !Each process calculates forces between its particles based on the tree
   CALL gather_particles(p, i_start, i_end, n_nodes, displacements, MPI_PARTICLE3D, rank, ierr) !Gather particle data from all processes
@@ -103,8 +101,6 @@ PROGRAM ex3
      CALL Calculate_masses(head, p) !Recalculate masses and centers of mass for the cells
      
      CALL set_acceleration(p(i_start:i_end)) !Each process resets the acceleration of its particles to zero
-     CALL gather_particles(p, i_start, i_end, n_nodes, displacements, MPI_PARTICLE3D, rank, ierr) !Gather particle data from all processes
-
      CALL Calculate_forces(head, p, rji, theta, i_start, i_end, rank) !Each process recalculates forces between its particles
      
      CALL velocity(dt, p(i_start:i_end)) !Each process updates the velocities of its particles
