@@ -13,7 +13,7 @@ DELETE_IMAGES_SCRIPT = visual/delete_images.py
 SIM_NAME ?= test_5part_stable_orbit
 OUTPUT_FILE ?= output/$(SIM_NAME).dat
 INPUT_FILE ?= ics/ic_$(SIM_NAME).txt
-NUM_CORES ?= None
+NUM_CORES ?= $(shell nproc)
 DIRECTORY_IMAGES = output/images_$(SIM_NAME)
 DIRECTORY_VIDEO ?= videos/
 TITLE ?= $(SIM_NAME)
@@ -56,7 +56,7 @@ video: $(PLOT_IMAGES_SCRIPT) $(IMAGE_TO_VIDEO_SCRIPT)
 
 all_videos: 
 	for file in output/*.dat; do \
-		if [[ $$file != *test* ]]; then \
+		if [ $$file != *test* ]; then \
 			SIM_NAME_V=$$(basename $$file .dat); \
 			$(MAKE) video OUTPUT_FILE=$$file SIM_NAME=$$SIM_NAME_V; \
 		fi \

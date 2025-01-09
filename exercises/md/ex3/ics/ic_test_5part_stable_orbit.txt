@@ -2,7 +2,7 @@
 test_5part_stable_orbit
 
 ! Time step:
-1E-4
+1E-3
 
 ! Output time step:
 0.01
