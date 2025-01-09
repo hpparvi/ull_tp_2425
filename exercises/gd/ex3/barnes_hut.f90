@@ -384,7 +384,8 @@ CONTAINS
     type(vector3d), intent(inout) :: a(:)
     INTEGER :: i,j,k,i_start, i_end
     type(particle3d), intent(in) :: pt(:)
-    IF(rank /= root) THEN
+    !!  Process does not execute when there are no particles in the node
+    IF(i_end /= 0) THEN
       DO i = i_start, i_end
         CALL Calculate_forces_aux(i,pt,a,head)
       END DO

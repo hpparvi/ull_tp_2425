@@ -7,7 +7,7 @@ PROGRAM ex3
   USE ISO_FORTRAN_ENV
   IMPLICIT NONE      
   
-  REAL(REAL64) :: dt, t_end, t, dt_out, t_out    
+  REAL(REAL64) :: dt, t_end, t, dt_out, t_out 
   character(len=25) :: input, output, orbit
   INTEGER :: comsize, ierr, workers, counts, counts_finale, i_start, i_end
   INTEGER, ALLOCATABLE :: sendcounts(:), displs(:)
@@ -26,7 +26,6 @@ PROGRAM ex3
   CALL MPI_init(ierr)
   CALL MPI_comm_size(MPI_COMM_WORLD, comsize, ierr)
   CALL MPI_comm_rank(MPI_COMM_WORLD, rank, ierr)
-  workers = comsize - 1
 
   ALLOCATE(sendcounts(comsize), displs(comsize))
   
@@ -134,8 +133,9 @@ PROGRAM ex3
   END DO
   CALL Borrar_empty_leaves(head)
   CALL Calculate_masses(head)
-
+  
 !! Calculate the limits and the size to be sent.
+  workers = MIN(comsize-1, n)
   counts = CEILING(REAL(n)/REAL(workers))
   counts_finale = n - counts * (workers - 1)
   
@@ -146,15 +146,22 @@ PROGRAM ex3
   a = vector3d(0,0,0)
 
   IF (rank == root) THEN
-     PRINT'(A,I2,A)', 'Parallelized process with ', comsize, ' cores' 
+     IF (workers == comsize - 1) THEN
+     	PRINT'(A,I2,A)', 'Parallelized process with ', comsize, ' cores' 
+     ELSE
+     	PRINT'(A,I2,A)', 'Less particles than workers nodes. Parallelized with', workers, ' workers. Execution will be EXTREMELY inefficient.' 
+     END IF
      i_start = 0
      i_end = 0
-  ELSEIF (rank /= workers) THEN
+  ELSEIF ((rank /= workers).AND.(rank < workers)) THEN
      i_start=1+(rank-1)*counts
      i_end = (rank)*counts
-  ELSE
+  ELSEIF (rank == workers) THEN
      i_start=1+(rank-1)*counts
      i_end = (rank-1)*counts + counts_finale
+  ELSE
+     i_start = 0
+     i_end = 0
   END IF
   
 !!  Calculate the parameters needed to send the information  
@@ -162,12 +169,15 @@ PROGRAM ex3
      IF (i.EQ.1) THEN
        sendcounts(i) = 0
        displs(i) = 0
-     ELSEIF (i /= workers+1) THEN
+     ELSEIF (i < workers+1) THEN
        sendcounts(i) = counts
        displs(i) = counts*(i - 2)
-     ELSE
+     ELSEIF (i == workers + 1) THEN
        sendcounts(i) = counts_finale
        displs(i) = counts*(i - 2)
+     ELSE
+       sendcounts(i) = 0
+       displs(i) = n
      END IF
   END DO
   ALLOCATE(pt_workers(sendcounts(rank+1)))
