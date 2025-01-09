@@ -84,7 +84,7 @@ make test NUM_CORES=N_proc
 `N_proc` is the number of processes you want to run. This number must not be greater than the number of cores in your machine. 
 
 > [!TIP]  
-> If you do not define NUM_CORES, the maximum number of cores available will be used. It is advisable to set a lowe value for the number of processes to use when running MPI programs on multithreaded machines. This is because, on multithreaded systems, the operating system may identify each thread as a 'logical core', which could lead to problems if the number of processes launched exceeds the available physical cores or if processes attempt to use multiple threads. For example, on a computer with 6 physical cores and 12 logical threads, you could attempt to launch 12 processes, but if each process uses more than one thread, the command could fail due to overhead. In this case you should use NUM_CORES=6
+> If you do not define NUM_CORES, the maximum number of cores available will be used. It is advisable to set a lower value for the number of processes to use when running MPI programs on multithreaded machines. This is because, on multithreaded systems, the operating system may identify each thread as a 'logical core', which could lead to problems if the number of processes launched exceeds the available physical cores or if processes attempt to use multiple threads. For example, on a computer with 6 physical cores and 12 logical threads, you could attempt to launch 12 processes, but if each process uses more than one thread, the command could fail due to overhead. In this case you should use NUM_CORES=6
 
 > [!WARNING]
 > The first tests should execute in a few seconds, but running the second type of tests can take between 10-20 minutes in the parallelized version. In the non-parallelized version, these can take up to an hour.
@@ -112,9 +112,9 @@ mpirun -np N_proc ./ex3 ics/ic_template.txt
 mpirun -np N_proc ./ex3 
 ```
 
-Commands before will generate output files with the position of the particles at each simulation time in `ouput/template.txt`.
+Commands before will generate output files with the position of the particles at each simulation time in [`ouput/template.dat`](output/template.dat).
 
-To run all the simulations with a file of initial conditions in `ics/` you can do:
+To run all the simulations with a file of initial conditions in [`ics/`](ics/) you can do:
 
 ```sh
 make all_ics NUM_CORES=N_proc
@@ -152,7 +152,7 @@ To create a video, you can do it in two ways:
 ```sh
 make video SIM_NAME=template
 ``` 
-`template` is the name of the simulation, so the input file should be `ics/ic_template.txt`, the output file `output/template.txt`, and the video `videos/template.mp4`.
+`template` is the name of the simulation, so the input file should be [`ics/ic_template.txt`](ics/ic_template.txt), the output file [`output/template.dat`](output/template.dat), and the video [`videos/template.mp4`](videos/template.mp4).
 
 You can manually change several video parameters such as `INPUT_FILE`, `OUTPUT_FILE`, `NUM_CORES` (defaults to the maximum available), `DIRECTORY_IMAGES` (the directory where images are saved), `DIRECTORY_VIDEO` (the directory where the video is saved), `TITLE`, `FPS`, `RESIZE` (resize factor to reduce the video size), `DELETE` (whether to delete images created during video creation; defaults to True), `LIM_MIN` and `LIM_MAX` (lower and upper plot limit of the video):
 ```sh
@@ -162,7 +162,7 @@ make video SIM_NAME=template INPUT_FILE=ics/ic_template.txt OUTPUT_FILE=output/t
 > [!NOTE]  
 > If you want to make a video of one of the initial conditions generated with the text it is recommended to set the limits to the range of the generated box. This is because there will be particles that will be too far away and the programme will automatically try to adjust the scale so that they are seen, causing the text to be very small.
 
-To create all the videos of the simulations that have an output file in `output/` you can do:
+To create all the videos of the simulations that have an output file in [`output/`](output/) you can do:
 
 ```sh
 make all_videos
@@ -179,7 +179,7 @@ python visual/image_to_video.py output/images_template/ 30 videos/ template 1
 
 ## Output files
 
-The output files will be saved in the `output/` directory. They start with a Python-commented header that describes the information of each column. Each line represents a particle with its ID, position, mass, and simulation time. As a result, all outputs have the same number of columns, making them easier to read. Since the ID and time for each particle are saved, it is possible to track them over time. The last line of the output file (also commented for Python) shows the time it took to run the simulation.
+The output files will be saved in the [`output/`](output/) directory. They start with a Python-commented header that describes the information of each column. Each line represents a particle with its ID, position, mass, and simulation time. As a result, all outputs have the same number of columns, making them easier to read. Since the ID and time for each particle are saved, it is possible to track them over time. The last line of the output file (also commented for Python) shows the time it took to run the simulation.
 
 In [`visual/utils.py`](visual/utils.py), there is a function called `read_data(output_file)` that can be imported to read the output files. This function returns the positions of the particles in an $M\times3$ array, their masses, the simulation times, and the time it took to run the simulation. It also returns a list of $N$ ($N$ = number of particles) elements, where each element is a boolean array that can be used to index the positions array to distinguish the particles. For example:
 
@@ -221,7 +221,7 @@ The following figure shows the execution time of different simulations with diff
 ![Execution Time](output/figures/execution_time.png)
 
 
-For a large number of particles, the parallelized version is faster, with an improvement close to x10 (in the runs in which 10 or 12 processes have been used). This is because parallelization allows distributing the work among multiple processing cores. The bottleneck of this implementation is clearly in the data sharing times. Data is sent and received between processes. This is because each process calculates the forces, positions, etc for a list of particles (which is different between processes). So, each time the positions are updated, the information has to be sent between the processes so that when the force is calculated each process has all the updated information. 
+For a large number of particles, the parallelized version is faster, with an improvement close to x10 (in the runs in which 6 or 8 processes have been used). This is because parallelization allows distributing the work among multiple processing cores. An important factor of this implementation is the data sharing. Data is sent and received between processes. This is because each process calculates the forces, positions, etc for a list of particles (which is different between processes). So, each time the positions are updated, the information has to be sent between the processes so that when the force is calculated each process has all the updated information. 
 
 However, for a small number of particles, the non-parallelized version is faster. This is because it does not have to open parallelization, distribute the data among the cores, etc, which introduces additional overhead in the parallelized version.
 
