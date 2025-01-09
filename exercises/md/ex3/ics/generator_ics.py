@@ -79,8 +79,6 @@ class ic:
     def word(self, text, N, font=None, font_size=500, box_size = (50, 50)):
         """
         Generates initial positions, velocities, and masses for particles in a text shape.
-        
-        Args:
             text (str): The text to form (e.g., "MPI").
             N (int): Total number of particles.
             font (str): Path to the font file (default is None). For example, arial.ttf
