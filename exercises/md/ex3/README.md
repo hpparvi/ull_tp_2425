@@ -87,7 +87,7 @@ make test NUM_CORES=N_proc
 > If you do not define NUM_CORES, the maximum number of cores available will be used. It is advisable to set a lower value for the number of processes to use when running MPI programs on multithreaded machines. This is because, on multithreaded systems, the operating system may identify each thread as a 'logical core', which could lead to problems if the number of processes launched exceeds the available physical cores or if processes attempt to use multiple threads. For example, on a computer with 6 physical cores and 12 logical threads, you could attempt to launch 12 processes, but if each process uses more than one thread, the command could fail due to overhead. In this case you should use NUM_CORES=6
 
 > [!WARNING]
-> The first tests should execute in a few seconds, but running the second type of tests can take between 10-20 minutes in the parallelized version. In the non-parallelized version, these can take up to an hour.
+> The first tests should execute in a few seconds, but running the second type of tests can take between 10-20 minutes.
 >
 > These tests were used to calculate the execution times shown in the last graph of this `README`.
 
@@ -216,7 +216,7 @@ In [`visual/nbody_check.ipynb`](visual/nbody_check.ipynb), there are examples of
 
 ## Execution Time
 
-The following figure shows the execution time of different simulations with different numbers of particles. The red line represents the non-parallelized version, others lines represents using MPI version of the code (each line corresponds to a run made with a different processes number). Additionally, the theoretical function that this code should follow is fitted to the data. All these simulations have been run with the same settings (same time steps,simulation duration and same $\theta$). In addition, the number of times a line is written to the output has been minimised (maximise dt_out) in order to include as few write effects as possible in the computation time.
+The following figure shows the execution time of different simulations with different numbers of particles. The red line represents the non-parallelized version, others lines represents using MPI version of the code (each line corresponds to a run made with a different processes number). Additionally, the theoretical function that this code should follow is fitted to the data. All these simulations have been run with the same settings (same time steps, simulation duration and same $\theta$). In addition, the number of times a line is written to the output has been minimised (maximise dt_out) in order to include as few write effects as possible in the computation time.
 
 ![Execution Time](output/figures/execution_time.png)
 
