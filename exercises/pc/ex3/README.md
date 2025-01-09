@@ -19,7 +19,7 @@ The code is a distributed version of the Barnes-Hut algorithm for performing an 
 
 7. ```Initialization of particle accelerations```: each process sets the acceleration of its assigned particles to zero.
 
-8. ```Force calculation and acceleration update```: each process calculates the forces between its particles using the Barnes-Hut tree algorithm. The forces are computed based on the tree of particles built in the previous step. Then, the processes gather particle data using MPI_Allgatherv to update all particles' information. 
+8. ```Force calculation and acceleration update```: each process calculates the forces between its particles using the Barnes-Hut tree algorithm. The forces are computed based on the tree of particles built in the previous step. 
 
 9. ```Opening output file```: the master process opens the output file to store the results of the simulation. 
 
@@ -81,11 +81,11 @@ Several time tests were performed using different versions of the code on a 4-co
 |:---------:|:-----:               |:--------:                        |:--------------:|:--------------:|
 |     5     |   2   |     3    |        8       |                  2                 |           
 |     10    |   2   |     4    |        7       |                  2                 |    
-|     25    |   3   |     5    |        9       |                  3                 |    
-|     50    |   3   |     6    |        9       |                  4                 |    
-|    100    |   5   |     7    |       24       |                  5                 |    
-|    250    |   27  |    29    |       34       |                  9                 |    
-|    500    |  108  |    71    |       51       |                  20                |    
+|     25    |   3   |     5    |        9       |                  2                 |    
+|     50    |   3   |     6    |        9       |                  3                 |    
+|    100    |   5   |     7    |       24       |                  4                 |    
+|    250    |   27  |    29    |       34       |                  10                |    
+|    500    |  108  |    71    |       51       |                  19                |    
 |    1000   |  441  |    172   |       90       |                  49                |    
 
 For a small number of particles, the direct-sum algorithm is computationally faster as the Barnes-Hut has to build the tree and recursively compute the center of mass and total mass for each cell. However, for a larger number of particles the Barnes-Hut algorithm becomes more efficient due its optimized method for calculating forces between particles. As expected, the OpenMP-parallelized version of the Barnes-Hut algorithm takes more time to perform simulations when dealing with a small number of particles. This is because parallelization introduces overhead that outweights its benefits. On the contrary, for simulations involving a large number of particles, the parallelized code becomes computationally faster as the benefits of parallel processing -such as distributing workloads across multiple cores- outweigh the initial overhead. 

@@ -67,9 +67,7 @@ PROGRAM ex3
 
   CALL particles_nodes(n, comsize, rank, ierr, i_start, i_end, n_local, n_extra, n_nodes, displacements) !Determine how particles are distributed among processes
   CALL set_acceleration(p(i_start:i_end)) !Each process resets the acceleration of its particles to zero
-
   CALL Calculate_forces(head, p, rji, theta, i_start, i_end, rank) !Each process calculates forces between its particles based on the tree
-  CALL gather_particles(p, i_start, i_end, n_nodes, displacements, MPI_PARTICLE3D, rank, ierr) !Gather particle data from all processes
 
   t = 0.0     !Initialize time
   t_out = 0.0 !Initialize output time
