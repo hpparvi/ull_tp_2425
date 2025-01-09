@@ -27,8 +27,10 @@ program tree
     call mpi_comm_size(MPI_COMM_WORLD, comsize, ierr)
     call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
     
+    ! Create the MPI type for the particle3d type to share the data between the processes
     call create_mpi_particle_type(mpi_particle3d, ierr)
     
+    ! Only the root process reads the initial conditions
     if (rank == 0) then
         ! Check if an input file was provided or use terminal input
         if (command_argument_count() == 1) then
@@ -127,47 +129,37 @@ program tree
     
     
     ! Broadcast the simulation parameters to all processes
-    call mpi_bcast(dt, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(dt_out, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(t_end, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(epsilon, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(theta_local, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(file_out, 100, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
+    call mpi_bcast(dt, 1, mpi_real8, 0, mpi_comm_world, ierr)
+    call mpi_bcast(dt_out, 1, mpi_real8, 0, mpi_comm_world, ierr)
+    call mpi_bcast(t_end, 1, mpi_real8, 0, mpi_comm_world, ierr)
+    call mpi_bcast(n, 1, mpi_integer, 0, mpi_comm_world, ierr)
+    call mpi_bcast(epsilon, 1, mpi_real8, 0, mpi_comm_world, ierr)
+    call mpi_bcast(theta_local, 1, mpi_real8, 0, mpi_comm_world, ierr)
+    call mpi_bcast(file_out, 100, mpi_character, 0, mpi_comm_world, ierr)
 
+    ! Stop the program if something went wrong with the broadcast
+    if (ierr /= MPI_SUCCESS) then
+        print*, 'Error in MPI_Bcast:', ierr
+        call MPI_Abort(MPI_COMM_WORLD, ierr)
+    end if
+
+    ! Allocate the particles array in all processes except the root because it was already allocated
     if (rank /= 0) then
         allocate(particles(n))
     end if
 
     allocate(head)
-
-    if (ierr /= MPI_SUCCESS) then
-        print*, 'Error1 en MPI_Bcast:', ierr
-        call MPI_Abort(MPI_COMM_WORLD, ierr)
-    end if
     
-    ! Broadcast the particles array to all processes
-    call mpi_bcast(particles, n, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-
-    if (ierr /= MPI_SUCCESS) then
-        print*, 'Error2 en MPI_Bcast:', ierr
-        call MPI_Abort(MPI_COMM_WORLD, ierr)
-    end if
-
-
-    
-    ! Create the octree
-    call barnes_hut_tree(particles, head, n)
-    ! Calculate the masses of the cells
-    call calculate_masses(particles, head)
+    ! Broadcast the particles array to all processes from root
+    call mpi_bcast(particles, n, mpi_particle3d, 0, mpi_comm_world, ierr)
 
     ! Number of particles per process 
     local_n = n / comsize
+    ! Number of extra particles for the first processes
     extra_n = mod(n, comsize)
     
-
     ! Calculate the start and end index of the particles for each process
-    ! First proccess will have 1 more particle if there are extra particles
+    ! First processes will have 1 more particle if there are extra particles
     if (rank < extra_n) then
         index_start = rank * (local_n + 1) + 1
         index_end = index_start + local_n
@@ -182,7 +174,7 @@ program tree
         recvcounts(i) = local_n
     end do
     
-
+    ! Adding extra particles to the previous array
     do i = 1, extra_n
         recvcounts(i) = recvcounts(i) + 1
     end do
@@ -193,25 +185,17 @@ program tree
     do i = 2, comsize
         desplz(i) = desplz(i-1) + recvcounts(i-1)
     end do
-    
+
+    ! Create the octree
+    call barnes_hut_tree(particles, head, n)
+    ! Calculate the masses of the cells
+    call calculate_masses(particles, head)
     
     ! Calculate the forces for the particles, each process will calculate the forces for its particles
     call reset_a(particles(index_start:index_end))
-
-    ! Gather the particles to the root process
-    call mpi_gatherv(particles(index_start:index_end), recvcounts(rank+1), mpi_particle3d, particles, &
-    recvcounts, desplz, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-    ! Broadcast the particles to all processes
-    call mpi_bcast(particles, n, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)   
-
     call calculate_forces(particles, index_start, index_end, head, epsilon, theta_local, rank)
 
-    ! Gather the particles to the root process
-    call mpi_gatherv(particles(index_start:index_end), recvcounts(rank+1), mpi_particle3d, particles, &
-         recvcounts, desplz, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-    ! Broadcast the particles to all processes
-    call mpi_bcast(particles, n, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-
+    ! Start the simulation
     t_out = 0.0
     if (rank==0) then
         write(*,'(A)', advance='no') char(13) // "["
@@ -225,30 +209,19 @@ program tree
 
             call update_vel(particles(index_start:index_end), dt)
             call update_pos(particles(index_start:index_end), dt)
-
-            ! Gather the particles to the root process
-            call mpi_gatherv(particles(index_start:index_end), recvcounts(rank+1), mpi_particle3d, particles, &
-                 recvcounts, desplz, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-            ! Broadcast the particles to all processes
-            call mpi_bcast(particles, n, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
+            
+            ! Synchronize the data between the processes, so after that all processes have the updated positions and &
+            ! velocities of all particles
+            call syncronize_data(particles, index_start, index_end, recvcounts, desplz, comsize, n, rank, ierr)
 
             call borrar_tree(head)
             call barnes_hut_tree(particles, head, n)
             call calculate_masses(particles, head)
 
-            
-
             call reset_a(particles(index_start:index_end))
-
-            ! Gather the particles to the root process
-            call mpi_gatherv(particles(index_start:index_end), recvcounts(rank+1), mpi_particle3d, particles, &
-                 recvcounts, desplz, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-            ! Broadcast the particles to all processes
-            call mpi_bcast(particles, n, mpi_particle3d, 0, MPI_COMM_WORLD, ierr)
-
             call calculate_forces(particles, index_start, index_end, head, epsilon, theta_local, rank)
-
-
+            ! it is not necessary to synchronize the data here because the update of the positions and velocities is of &
+            ! a particle does not depend on the other particles (just the forces depends on the other particles)
             call update_vel(particles(index_start:index_end), dt)
 
             

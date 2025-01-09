@@ -18,6 +18,7 @@ module particle
     
 
     contains
+    !Create the MPI type for the particle3d type
     subroutine create_mpi_particle_type(mpi_particle3d, ierr)
         type(MPI_Datatype) :: mpi_particle3d
         type(MPI_Datatype) :: mpi_point3d, mpi_vector3d
@@ -29,17 +30,17 @@ module particle
         integer(kind=MPI_ADDRESS_KIND) :: displacements(block_count)
         type(MPI_Datatype) :: block_types(block_count)
 
-    
+        ! Create the MPI types for the point3d and vector3d types
         call MPI_Type_contiguous(3, mpi_real8, mpi_point3d, ierr)
         call MPI_Type_commit(mpi_point3d, ierr)
 
+        ! Create the MPI types for the point3d and vector3d types
         call MPI_Type_contiguous(3, mpi_real8, mpi_vector3d, ierr)
         call MPI_Type_commit(mpi_vector3d, ierr)
 
 
         block_lengths = [1, 1, 1, 1]
 
-    
         block_types = [mpi_point3d, mpi_vector3d, mpi_vector3d, mpi_real8]
 
         displacements = [0_mpi_address_kind, &
@@ -49,7 +50,6 @@ module particle
 
 
         call mpi_type_create_struct(block_count, block_lengths, displacements, block_types, mpi_particle3d, ierr)
-
         call mpi_type_commit(mpi_particle3d, ierr)
     end subroutine create_mpi_particle_type
 

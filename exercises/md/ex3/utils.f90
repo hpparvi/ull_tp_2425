@@ -1,4 +1,5 @@
 module utils
+    use mpi_f08
     use iso_fortran_env
     use particle
     implicit none
@@ -98,7 +99,6 @@ module utils
         end subroutine write_data
 
         subroutine show_progress(current_time, total_time)
-            implicit none
             real(real64), intent(in) :: current_time, total_time
             integer :: bar_width, position, i
             real(real64) :: progress
@@ -119,4 +119,25 @@ module utils
             write(*,'(A, F5.1, A, A, F6.1, A)', advance='no') "] ", progress*100.0, "% "
     
         end subroutine show_progress
+
+        subroutine syncronize_data(particles, index_start, index_end, recvcounts, desplz, comsize, n, rank, ierr)
+            integer, intent(in) :: comsize, n, rank
+            type(particle3d), intent(inout) :: particles(n)
+            integer, intent(in) :: index_start, index_end
+            integer, intent(in) :: recvcounts(comsize), desplz(comsize)
+            integer, intent(inout) :: ierr
+
+            ! Gather the particles to the root process
+            call mpi_gatherv(particles(index_start:index_end), recvcounts(rank+1), mpi_particle3d, particles, &
+                recvcounts, desplz, mpi_particle3d, 0, mpi_comm_world, ierr)
+            ! Broadcast the particles to all processes from root
+            call mpi_bcast(particles, n, mpi_particle3d, 0, mpi_comm_world, ierr)
+
+            ! Stop the program if something went wrong with the broadcast
+            if (ierr /= MPI_SUCCESS) then
+                print*, 'Error in gather/broadcast of data:', ierr
+                call MPI_Abort(MPI_COMM_WORLD, ierr)
+            end if
+        end subroutine syncronize_data
+
 end module utils
