@@ -1,0 +1,17 @@
+FC = gfortran
+FCFLAGS = -c
+OBJECTS = geometry.o particle.o random_input.o
+
+all: random_input
+
+random_input: $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
+
+%.o: %.f90
+	$(FC) $(FCFLAGS) $<
+
+clean:
+	del /Q *.o *.mod random_input.exe
+
+test: random_input
+	./random_input

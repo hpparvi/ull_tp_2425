@@ -1,5 +1,6 @@
 MODULE tree
   USE iso_fortran_env
+  use omp_lib
   USE geometry
   USE particle
   IMPLICIT NONE
@@ -188,7 +189,7 @@ logical FUNCTION Belongs (part, goal)
   SUBROUTINE Create_Subcells(goal)
     TYPE(CELL), POINTER, intent(inout) :: goal
     type(particle3d) :: part
-    INTEGER :: i, j, k, n
+    INTEGER :: i, j, k
     INTEGER, DIMENSION(3) :: octant
     part = goal%part
     goal%TYPE=2
@@ -227,15 +228,17 @@ logical FUNCTION Belongs (part, goal)
     type(particle3d), intent(in) :: part
     INTEGER, intent(in) :: n
     SELECT CASE (goal%type)
+       
     CASE (0)
        goal%TYPE = 1
        goal%part = part
        goal%pos = n
+       
     CASE (1)
        CALL Create_Subcells(goal)
-
        CALL Find_Cell(goal, temp, part)
        CALL Place_Cell(temp, part, n)
+       
     CASE DEFAULT
        PRINT*,"SHOULD NOT BE HERE. ERROR!"
     END SELECT
@@ -317,13 +320,13 @@ logical FUNCTION Belongs (part, goal)
                 IF (ASSOCIATED(goal%subcell(i, j, k)%ptr)) THEN
                    CALL Calculate_masses(goal%subcell(i, j, k)%ptr)
                    mass = goal%mass
-                   goal%mass = goal%part%m + goal%subcell(i,j,k)%ptr%mass
+                   goal%mass = goal%mass + goal%subcell(i,j,k)%ptr%mass
                    
                    c_o_m = (mass * (goal%center_of_mass - zero) + &
                         goal%subcell(i,j,k)%ptr%mass * (goal%subcell(i,j,k)%ptr%center_of_mass - zero)) &
                         &/ goal%mass
 
-                   goal%center_of_mass = point3d(c_o_m%xx, c_o_m%yy, c_o_m%zz) ! this is what we spanish call a ñapa
+                   goal%center_of_mass = point3d(c_o_m%xx, c_o_m%yy, c_o_m%zz) ! this is what we spanish call a chapuza
                 END IF
              END DO
           END DO
@@ -411,9 +414,13 @@ logical FUNCTION Belongs (part, goal)
     real(real64), intent(in) :: theta
     INTEGER :: i, n
     n = size(aa)
+    !!$omp parallel private(i) shared(head, parts, aa)
+    !$omp do
     DO i = 1, n
        CALL Calculate_forces_aux(i, head, parts, aa, theta)
     END DO
+    !$omp end do
+    !!$omp end parallel
   END SUBROUTINE Calculate_forces
 
 
