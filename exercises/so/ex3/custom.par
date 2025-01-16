@@ -1,0 +1,14 @@
+# Simulation parameters
+dt = 0.01       # Time step
+dt_out = 1    # Printing time step
+t_end = 100     # Final execution time
+epsilon = 0.01   # Softening scale
+theta = 1    # l/D ratio compared to theta
+
+# File names
+input_file = "data/random_bodies.txt"
+create_bodies = .True. 
+N_bodies = 2000
+radius = 10
+output_file = "output/output.txt"
+
