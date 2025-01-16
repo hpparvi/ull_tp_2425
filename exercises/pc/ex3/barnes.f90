@@ -1,8 +1,7 @@
 MODULE barnes
   USE geometry !Importing the geometry module
   USE particle !Importing the particle module
-  USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits for variables
-  !$USE omp_lib  !Importing the omp library to use OpenMP
+  USE iso_fortran_env !Importing iso_fortran_env to specify the number of bits for variables 
   IMPLICIT NONE
 
   !Define a RANGE type to hold the minimum and maximum range in 3D space
@@ -283,31 +282,31 @@ CONTAINS
   END SUBROUTINE Calculate_masses
 
   !Subroutine to calculate forces between particles based on their positions and masses
-  SUBROUTINE Calculate_forces(head, n, p, rji, theta)
+  SUBROUTINE Calculate_forces(head, p, rji, theta, i_start, i_end, rank)
     TYPE(CELL), POINTER :: head !Head of the tree or root cell
-    INTEGER(INT64) :: i, n !Loop indexing variable and number of bodies
+    INTEGER(INT64) :: i !Loop indexing variable
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
     REAL(REAL64) :: theta !Parameter that determines the accuracy of the simulation
+    INTEGER, INTENT(IN) :: i_start, i_end, rank !First and last index of the range of particles to process and processes IDs
     
     !Calculate forces for each particle
-    !$OMP DO
-    DO i = 1, n
-       CALL Calculate_forces_aux(i, head, p, rji, theta) !Auxiliary subroutine for force calculation 
+    DO i = i_start, i_end
+       CALL Calculate_forces_aux(i, head, p, rji, theta, rank) !Auxiliary subroutine for force calculation 
     END DO
-    !$OMP END DO
     
   END SUBROUTINE Calculate_forces
 
   !Recursive subroutine to calculate forces between a specific particle and the tree structure
-  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji, theta)
+  RECURSIVE SUBROUTINE Calculate_forces_aux(goal, tree, p, rji, theta, rank)
     INTEGER(INT64) :: goal, i, j, k !Index of the current particle and loop indexing variables
     TYPE(CELL), POINTER :: tree !Current cell or subcell being processed
     TYPE(particle3d), INTENT(INOUT) :: p(:) !Particles
     TYPE(vector3d), INTENT(INOUT) :: rji !Vector from one particle to another
-    REAL(REAL64) :: l, D, theta  !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
+    REAL(REAL64) :: l, D, theta !Length of the side of the cell, distance between particle and center of mass, and parameter that determines the accuracy of the simulation
     REAL(REAL64) :: r2, r3 !Real variables for squared and cubed distances
-
+    INTEGER, INTENT(IN) :: rank !Processes IDs
+    
     SELECT CASE (tree%type)
     CASE (1) !One particle in the cell
        IF (goal .NE. tree%pos) THEN
@@ -330,7 +329,7 @@ CONTAINS
              DO j = 1, 2
                 DO k = 1, 2
                    IF (ASSOCIATED(tree%subcell(i, j, k)%ptr)) THEN
-                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji, theta) !Recursive call into the subcells to calculate forces on individual particles
+                      CALL Calculate_forces_aux(goal, tree%subcell(i, j, k)%ptr, p, rji, theta, rank) !Recursive call into the subcells to calculate forces on individual particles
                    END IF
                 END DO
              END DO

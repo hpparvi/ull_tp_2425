@@ -1,18 +1,14 @@
-FC = gfortran
+FC = mpifort
 FCFLAGS = -c
-OMPFLAGS = -fopenmp -march=native
-OBJECTS = geometry.o particle.o barnes.o calcs.o data.o ex3.o
+OBJECTS = geometry.o particle.o barnes.o calcs.o data.o mpi_types.o mpi_env.o ex3.o
 
 all: ex3
 
 ex3: $(OBJECTS)
-	$(FC) $(OMPFLAGS) -o $@ $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS)
 
 %.o: %.f90
-	$(FC) $(FCFLAGS) $(OMPFLAGS) $<
+	$(FC) $(FCFLAGS) $<
 
 clean:
-	del /Q *.o *.mod ex3.exe 
-
-test: ex3
-	./ex3
+	rm -f *.o *.mod ex3
