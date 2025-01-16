@@ -1,0 +1,15 @@
+G = 1
+
+T = 0.5
+
+DT = 0.001
+
+EPSILON = 0.0001  
+
+THETA = 0.01
+
+N_SNAPSHOTS = 100
+
+ICS_FILE = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex3/ics/uniform_sphere.dat
+
+SAVE_FOLDER = /home/prossello/Documents/ULL/subjects/q3/tecnicas_numericas/ull_tp_2425/exercises/rp/ex3/results/uniform_collapse/
