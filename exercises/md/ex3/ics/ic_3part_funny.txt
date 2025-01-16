@@ -1,0 +1,35 @@
+! Simulation name:
+3part_funny
+
+! Time step:
+1E-3
+
+! Output time step:
+0.1
+
+! Final time:
+50
+
+! Number of particles:
+3
+
+! Theta:
+0.001
+
+! Epsilon (softening length):
+0.0
+
+! Positions (x,y,z) (each line, a particle):
+-0.337076702, 0, 0
+2.1164029743, 0, 0
+-1.7793262723, 0, 0
+
+! Velocity (vx, vy, vz) (each line, a particle):
+0, 0.9174260238, 0
+0, -0.0922665014, 0
+0, -0.8251595224, 0
+
+! Mass (each line, a particle):
+1
+1
+1
